@@ -71,6 +71,7 @@ local.properties
 *.launch
 
 # CDT-specific (C/C++ Development Tooling)
+.project
 .cproject
 
 # sbteclipse plugin

@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 	
 	file = fopen(file_name,"r");
 	if (file == NULL)
-		perror ("The following error occurred");//invalid argument
+		perror ("The following error occurred");//
   } else fprintf(stderr,"Wrong number of arguments");
 	
 	puts(""); /* prints  */

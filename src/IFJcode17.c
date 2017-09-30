@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
 	
 	file = fopen(file_name,"r");
 	if (file == NULL)
-		fprintf(stderr,"Nepodarilo sa otvorit zdrojovy kod");
-  } else fprintf(stderr,"Zly pocet argumentou");
+		perror ("The following error occurred");//invalid argument
+  } else fprintf(stderr,"Wrong number of arguments");
 	
 	puts(""); /* prints  */
 	return EXIT_SUCCESS;

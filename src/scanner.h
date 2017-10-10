@@ -13,6 +13,7 @@ typedef struct structToken{
 */
 }token;
 
+#define ERR return tmpToken.type= -1;//dodelat chybovy vystup (1)
 
 int upper2lower(int c){
 	if (c >= 'A' && c <= 'Z')

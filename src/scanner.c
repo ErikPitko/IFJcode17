@@ -3,8 +3,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
-/* run this program using the console pauser or add your own getch, system("pause") or input loop */
-// Own Functions
+//TODO otestovat a opravit je v tom bordel
 #include "scanner.h"
 
 token tmpToken;

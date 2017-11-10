@@ -31,6 +31,11 @@ int garbageInit(unsigned size);
  * @brief allocates memory and creates item in H-table
  */
 void *myMalloc(size_t n);
+/**
+ * @brief reallocates memory and changes item in H-table
+ * @returns NULL if key is a valid pointer and cannot be found in H-Table
+ */
+void *myRealloc(void *key, size_t n);
 
 /**
  * @brief frees memory and removes item from H-table

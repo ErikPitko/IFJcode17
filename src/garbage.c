@@ -94,6 +94,33 @@ void *myMalloc(size_t n) {
 	return (item->key);
 }
 
+struct htab_listitem *htab_find(void* key){
+	unsigned index = hash_function(key) % htable->arr_size;
+
+	// cycle through items
+	for(htab_listitem* item = htable->list[index]; item != NULL; item = item->next){
+		if(item->key == key)
+			return (item); // item found
+	}
+
+	return (NULL);
+}
+
+void *myRealloc(void* key, size_t n){
+	if(key == NULL)
+		return (myMalloc(n));
+
+	htab_listitem temp;
+	if((temp = htab_find(key)) != NULL){
+		void* new = realloc(key, n);
+		temp->key = new;
+		return (new);
+	}
+
+	return NULL;
+
+}
+
 int myFree(void* key) {
 	unsigned index = hash_function(key) % htable->arr_size;
 	htab_listitem* prev = htable->list[index];

@@ -1,11 +1,3 @@
-/*
- * htab.h
- *
- *  Created on: Apr 19, 2017
- *      Author:		Erik Pitko(xpitko00), FIT
- *      Compiled:	gcc 5.4.0
- */
-
 #ifndef HTAB_H_
 #define HTAB_H_
 
@@ -36,12 +28,12 @@ typedef struct htab{
 int garbageInit(unsigned size);
 
 /**
- * @brief creates new element in list on index calculated by hash_function()
+ * @brief allocates memory and creates item in H-table
  */
 void *myMalloc(size_t n);
 
 /**
- * @brief removes item with given key
+ * @brief frees memory and removes item from H-table
  * @returns non-zero on success
  */
 int myFree(void* key);

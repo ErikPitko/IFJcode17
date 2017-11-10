@@ -12,7 +12,6 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
-void qWarning(const char *fmt, va_list args, int fatal);
 void warning_msg(const char *fmt, ...);
 void error_msg(const char *fmt, ...);
 

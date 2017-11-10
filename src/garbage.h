@@ -40,6 +40,4 @@ int myFree(void* key);
 void mem_clear();
 void garbageFree();
 
-int main(void);
-
 #endif /* HTAB_H_ */

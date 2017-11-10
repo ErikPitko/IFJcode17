@@ -1,10 +1,3 @@
-/*
- * error.h
- *
- *  Created on: Mar 18, 2017
- *      Author:		Erik Pitko(xpitko00), FIT
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

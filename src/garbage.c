@@ -94,7 +94,7 @@ void *myMalloc(size_t n) {
 	return (item->key);
 }
 
-struct htab_listitem *htab_find(void* key){
+htab_listitem *htab_find(void* key){
 	unsigned index = hash_function(key) % htable->arr_size;
 
 	// cycle through items
@@ -110,7 +110,7 @@ void *myRealloc(void* key, size_t n){
 	if(key == NULL)
 		return (myMalloc(n));
 
-	htab_listitem temp;
+	htab_listitem *temp;
 	if((temp = htab_find(key)) != NULL){
 		void* new = realloc(key, n);
 		temp->key = new;

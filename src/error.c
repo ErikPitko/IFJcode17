@@ -13,8 +13,10 @@ void qWarning(const char *form, va_list args, int fatal){
 	vfprintf(stderr, form, args);
 	fprintf(stderr, "\n");
 
-	if(fatal)
+	if(fatal){
+		garbageFree();
 		exit(1);
+	}
 }
 
 void warning_msg(const char *form, ...){

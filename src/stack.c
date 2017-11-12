@@ -17,12 +17,12 @@ void stackInit ( tStack* s ) {
 		return;
 
 	s->top = -1;
-	s->arr = (struct structToken*)myMalloc(STACK_SIZE * sizeof(struct structToken));
+	s->arr = (token*)myMalloc(STACK_SIZE * sizeof(token));
 	s->size = STACK_SIZE;
 }
 
 void stackIncrement ( tStack* s ){
-	struct structToken* new = (struct structToken*)myRealloc(s->arr, s->size + STACK_SIZE);
+	token *new = (token)myRealloc(s->arr, s->size + STACK_SIZE);
 	if(new == NULL)
 		return;
 	s->arr = new;
@@ -30,18 +30,18 @@ void stackIncrement ( tStack* s ){
 }
 
 int stackEmpty ( const tStack* s ) {
-	return (s->top < 0) ? 1 : 0;
+	return ((s->top < 0) ? 1 : 0);
 }
 
 int stackFull ( const tStack* s ) {
-	return (s->top < s->size) ? 0 : 1;
+	return ((s->top < s->size) ? 0 : 1);
 }
 
-struct structToken *stackTop ( const tStack* s) {
+token *stackTop ( const tStack* s) {
 	if (stackEmpty(s))
 		return NULL;
 	else
-		return &(s->arr[s->top]);
+		return (&(s->arr[s->top]));
 }
 
 void stackPop ( tStack* s ) {
@@ -50,7 +50,7 @@ void stackPop ( tStack* s ) {
 	s->top--;
 }
 
-void stackPush ( tStack* s, struct structToken token ) {
+void stackPush ( tStack* s, token token ) {
 	if(stackFull(s))
 		stackIncrement(s);
 	s->arr[++(s->top)] = token;

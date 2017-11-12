@@ -32,7 +32,7 @@ int stackFull(const tStack* s);
 /**
  * @brief Vrací znak z vrcholu zásobníku.
  */
-struct structToken *stackTop(const tStack* s);
+token *stackTop(const tStack* s);
 
 /**
  * @brief Odstraní prvek z vrcholu zásobníku
@@ -42,6 +42,6 @@ void stackPop(tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */
-void stackPush(tStack* s, struct structToken token);
+void stackPush(tStack* s, token token);
 
 #endif

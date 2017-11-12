@@ -143,7 +143,7 @@ int myFree(void* key) {
 	return (0);
 }
 
-/*int main(void){
+int main(void){
 
 	if (!garbageInit(400))
 		return (EXIT_FAILURE);
@@ -153,4 +153,4 @@ int myFree(void* key) {
 	}
 
 	garbageFree();
-}*/
+}

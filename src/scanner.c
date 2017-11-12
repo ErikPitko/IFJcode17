@@ -602,7 +602,7 @@ int isKeyword(char* s){
 
 		i++;
 	}
-	return 0;// don`t even think about it
+	return 0;
 }
 
 int isOperator(int c){

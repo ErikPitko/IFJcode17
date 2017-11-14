@@ -83,5 +83,31 @@ tInstruction *GetInstructionFromActive(tInstructionList *instrList)
 {
 	return instrList->Active->Instruction;
 }
+void *TokenToTypeConversion(ETokenConversion eToken,char *token)
+{
+	if(eToken == CHARTOINT)
+	{
+		return (myMalloc(sizeof(int))= atoi(token));
+	}
+	if(eToken == CHARTOFLOAT)
+	{
+		return (myMalloc(sizeof(float))= atoi(token));
+	}
+	if(eToken == CHARTOID)
+	{
+		void *tmp = mymalloc(((sizeof(char))*strlen(token))+1);
+		strcpy(tmp,token);
+		return tmp;
+	}
+	if(eToken == CHARTOTRUE)
+	{
+		return (myMalloc(sizeof(int))= 1);
+	}
+	if(eToken == CHARTOFALSE)
+	{
+		return (myMalloc(sizeof(int))= 0);
+	}
+	return NULL;
+}
 
 

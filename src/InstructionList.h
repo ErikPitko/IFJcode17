@@ -87,6 +87,16 @@ typedef enum
 	/*********************************************/
 
 } EINSTRUCTION;
+
+typedef enum
+{
+	CHARTOFLOAT,
+	CHARTOID,
+	CHARTOINT,
+	CHARTOTRUE,
+	CHARTOFALSE
+}ETokenConversion;
+
 typedef struct
 {
 	EINSTRUCTION Instruction;
@@ -117,6 +127,6 @@ void LNext(tInstructionList *instrList);
 void *LLast(tInstructionList *instrList);
 void *LAct(tInstructionList *instrList);
 tInstruction *GetInstructionFromActive(tInstructionList *instrList);
-
+void *TokenToTypeConversion(ETokenConversion eToken,char *token);
 
 #endif /* INSTRUCTIONLIST_H_ */

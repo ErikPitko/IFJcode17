@@ -7,7 +7,7 @@
 #include "scanner.h"
 
 //extern struct structToken;
-//
+
 token tmpToken;
 int ungetcharpom = 0;
 
@@ -15,7 +15,7 @@ token getToken();
 
 
 //testove ucely 1. TOKEN_ID OBSAH
-/*
+
 int main (){
 	token myToken;
 	int i = 0;
@@ -30,7 +30,7 @@ int main (){
 	}
 
 	return 0;
-}*/
+}
 // vrati typ (token.type)a dani nazov v token.info
 token getToken() {
 		int c;
@@ -89,7 +89,7 @@ token getToken() {
 				free(tmpToken.info); tmpToken.info = NULL;
 				return tmpToken;
 			}else
-		  if(c == ','){
+      if(c == ','){
         tmpToken.type = COMMA;
 				free(tmpToken.info); tmpToken.info = NULL;
 				return tmpToken;
@@ -185,7 +185,7 @@ token getToken() {
 					if(isspace(c) || isOperator(c)){
 						//if (c == '\n')
 							tmp_s[i] = '\0';
-						tmpToken.type = NUM_INTEGER;
+						tmpToken.type = VALUE_INTEGER;
 						tmpToken.info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
@@ -211,7 +211,7 @@ token getToken() {
 							ungetcharpom = c;
 							tmp_s[i] = '\0';
 							tmpToken.info = tmp_s;
-							tmpToken.type = NUM_DOUBLE;
+							tmpToken.type = VALUE_DOUBLE;
 							return tmpToken; // 123.123
 						}else {
 							tmp_s[i++] = c;
@@ -243,7 +243,7 @@ token getToken() {
 								ungetcharpom = c;
 								tmp_s[i] = '\0';
 								tmpToken.info = tmp_s;
-								tmpToken.type = NUM_DOUBLE;
+								tmpToken.type = VALUE_DOUBLE;
 								return tmpToken;
 							}
 						}else { // chyba v syntaktike?
@@ -254,7 +254,7 @@ token getToken() {
 						tmp_s[i] = '\0';
 						ungetcharpom = c;
 						tmpToken.info = tmp_s;
-						tmpToken.type = NUM_INTEGER;
+						tmpToken.type = VALUE_INTEGER;
 						return tmpToken;
 					}
 /*
@@ -419,7 +419,7 @@ token getToken() {
 				}
 				tmp_s[i]='\0';
 				tmpToken.info = tmp_s;//"tohle tam je bez uvozovek\0"
-				tmpToken.type = STRING;
+				tmpToken.type = VALUE_STRING;
 				return tmpToken;
 			// STRING_END
 				break;

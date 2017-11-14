@@ -7,7 +7,7 @@
 #include "scanner.h"
 
 //extern struct structToken;
-
+//
 token tmpToken;
 int ungetcharpom = 0;
 

@@ -15,7 +15,7 @@ token getToken();
 
 
 //testove ucely 1. TOKEN_ID OBSAH
-
+/*
 int main (){
 	token myToken;
 	int i = 0;
@@ -30,7 +30,7 @@ int main (){
 	}
 
 	return 0;
-}
+}*/
 // vrati typ (token.type)a dani nazov v token.info
 token getToken() {
 		int c;

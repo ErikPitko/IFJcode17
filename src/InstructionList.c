@@ -7,8 +7,8 @@
 #include "InstructionList.h"
 #include "garbage.h"
 #include "scanner.h"
-
-
+#include "error.h"
+#include <stdbool.h>
 tInstructionList ListOfInstructions;
 
 void LInit(tInstructionList *Instr_List)
@@ -31,7 +31,7 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction Instruction)
 	tListElement elem;
 	if((elem =myMalloc(sizeof(struct tListElement))) == NULL)
 	{
-		garbageFree();
+		error_msg("Malloc elementu se nepovedl.");
 	}
 	else
 	{
@@ -89,25 +89,53 @@ void *TokenToTypeConversion(token tok)
 {
 	if(tok->type == VALUE_INTEGER)
 	{
-		return (myMalloc(sizeof(int))= atoi(tok->info));
+		void *tmp = (int)myMalloc(sizeof(int));
+		*((int*)tmp) = atoi(tok->info);
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
 	if(tok->type == VALUE_DOUBLE)
 	{
-		return (myMalloc(sizeof(float))= atoi(tok->info));
+		void *tmp = (float)myMalloc(sizeof(float));
+		*((float*)tmp) = atoi(tok->info);
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
 	if(tok->type == VALUE_STRING)
 	{
 		void *tmp = mymalloc(((sizeof(char))*strlen(tok->info))+1);
+		if(tmp== NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
 		strcpy(tmp,token);
 		return tmp;
 	}
 	if(tok->type == TRUE)
 	{
-		return (myMalloc(sizeof(int))= 1);
+		void *tmp = (bool)myMalloc(sizeof(bool));
+		*((bool*)tmp) = true;
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
 	if(tok->type == FALSE)
 	{
-		return (myMalloc(sizeof(int))= 0);
+		void *tmp = (bool)myMalloc(sizeof(bool));
+		*((bool*)tmp) = false;
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
 	return NULL;
 }

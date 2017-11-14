@@ -92,4 +92,7 @@ int getchar0(int c);
 
 #define LEFT_PARENTHESIS 51
 #define RIGHT_PARENTHESIS 52
-#define TOKEN_END 52
+
+#define COMMA 53
+#define SEMICOLON 54
+#define TOKEN_END 54

@@ -10,7 +10,7 @@
 
 token tmpToken;
 int ungetcharpom = 0;
-
+/*
 token getToken();
 
 
@@ -30,7 +30,7 @@ int main (){
 	}
 
 	return 0;
-}
+}*/
 // vrati typ (token.type)a dani nazov v token.info
 token getToken() {
 		int c;

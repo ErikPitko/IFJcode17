@@ -6,6 +6,8 @@
  */
 #include "InstructionList.h"
 #include "garbage.h"
+#include "scanner.h"
+
 
 tInstructionList ListOfInstructions;
 
@@ -83,27 +85,27 @@ tInstruction *GetInstructionFromActive(tInstructionList *instrList)
 {
 	return instrList->Active->Instruction;
 }
-void *TokenToTypeConversion(ETokenConversion eToken,char *token)
+void *TokenToTypeConversion(token tok)
 {
-	if(eToken == CHARTOINT)
+	if(tok->type == VALUE_INTEGER)
 	{
-		return (myMalloc(sizeof(int))= atoi(token));
+		return (myMalloc(sizeof(int))= atoi(tok->info));
 	}
-	if(eToken == CHARTOFLOAT)
+	if(tok->type == VALUE_DOUBLE)
 	{
-		return (myMalloc(sizeof(float))= atoi(token));
+		return (myMalloc(sizeof(float))= atoi(tok->info));
 	}
-	if(eToken == CHARTOID)
+	if(tok->type == VALUE_STRING)
 	{
-		void *tmp = mymalloc(((sizeof(char))*strlen(token))+1);
+		void *tmp = mymalloc(((sizeof(char))*strlen(tok->info))+1);
 		strcpy(tmp,token);
 		return tmp;
 	}
-	if(eToken == CHARTOTRUE)
+	if(tok->type == TRUE)
 	{
 		return (myMalloc(sizeof(int))= 1);
 	}
-	if(eToken == CHARTOFALSE)
+	if(tok->type == FALSE)
 	{
 		return (myMalloc(sizeof(int))= 0);
 	}

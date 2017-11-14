@@ -127,6 +127,6 @@ void LNext(tInstructionList *instrList);
 void *LLast(tInstructionList *instrList);
 void *LAct(tInstructionList *instrList);
 tInstruction *GetInstructionFromActive(tInstructionList *instrList);
-void *TokenToTypeConversion(ETokenConversion eToken,char *token);
+void *TokenToTypeConversion(token tok);
 
 #endif /* INSTRUCTIONLIST_H_ */

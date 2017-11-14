@@ -10,7 +10,7 @@ typedef struct structToken{
 }token;
 
 
-
+token getToken();
 int upper2lower(int c);
 
 int isKeyword(char* s);

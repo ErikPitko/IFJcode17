@@ -84,15 +84,16 @@ int getchar0(int c);
 #define DIV_INT 45
 #define DIV_DOUBLE 46
 
-#define NUM_INTEGER 47
-#define NUM_DOUBLE 48
+#define VALUE_INTEGER 47
+#define VALUE_DOUBLE 48
+#define VALUE_STRING 49
 
-#define IDENTIFIER 49
 #define EOL 50
+#define IDENTIFIER 51
 
-#define LEFT_PARENTHESIS 51
-#define RIGHT_PARENTHESIS 52
+#define LEFT_PARENTHESIS 52
+#define RIGHT_PARENTHESIS 53
 
-#define COMMA 53
-#define SEMICOLON 54
-#define TOKEN_END 54
+#define COMMA 54
+#define SEMICOLON 55
+#define TOKEN_END 55

@@ -89,8 +89,16 @@ token getToken() {
 				free(tmpToken.info); tmpToken.info = NULL;
 				return tmpToken;
 			}else
-
-			c = getchar0(c);
+		  if(c == ','){
+        tmpToken.type = COMMA;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+      }else
+      if(c == ';'){
+        tmpToken.type = SEMICOLON;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+      }else
 			if (c == '/'){
 				if ((c = getchar0(c)) == 39) {// /' blokovy komentar zaciatok
 						if(c == EOF){

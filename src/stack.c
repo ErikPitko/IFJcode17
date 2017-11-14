@@ -60,7 +60,7 @@ void stackPush ( tStack* s, token token ) {
 		stackIncrement(s);
 	s->arr[++(s->top)] = token;
 }
-
+/*
 int main(){
 	garbageInit(400);
 	struct structToken *temp;
@@ -76,4 +76,5 @@ int main(){
 	garbageFree();
 	return EXIT_SUCCESS;
 }
+*/
 

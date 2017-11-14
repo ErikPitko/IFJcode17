@@ -32,13 +32,14 @@ int stackFull(const tStack* s);
 /**
  * @brief Vrací znak z vrcholu zásobníku.
  */
-token *stackTop(const tStack* s);
+token *stackTop( const tStack* s);
 
 /**
  * @brief Odstraní prvek z vrcholu zásobníku
  */
-void stackPop(tStack* s);
+void stackPop( tStack* s);
 
+token *stackTopPop ( tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */

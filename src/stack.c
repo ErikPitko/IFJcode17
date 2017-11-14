@@ -22,7 +22,7 @@ void stackInit ( tStack* s ) {
 }
 
 void stackIncrement ( tStack* s ){
-	token *new = (token)myRealloc(s->arr, s->size + STACK_SIZE);
+	token *new = (token*)myRealloc(s->arr, s->size + STACK_SIZE);
 	if(new == NULL)
 		return;
 	s->arr = new;
@@ -50,12 +50,17 @@ void stackPop ( tStack* s ) {
 	s->top--;
 }
 
+token *stackTopPop ( tStack* s) {
+	token *temp = stackTop(s);
+	stackPop(s);
+	return (temp);
+}
 void stackPush ( tStack* s, token token ) {
 	if(stackFull(s))
 		stackIncrement(s);
 	s->arr[++(s->top)] = token;
 }
-/*
+
 int main(){
 	garbageInit(400);
 	struct structToken *temp;
@@ -71,4 +76,4 @@ int main(){
 	garbageFree();
 	return EXIT_SUCCESS;
 }
-*/
+

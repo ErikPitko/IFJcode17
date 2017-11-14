@@ -6,7 +6,9 @@
  */
 #include "InstructionList.h"
 #include "garbage.h"
-
+#include "scanner.h"
+#include "error.h"
+#include <stdbool.h>
 tInstructionList ListOfInstructions;
 
 void LInit(tInstructionList *Instr_List)
@@ -29,7 +31,7 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction Instruction)
 	tListElement elem;
 	if((elem =myMalloc(sizeof(struct tListElement))) == NULL)
 	{
-		garbageFree();
+		error_msg("Malloc elementu se nepovedl.");
 	}
 	else
 	{
@@ -83,29 +85,57 @@ tInstruction *GetInstructionFromActive(tInstructionList *instrList)
 {
 	return instrList->Active->Instruction;
 }
-void *TokenToTypeConversion(ETokenConversion eToken,char *token)
+void *TokenToTypeConversion(token tok)
 {
-	if(eToken == CHARTOINT)
+	if(tok->type == VALUE_INTEGER)
 	{
-		return (myMalloc(sizeof(int))= atoi(token));
+		void *tmp = (int)myMalloc(sizeof(int));
+		*((int*)tmp) = atoi(tok->info);
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
-	if(eToken == CHARTOFLOAT)
+	if(tok->type == VALUE_DOUBLE)
 	{
-		return (myMalloc(sizeof(float))= atoi(token));
+		void *tmp = (float)myMalloc(sizeof(float));
+		*((float*)tmp) = atoi(tok->info);
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
-	if(eToken == CHARTOID)
+	if(tok->type == VALUE_STRING)
 	{
-		void *tmp = mymalloc(((sizeof(char))*strlen(token))+1);
+		void *tmp = mymalloc(((sizeof(char))*strlen(tok->info))+1);
+		if(tmp== NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
 		strcpy(tmp,token);
 		return tmp;
 	}
-	if(eToken == CHARTOTRUE)
+	if(tok->type == TRUE)
 	{
-		return (myMalloc(sizeof(int))= 1);
+		void *tmp = (bool)myMalloc(sizeof(bool));
+		*((bool*)tmp) = true;
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
-	if(eToken == CHARTOFALSE)
+	if(tok->type == FALSE)
 	{
-		return (myMalloc(sizeof(int))= 0);
+		void *tmp = (bool)myMalloc(sizeof(bool));
+		*((bool*)tmp) = false;
+		if(tmp == NULL)
+		{
+			error_msg("Malloc elementu se nepovedl.");
+		}
+		return tmp;
 	}
 	return NULL;
 }

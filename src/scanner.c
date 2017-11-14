@@ -12,81 +12,10 @@ token tmpToken;
 int ungetcharpom = 0;
 
 token getToken();
-#define ERR printf("ERR_1_")//-2
-#define ERR_SYN printf("ERR_2_")//-3
-
-
-
-#define EOF0 -1
-
-#define NOPE 0  // pri blokovom komentary vrati NOPE
-//nemenit poradie pre keyword
-#define KEYWORD_START 1
-#define AS 1
-#define ASC 2
-#define DECLARE 3
-#define DIM 4
-#define DO 5
-#define DOUBLE 6
-#define ELSE 7
-#define END 8
-#define CHR 9
-#define FUNCTION 10
-#define IF 11
-#define INPUT 12
-#define INTEGER 13
-#define LENGTH 14
-#define LOOP 15
-#define PRINT 16
-#define RETURN0 17
-#define SCOPE 18
-#define STRING 19
-#define SUBSTR 20
-#define THEN 21
-#define WHILE 22
-#define KEYWORD_END 22
-
-#define RESERVED_START 23
-#define AND 23
-#define BOOLEAN 24
-#define CONTINUE 25
-#define ELSEIF 26
-#define EXIT 27
-#define FALSE 28
-#define FOR 29
-#define NEXT 30
-#define NOT 31
-#define OR 32
-#define SHARED 33
-#define STATIC 34
-#define TRUE 35
-#define RESERVED_END 35
-
-#define TOKEN_START 36
-#define LESS 36
-#define INEQUALITY 37
-#define LESS_EQUAL 38
-#define EQUAL 39
-#define GREATER 40
-#define GREATER_EQUAL 41
-
-#define PLUS 42
-#define MINUS 43
-#define ASTERIX 44
-#define DIV_INT 45
-#define DIV_DOUBLE 46
-
-#define NUM_INTEGER 47
-#define NUM_DOUBLE 48
-
-#define IDENTIFIER 49
-#define EOL 50
-#define TOKEN_END 50
-
 
 
 //testove ucely 1. TOKEN_ID OBSAH
-/*
+
 int main (){
 	token myToken;
 	int i = 0;
@@ -101,7 +30,7 @@ int main (){
 	}
 
 	return 0;
-}*/
+}
 // vrati typ (token.type)a dani nazov v token.info
 token getToken() {
 		int c;
@@ -150,6 +79,26 @@ token getToken() {
 				free(tmpToken.info); tmpToken.info = NULL;
 				return tmpToken;
 			} else
+			if (c == '('){
+				tmpToken.type = LEFT_PARENTHESIS;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+			}else
+			if(c == ')'){
+				tmpToken.type = RIGHT_PARENTHESIS;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+			}else
+      if(c == ','){
+        tmpToken.type = COMMA;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+      }else
+      if(c == ';'){
+        tmpToken.type = SEMICOLON;
+				free(tmpToken.info); tmpToken.info = NULL;
+				return tmpToken;
+      }else
 			if (c == '/'){
 				if ((c = getchar0(c)) == 39) {// /' blokovy komentar zaciatok
 						if(c == EOF){
@@ -236,7 +185,7 @@ token getToken() {
 					if(isspace(c) || isOperator(c)){
 						//if (c == '\n')
 							tmp_s[i] = '\0';
-						tmpToken.type = NUM_INTEGER;
+						tmpToken.type = VALUE_INTEGER;
 						tmpToken.info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
@@ -262,7 +211,7 @@ token getToken() {
 							ungetcharpom = c;
 							tmp_s[i] = '\0';
 							tmpToken.info = tmp_s;
-							tmpToken.type = NUM_DOUBLE;
+							tmpToken.type = VALUE_DOUBLE;
 							return tmpToken; // 123.123
 						}else {
 							tmp_s[i++] = c;
@@ -294,7 +243,7 @@ token getToken() {
 								ungetcharpom = c;
 								tmp_s[i] = '\0';
 								tmpToken.info = tmp_s;
-								tmpToken.type = NUM_DOUBLE;
+								tmpToken.type = VALUE_DOUBLE;
 								return tmpToken;
 							}
 						}else { // chyba v syntaktike?
@@ -305,7 +254,7 @@ token getToken() {
 						tmp_s[i] = '\0';
 						ungetcharpom = c;
 						tmpToken.info = tmp_s;
-						tmpToken.type = NUM_INTEGER;
+						tmpToken.type = VALUE_INTEGER;
 						return tmpToken;
 					}
 /*
@@ -470,7 +419,7 @@ token getToken() {
 				}
 				tmp_s[i]='\0';
 				tmpToken.info = tmp_s;//"tohle tam je bez uvozovek\0"
-				tmpToken.type = STRING;
+				tmpToken.type = VALUE_STRING;
 				return tmpToken;
 			// STRING_END
 				break;

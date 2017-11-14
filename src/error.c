@@ -7,7 +7,6 @@
 
 #include "error.h"
 
-
 void qWarning(const char *form, va_list args, int fatal){
 	fprintf(stderr, "%s", "ERROR: ");
 	vfprintf(stderr, form, args);

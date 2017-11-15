@@ -121,7 +121,7 @@ typedef struct
 {
 	tListElement *nextPtr;
 	tInstruction Instruction;
-}	*tListElement;
+}	tListElement;
 typedef struct
 {
 	tListElement First;

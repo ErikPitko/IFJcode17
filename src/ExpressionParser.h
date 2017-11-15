@@ -12,6 +12,6 @@
 #include "header.h"
 #include "scanner.h"
 int parseExpression();
-int tableIndexSelect(token tok);
+int tableIndexSelect(tReductToken *tok);
 bool areOperandOkey(token firstOperand,token secondOperand);
 #endif /* EXPRESSIONPARSER_H_ */

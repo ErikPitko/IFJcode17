@@ -47,7 +47,7 @@ ePrecElem precTable[15][15] =
 3.token => .type == equal ;  .info == NULL
 4.token => .type == VALUE_INTEGER; .info =="5"
  */
-int tableIndexSelect(tReductToken tok)
+int tableIndexSelect(tReductToken *tok)
 {
 	if(tok->firstToken->type == IDENTIFIER)
 	{

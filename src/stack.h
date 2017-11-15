@@ -51,7 +51,7 @@ token *stackTopPop ( tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */
-void stackPush(tStack* s, token token);
+void stackPush(tStack* s, tReductToken token);
 /**
  * @brief Vloží znak pod vrchol zásobníku.
  */

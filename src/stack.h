@@ -33,7 +33,7 @@ int stackFull(const tStack* s);
 /**
  * @brief Vrací znak z vrcholu zásobníku.
  */
-token *stackTop( const tStack* s);
+tReductToken *stackTop( const tStack* s);
 /**
  * @brief Vrací předposlední znak z vrcholu zásobníku.
  */

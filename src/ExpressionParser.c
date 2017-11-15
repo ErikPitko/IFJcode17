@@ -132,7 +132,7 @@ int parseExpression()
 	return 0;
 }
 
-bool areOperandOkey(token firstOperand,token secondOperand)
+bool areOperandOkey(token *firstOperand,token *secondOperand)
 {
 	if((firstOperand->type == VALUE_INTEGER || firstOperand ->type == VALUE_DOUBLE) && (secondOperand->type == VALUE_INTEGER || secondOperand->type == VALUE_DOUBLE))
 		return true;

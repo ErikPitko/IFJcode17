@@ -41,7 +41,7 @@ tReductToken *stackBeforeTop ( const tStack* s);
 /**
  * @brief Vrací velikost zásobníku.
  */
-int stackSize(tStack* s)
+int stackSize(tStack* s);
 /**
  * @brief Odstraní prvek z vrcholu zásobníku
  */

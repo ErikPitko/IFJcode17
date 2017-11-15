@@ -47,16 +47,16 @@ ePrecElem precTable[15][15] =
 3.token => .type == equal ;  .info == NULL
 4.token => .type == VALUE_INTEGER; .info =="5"
  */
-int tableIndexSelect(token tok)
+int tableIndexSelect(tReductToken tok)
 {
-	if(tok->type == IDENTIFIER)
+	if(tok->firstToken->type == IDENTIFIER)
 	{
 		return 15;
 	}
 	unsigned arr[15] = {PLUS,MINUS,ASTERIX,DIV_INT,DIV_DOUBLE,EQUAL,LESS,GREATER,LESS_EQUAL,
 				INEQUALITY,LEFT_PARENTHESIS,RIGHT_PARENTHESIS,EOL};
 	for(int i = 0;i<15;i++)
-		if(arr[i]== tok->type)
+		if(arr[i]== tok->firstToken->type)
 			return i;
 	return -1;
 }
@@ -301,5 +301,6 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 			}
 		}
 	}
+	return;
 }
 

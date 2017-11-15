@@ -5,10 +5,10 @@
  *      Author: adam
  */
 
+#include "stack.h"
 #include "ExpressionParser.h"
 #include "scanner.h"
 #include "InstructionList.h"
-
 ePrecElem precTable[15][15] =
 {		//+   	-    	*   	/   	\  		=     	<    	>   	<=   	>=   	<>   	(    	)   	EOL   	VAR
 /*"+"*/	{HIGH,	HIGH,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
@@ -73,12 +73,12 @@ int parseExpression()
 	t->firstToken->info= NULL;
 	t->firstToken->type= EOL;
 	stackPush(stack,t);
-	int reduct = 0;
+	bool reduct = false;
 	tReductToken actToken = getToken();
 	do
 	{
 		int select;
-		if((*reduct) == 0)
+		if((*reduct) == false)
 			select = tableIndexSelect(stackTop(stack));
 		else select = tableIndexSelect(stackBeforeTop(stack));
 		switch (precTable[select][tableIndexSelect(actToken)])
@@ -88,12 +88,12 @@ int parseExpression()
 				for(top = stackTopPop(stack);top->firstToken != NULL;top = stackTopPop(stack))
 				{
 					stackPush(rStack,top);
-					if((*reduct) == 0 && stackTop(stack)->priority == LOW)
+					if((*reduct) == false && stackTop(stack)->priority == LOW)
 					{
 						stackPop(stack);
 						break;
 					}
-					else if((*reduct) != 0 && stackBeforeTop(stack)->priority == LOW)
+					else if((*reduct) != false && stackBeforeTop(stack)->priority == LOW)
 					{
 						stackPop(stack);
 						break;
@@ -110,10 +110,10 @@ int parseExpression()
 				tReductToken priority;
 				priority->firstToken = NULL;
 				priority->priority = LOW;
-				if((*reduct) == 0)
+				if((*reduct) == false)
 					stackPush(stack,priority);	//push a<
 				else stackPushUnderTop(stack,priority);
-				(*reduct) = 0;
+				(*reduct) = false;
 				stackPush(stack,actToken);	//push b
 				actToken = getToken();
 				break;
@@ -134,13 +134,20 @@ int parseExpression()
 	return 0;
 }
 
+bool areOperandOkey(token firstOperand,token secondOperand)
+{
+	if((firstOperand->type == VALUE_INTEGER || firstOperand ->type == VALUE_DOUBLE) && (secondOperand->type == VALUE_INTEGER || secondOperand->type == VALUE_DOUBLE))
+		return true;
+	return false;
+}
+
 void applyRule(tStack *stack,tStack *rStack,int *reduct)
 {
 	//E -> i
 	if(stackSize(rStack)==1)
 	{
 		stackPush(stack,stackTopPop(rStack));
-		(*reduct) = 1;
+		(*reduct) = true;
 	}
 	else if(stackSize(rStack)>1)
 	{
@@ -154,12 +161,16 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 				tReductToken *fOper = stackTopPop(rStack);
 				if(stackTop(rStack)->firstToken->type == IDENTIFIER)
 				{
+					if(areOperandOkay(stackTop(rStack)->firstToken,fID->firstToken)== false)
+					{
+						// ******************CHYBAAAAAA****************
+					}
 					tReductToken *result = myMalloc(sizeof(tReductToken));
 					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(I_ADD,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken),result->firstToken);
+					LInsert(I_ADD,result->firstToken,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
 					stackPop(rStack);
 					stackPush(stack,result);
-					(*reduct) = 1;
+					(*reduct) = true;
 				}
 				break;
 			//E -> E-E
@@ -167,12 +178,16 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 				tReductToken *fOper = stackTopPop(rStack);
 				if(stackTop(rStack)->firstToken->type == IDENTIFIER)
 				{
+					if(areOperandOkay(stackTop(rStack)->firstToken,fID->firstToken)== false)
+					{
+						// ******************CHYBAAAAAA****************
+					}
 					tReductToken *result = myMalloc(sizeof(tReductToken));
 					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(I_SUB,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken),result->firstToken);
+					LInsert(I_SUB,result->firstToken,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
 					stackPop(rStack);
 					stackPush(stack,result);
-					(*reduct) = 1;
+					(*reduct) = true;
 				}
 				break;
 			//E -> E*E
@@ -180,12 +195,16 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 				tReductToken *fOper = stackTopPop(rStack);
 				if(stackTop(rStack)->firstToken->type == IDENTIFIER)
 				{
+					if(areOperandOkay(stackTop(rStack)->firstToken,fID->firstToken)== false)
+					{
+						// ******************CHYBAAAAAA****************
+					}
 					tReductToken *result = myMalloc(sizeof(tReductToken));
 					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(I_MUL,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken),result->firstToken);
+					LInsert(I_MUL,result->firstToken,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
 					stackPop(rStack);
 					stackPush(stack,result);
-					(*reduct) = 1;
+					(*reduct) = true;
 				}
 				break;
 			//E -> E\E
@@ -193,14 +212,18 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 				tReductToken *fOper = stackTopPop(rStack);
 				if(stackTop(rStack)->firstToken->type == IDENTIFIER)
 				{
+					if(areOperandOkay(stackTop(rStack)->firstToken,fID->firstToken)== false)
+					{
+						// ******************CHYBAAAAAA****************
+					}
 					if((int)(*TokenToTypeConversion(stackTop(rStack)->firstToken))==0)
 						return; // dělení nulou
 					tReductToken *result = myMalloc(sizeof(tReductToken));
 					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(I_DIV,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken),result->firstToken);
+					LInsert(I_DIV,result->firstToken,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
 					stackPop(rStack);
 					stackPush(stack,result);
-					(*reduct) = 1;
+					(*reduct) = true;
 				}
 				break;
 			//E -> E/E
@@ -208,14 +231,18 @@ void applyRule(tStack *stack,tStack *rStack,int *reduct)
 				tReductToken *fOper = stackTopPop(rStack);
 				if(stackTop(rStack)->firstToken->type == IDENTIFIER)
 				{
+					if(areOperandOkay(stackTop(rStack)->firstToken,fID->firstToken)== false)
+					{
+						// ******************CHYBAAAAAA****************
+					}
 					if((double)(*TokenToTypeConversion(stackTop(rStack)->firstToken))==0)
 						return; // dělení nulou
 					tReductToken *result = myMalloc(sizeof(tReductToken));
 					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(I_DIV,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken),result->firstToken);
+					LInsert(I_DIV,result->firstToken,TokenToTypeConversion(fID->firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
 					stackPop(rStack);
 					stackPush(stack,result);
-					(*reduct) = 1;
+					(*reduct) = true;
 				}
 				break;
 			/*case EQUAL:

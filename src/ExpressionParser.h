@@ -7,8 +7,6 @@
 
 #ifndef EXPRESSIONPARSER_H_
 #define EXPRESSIONPARSER_H_
-
-#include "stack.h"
 #include <stdbool.h>
 typedef enum
 {
@@ -25,4 +23,5 @@ typedef struct
 }tReductToken;
 int parseExpression();
 int tableIndexSelect(token tok);
+bool areOperandOkey(token firstOperand,token secondOperand);
 #endif /* EXPRESSIONPARSER_H_ */

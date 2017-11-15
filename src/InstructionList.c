@@ -47,7 +47,7 @@ void LSimpleInsert(tInstruction Instruction)
 
 }
 
-void LInsert(EINSTRUCTION instruction,void *arg1,void *arg2,void *result)
+void LInsert(EINSTRUCTION instruction,void *result,void *arg1,void *arg2)
 {
 	tInstruction instr;
 	instr.Instruction = instruction;
@@ -81,7 +81,7 @@ tInstruction *GetInstructionFromActive(tInstructionList *instrList)
 {
 	return instrList->Active->Instruction;
 }
-void *TokenToTypeConversion(token tok)
+void *TokenToTypeConversion(token *tok)
 {
 	if(tok->type == VALUE_INTEGER)
 	{

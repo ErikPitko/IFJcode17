@@ -115,18 +115,18 @@ typedef struct
 	void *arg1;
 	void *arg2;
 	void *result;
-}	tInstruction;
+}tInstruction;
 
-typedef struct
+typedef struct tListElement
 {
-	tListElement *nextPtr;
+	struct tListElement *nextPtr;
 	tInstruction Instruction;
-}	tListElement;
+}tListElement;
 typedef struct
 {
 	tListElement First;
 	tListElement Last;
 	tListElement Active;
-} tInstructionList;
+}tInstructionList;
 
 #endif /* HEADER_H_ */

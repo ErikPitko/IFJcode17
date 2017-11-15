@@ -15,4 +15,5 @@
 int parseExpression();
 int tableIndexSelect(tReductToken *tok);
 bool areOperandOkey(token *firstOperand,token *secondOperand);
+void applyRule(tStack *stack,tStack *rStack,bool *reduct);
 #endif /* EXPRESSIONPARSER_H_ */

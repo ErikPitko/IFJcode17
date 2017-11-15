@@ -47,14 +47,14 @@ int stackSize(tStack* s);
  */
 void stackPop( tStack* s);
 
-token *stackTopPop ( tStack* s);
+tReductToken *stackTopPop ( tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */
-void stackPush(tStack* s, tReductToken token);
+void stackPush(tStack* s, tReductToken *token);
 /**
  * @brief Vloží znak pod vrchol zásobníku.
  */
-void stackPushUnderTop(tStack* s, tReductToken token);
+void stackPushUnderTop(tStack* s, tReductToken *token);
 
 #endif

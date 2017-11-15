@@ -1,8 +1,13 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+
+#include "garbage.h"
+#include "garbage.c"
 
 typedef struct structToken{
 	unsigned type;
@@ -10,7 +15,7 @@ typedef struct structToken{
 }token;
 
 
-
+token getToken();
 int upper2lower(int c);
 
 int isKeyword(char* s);
@@ -21,7 +26,7 @@ int isOperator(int c);
 int getchar0(int c);
 
 #define ERR printf("ERR_1_")//-2
-#define ERR_SYN printf("ERR_2_")//-3
+
 
 
 

@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include "stack.h"
 #include "header.h"
-#include "scanner.h"
 #include "InstructionList.h"
 int parseExpression();
 int tableIndexSelect(tReductToken *tok);

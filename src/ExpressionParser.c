@@ -114,12 +114,12 @@ int parseExpression()
 				//else chyba
 				break;
 			case L:
-				tReductToken *priority = NULL;
-				priority->firstToken = NULL;
-				priority->priority = L;
+				tReductToken priority;
+				priority.firstToken = NULL;
+				priority.priority = L;
 				if((*reduct) == false)
-					stackPush(stack,priority);	//push a<
-				else stackPushUnderTop(stack,priority);
+					stackPush(stack,&priority);	//push a<
+				else stackPushUnderTop(stack,&priority);
 				(*reduct) = false;
 				stackPush(stack,actToken);	//push b
 				actToken = getToken();

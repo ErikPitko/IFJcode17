@@ -11,6 +11,7 @@
 #include "garbage.h"
 #include "scanner.h"
 #include "error.h"
+#include "scanner.h"
 #include <stdbool.h>
 void LInit(tInstructionList *instrList);
 void LClear(tInstructionList *instrList);

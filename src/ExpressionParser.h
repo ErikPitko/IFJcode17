@@ -8,19 +8,9 @@
 #ifndef EXPRESSIONPARSER_H_
 #define EXPRESSIONPARSER_H_
 #include <stdbool.h>
-typedef enum
-{
-	HIGH,
-	LOW,
-	EQ,
-	ERROR,
-	NONE
-}ePrecElem;
-typedef struct
-{
-	token *firstToken;
-	ePrecElem priority;
-}tReductToken;
+#include "stack.h"
+#include "header.h"
+#include "scanner.h"
 int parseExpression();
 int tableIndexSelect(token tok);
 bool areOperandOkey(token firstOperand,token secondOperand);

@@ -5,10 +5,7 @@
  *      Author: adam
  */
 
-#include "stack.h"
 #include "ExpressionParser.h"
-#include "scanner.h"
-#include "InstructionList.h"
 ePrecElem precTable[15][15] =
 {		//+   	-    	*   	/   	\  		=     	<    	>   	<=   	>=   	<>   	(    	)   	EOL   	VAR
 /*"+"*/	{HIGH,	HIGH,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},

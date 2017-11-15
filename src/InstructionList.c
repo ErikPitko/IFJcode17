@@ -5,10 +5,6 @@
  *      Author: adam
  */
 #include "InstructionList.h"
-#include "garbage.h"
-#include "scanner.h"
-#include "error.h"
-#include <stdbool.h>
 tInstructionList ListOfInstructions;
 
 void LInit(tInstructionList *Instr_List)

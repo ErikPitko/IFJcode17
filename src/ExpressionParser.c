@@ -6,23 +6,24 @@
  */
 
 #include "ExpressionParser.h"
+
 ePrecElem precTable[15][15] =
 {		//+   	-    	*   	/   	\  		=     	<    	>   	<=   	>=   	<>   	(    	)   	EOL   	VAR
-/*"+"*/	{HIGH,	HIGH,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"-"*/	{HIGH,	HIGH,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"*"*/	{HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"/"*/	{HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"\"*/	{HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"="*/	{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	LOW,	LOW,	LOW,	LOW,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"<"*/	{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*">"*/	{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"<="*/{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*">="*/{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"<>"*/{LOW,	LOW,	LOW,	LOW,	LOW,	HIGH,	LOW,	LOW,	LOW,	LOW,	HIGH,	LOW,	HIGH,	HIGH,	LOW},
-/*"("*/	{LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	EQ,		ERROR,	LOW},
-/*")"*/	{HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	ERROR,	HIGH,	HIGH,	ERROR},
-/*"EOL"*/{LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	LOW,	ERROR,	ERROR,	LOW},
-/*"VAR"*/{HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	HIGH,	ERROR,	HIGH,	HIGH,	ERROR}
+/*"+"*/	{H,		H,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"-"*/	{H,		H,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"*"*/	{H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"/"*/	{H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"\"*/	{H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"="*/	{L,		L,		L,		L,		L,		H,		L,		L,		L,		L,		H,		L,		H,		H,		L},
+/*"<"*/	{L,		L,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*">"*/	{L,		L,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"<="*/{L,		L,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*">="*/{L,		L,		L,		L,		L,		H,		H,		H,		H,		H,		H,		L,		H,		H,		L},
+/*"<>"*/{L,		L,		L,		L,		L,		H,		L,		L,		L,		L,		H,		L,		H,		H,		L},
+/*"("*/	{L,		L,		L,		L,		L,		L,		L,		L,		L,		L,		L,		L,		EQ,		ERROR,	L},
+/*")"*/	{H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		ERROR,	H,		H,		ERROR},
+/*"EOL"*/{L,	L,		L,		L,		L,		L,		L,		L,		L,		L,		L,		L,		ERROR,	ERROR,	L},
+/*"VAR"*/{H,	H,		H,		H,		H,		H,		H,		H,		H,		H,		H,		ERROR,	H,		H,		ERROR}
 };
 
 
@@ -80,17 +81,17 @@ int parseExpression()
 		else select = tableIndexSelect(stackBeforeTop(stack));
 		switch (precTable[select][tableIndexSelect(actToken)])
 		{
-			case HIGH:
+			case H:
 				tReductToken *top = NULL;
 				for(top = stackTopPop(stack);top->firstToken != NULL;top = stackTopPop(stack))
 				{
 					stackPush(rStack,top);
-					if((*reduct) == false && stackTop(stack)->priority == LOW)
+					if((*reduct) == false && stackTop(stack)->priority == L)
 					{
 						stackPop(stack);
 						break;
 					}
-					else if((*reduct) != false && stackBeforeTop(stack)->priority == LOW)
+					else if((*reduct) != false && stackBeforeTop(stack)->priority == L)
 					{
 						stackPop(stack);
 						break;
@@ -103,10 +104,10 @@ int parseExpression()
 				//then zaměň <y za A & vypiš r na výstup
 				//else chyba
 				break;
-			case LOW:
+			case L:
 				tReductToken priority;
 				priority->firstToken = NULL;
-				priority->priority = LOW;
+				priority->priority = L;
 				if((*reduct) == false)
 					stackPush(stack,priority);	//push a<
 				else stackPushUnderTop(stack,priority);

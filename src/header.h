@@ -9,8 +9,8 @@
 #define HEADER_H_
 typedef enum
 {
-	HIGH,
-	LOW,
+	H,
+	L,
 	EQ,
 	ERROR,
 	NONE

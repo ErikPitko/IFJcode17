@@ -26,7 +26,7 @@ void LClear(tInstructionList *instrList)
 	}
 	instrList->Active = NULL;
 }
-void LSimpleInsert(tInstructionList *instrList,tInstruction Instruction)
+void LSimpleInsert(tInstruction Instruction)
 {
 	tListElement elem;
 	if((elem =myMalloc(sizeof(struct tListElement))) == NULL)
@@ -44,21 +44,21 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction Instruction)
 		}else
 			instrList ->First = elem;
 		 */
-		instrList = instrList->First!= NULL?instrList->Last->nextPtr = elem: instrList ->First = elem;
-		instrList->Last = elem;
-		instrList->Active = elem;
+		ListOfInstructions = ListOfInstructions->First!= NULL?ListOfInstructions->Last->nextPtr = elem: ListOfInstructions ->First = elem;
+		ListOfInstructions->Last = elem;
+		ListOfInstructions->Active = elem;
 	}
 
 }
 
-void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,void *arg1,void *arg2,void *result)
+void LInsert(EINSTRUCTION instruction,void *arg1,void *arg2,void *result)
 {
 	tInstruction instr;
 	instr.Instruction = instruction;
 	instr.arg1 = arg1;
 	instr.arg2 = arg2;
 	instr.result = result;
-	LInsert(instrList,instr);
+	LInsert(ListOfInstructions,instr);
 }
 
 void LSetStart(tInstructionList *instrList)
@@ -89,7 +89,7 @@ void *TokenToTypeConversion(token tok)
 {
 	if(tok->type == VALUE_INTEGER)
 	{
-		void *tmp = (int)myMalloc(sizeof(int));
+		void *tmp = myMalloc(sizeof(int));
 		*((int*)tmp) = atoi(tok->info);
 		if(tmp == NULL)
 		{
@@ -99,7 +99,7 @@ void *TokenToTypeConversion(token tok)
 	}
 	if(tok->type == VALUE_DOUBLE)
 	{
-		void *tmp = (float)myMalloc(sizeof(float));
+		void *tmp = myMalloc(sizeof(float));
 		*((float*)tmp) = atoi(tok->info);
 		if(tmp == NULL)
 		{
@@ -109,7 +109,7 @@ void *TokenToTypeConversion(token tok)
 	}
 	if(tok->type == VALUE_STRING)
 	{
-		void *tmp = mymalloc(((sizeof(char))*strlen(tok->info))+1);
+		void *tmp = myMalloc(((sizeof(char))*strlen(tok->info))+1);
 		if(tmp== NULL)
 		{
 			error_msg("Malloc elementu se nepovedl.");
@@ -119,7 +119,7 @@ void *TokenToTypeConversion(token tok)
 	}
 	if(tok->type == TRUE)
 	{
-		void *tmp = (bool)myMalloc(sizeof(bool));
+		void *tmp = myMalloc(sizeof(bool));
 		*((bool*)tmp) = true;
 		if(tmp == NULL)
 		{
@@ -129,7 +129,7 @@ void *TokenToTypeConversion(token tok)
 	}
 	if(tok->type == FALSE)
 	{
-		void *tmp = (bool)myMalloc(sizeof(bool));
+		void *tmp = myMalloc(sizeof(bool));
 		*((bool*)tmp) = false;
 		if(tmp == NULL)
 		{

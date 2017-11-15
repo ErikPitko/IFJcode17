@@ -9,6 +9,7 @@
 #define EXPRESSIONPARSER_H_
 
 #include "stack.h"
+#include <stdbool.h>
 typedef enum
 {
 	HIGH,
@@ -16,7 +17,13 @@ typedef enum
 	EQ,
 	ERROR
 }ePrecElem;
-
+typedef struct
+{
+	token firstToken;
+	token secondToken;
+	unsigned operation;
+}tReductToken;
 int parseExpression();
-
+int tableIndexSelect(token tok);
+//bool isIdentifier(token tok);
 #endif /* EXPRESSIONPARSER_H_ */

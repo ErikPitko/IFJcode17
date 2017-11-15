@@ -99,8 +99,8 @@ void *TokenToTypeConversion(token tok)
 	}
 	if(tok->type == VALUE_DOUBLE)
 	{
-		void *tmp = myMalloc(sizeof(float));
-		*((float*)tmp) = atoi(tok->info);
+		void *tmp = myMalloc(sizeof(double));
+		*((double*)tmp) = atoi(tok->info);
 		if(tmp == NULL)
 		{
 			error_msg("Malloc elementu se nepovedl.");

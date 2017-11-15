@@ -15,15 +15,14 @@ typedef enum
 	HIGH,
 	LOW,
 	EQ,
-	ERROR
+	ERROR,
+	NONE
 }ePrecElem;
 typedef struct
 {
-	token firstToken;
-	token secondToken;
-	unsigned operation;
+	token *firstToken;
+	ePrecElem priority;
 }tReductToken;
 int parseExpression();
 int tableIndexSelect(token tok);
-//bool isIdentifier(token tok);
 #endif /* EXPRESSIONPARSER_H_ */

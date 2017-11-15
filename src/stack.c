@@ -17,12 +17,12 @@ void stackInit ( tStack* s ) {
 		return;
 
 	s->top = -1;
-	s->arr = (token*)myMalloc(STACK_SIZE * sizeof(token));
+	s->arr = (tReductToken*)myMalloc(STACK_SIZE * sizeof(tReductToken));
 	s->size = STACK_SIZE;
 }
 
 void stackIncrement ( tStack* s ){
-	token *new = (token*)myRealloc(s->arr, s->size + STACK_SIZE);
+	tReductToken *new = (tReductToken*)myRealloc(s->arr, s->size + STACK_SIZE);
 	if(new == NULL)
 		return;
 	s->arr = new;
@@ -37,11 +37,18 @@ int stackFull ( const tStack* s ) {
 	return ((s->top < s->size) ? 0 : 1);
 }
 
-token *stackTop ( const tStack* s) {
+tReductToken *stackTop ( const tStack* s) {
 	if (stackEmpty(s))
 		return NULL;
 	else
 		return (&(s->arr[s->top]));
+}
+
+tReductToken *stackBeforeTop ( const tStack* s) {
+	if (stackEmpty(s)&& s->top>1)
+		return NULL;
+	else
+		return (&(s->arr[(s->top)-1]));
 }
 
 void stackPop ( tStack* s ) {
@@ -50,15 +57,26 @@ void stackPop ( tStack* s ) {
 	s->top--;
 }
 
-token *stackTopPop ( tStack* s) {
-	token *temp = stackTop(s);
+int stackSize(tStack* s)
+{
+	return s->top+1;
+}
+
+tReductToken *stackTopPop ( tStack* s) {
+	tReductToken *temp = stackTop(s);
 	stackPop(s);
 	return (temp);
 }
-void stackPush ( tStack* s, token token ) {
+void stackPush ( tStack* s, tReductToken token ) {
 	if(stackFull(s))
 		stackIncrement(s);
 	s->arr[++(s->top)] = token;
+}
+void stackPushUnderTop(tStack* s, tReductToken token)
+{
+	tReductToken *tmp = stackTopPop(s);
+	stackPush(s,token);
+	stackPush(s,tmp);
 }
 /*
 int main(){

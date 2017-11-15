@@ -13,25 +13,24 @@ int ungetcharpom = 0;
 
 token getToken();
 //testove ucely 1. TOKEN_ID OBSAH
-/*
+
 int main (){
-  garbageI
+  garbageInit(400);
 	token myToken;
 	int i = 0;
 	while (myToken.type != EOF0){
 		i++;
 		myToken = getToken();
-{
+
 		printf("%d. %d",i,myToken.type);
 		//if(myToken.info)
 			printf("     %s",myToken.info);
 		printf("\n");
   }
-	}
+
 
 	return 0;
 }
-*/
 // vrati typ (token.type)a dani nazov v token.info
 token getToken() {
 		int c;
@@ -41,7 +40,7 @@ token getToken() {
 		//START OF FINDING TOKENS
 		//char tmp_s[256];
 		char* tmp_s;
-		tmp_s = myMalloc( 1*sizeof(char));//problem
+		tmp_s = malloc(256*sizeof(char));//problem
 		int i = 0;
     int eol_counter=0;
 
@@ -312,20 +311,20 @@ token getToken() {
 						}
 						if (c == 92){//START OF ESC // c == '\'
 							//possible escape sequance
-              myRealloc(tmp_s,(i+1)*sizeof(char));
-							tmp_s[i++]=c;
+
+							tmp_s[i++] = c;
 							c = getchar0(c);//\_
 							if(c == EOF){
 								ERR; // eof pocas esc 1
 							}
-							tmp_s[i++]=c;//0-2 default ERR
+							tmp_s[i++] = c;//0-2 default ERR
 							switch(c){
 								case '0': //0
 											c = getchar0(c);
 											if(c == EOF){
 												ERR;//eof pocas esc 2
 											}
-											tmp_s[i++]=c;//0x
+											tmp_s[i++] = c;//0x
 											if (c == '0'){//00
 												c = getchar0(c);
                         if (c == EOF){
@@ -335,14 +334,14 @@ token getToken() {
 														ERR;//\000 wrong escape sequance
 												}
 												else if (c <='9'&& c>'0')//001-9
-															tmp_s[i++]=c;
+															tmp_s[i++] = c;
 															else {
 																	ERR;// what did come? char?
 															}
 											//01-9
   										}else if ((c <= '9') && (c >='0'))
                               if (((c=getchar0(c)) <= '9') && (c >='0'))
-    														tmp_s[i++]=c;//01-9x
+    														tmp_s[i++] = c;//01-9x
     														else{
     															ERR; // 01-9x x-neni cislo //some char nor number
     														}
@@ -363,19 +362,19 @@ token getToken() {
 								break;
 								case '2'://2
 												c=getchar0(c);//2x
-												tmp_s[i++]=c;
+												tmp_s[i++] = c;
 												if (c<='4'&& c>='0'){//20-4
 														c=getchar0(c);//20-4x
 														if(c == EOF){
 															ERR;
 														}
-														tmp_s[i++]=c;
+														tmp_s[i++] = c;
 												}
 												else
 													if(c == '5'){
 														c = getchar0(c);//25x
 														if(c <= '5' && c >= '0'){
-															tmp_s[i++]=c;
+															tmp_s[i++] = c;
 														}else ERR;//256+ wrong ESC or char
 													}else ERR; //26+ wrong esc or char
 								break;

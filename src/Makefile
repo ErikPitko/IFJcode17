@@ -1,9 +1,11 @@
 CC=gcc
-CFLAGS=-O0 -Wall
+CFLAGS=-O0 -Wall -Wextra -g
 
 all: IFJcode17
 
-IFJcode17: IFJcode17.o error.o
+OBJS=error.o ExpressionParser.o garbage.o InstructionList.o scanner.o stack.o
+
+IFJcode17: IFJcode17.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 zip: Makefile $(all)
@@ -17,5 +19,12 @@ clean:
 
 ##############################################################
 
-error.o: error.c error.h
-IFJcode17.o: IFJcode17.c
+error.o: error.c error.h garbage.h
+ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
+ scanner.h garbage.h InstructionList.h
+garbage.o: garbage.c garbage.h
+IFJcode17.o: IFJcode17.c error.h garbage.h
+InstructionList.o: InstructionList.c InstructionList.h garbage.h \
+ scanner.h error.h
+scanner.o: scanner.c scanner.h
+stack.o: stack.c stack.h scanner.h garbage.h ExpressionParser.h

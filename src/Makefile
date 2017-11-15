@@ -21,10 +21,10 @@ clean:
 
 error.o: error.c error.h garbage.h
 ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
- scanner.h garbage.h InstructionList.h
+ scanner.h garbage.h header.h
 garbage.o: garbage.c garbage.h
 IFJcode17.o: IFJcode17.c error.h garbage.h
-InstructionList.o: InstructionList.c InstructionList.h garbage.h \
+InstructionList.o: InstructionList.c InstructionList.h header.h garbage.h \
  scanner.h error.h
 scanner.o: scanner.c scanner.h
-stack.o: stack.c stack.h scanner.h garbage.h ExpressionParser.h
+stack.o: stack.c stack.h scanner.h garbage.h header.h

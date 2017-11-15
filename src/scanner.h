@@ -1,4 +1,5 @@
-
+#ifndef _SCANNER_H_
+#define _SCANNER_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,3 +103,5 @@ int getchar0(int c);
 #define COMMA 54
 #define SEMICOLON 55
 #define TOKEN_END 55
+
+#endif

@@ -67,12 +67,12 @@ tReductToken *stackTopPop ( tStack* s) {
 	stackPop(s);
 	return (temp);
 }
-void stackPush ( tStack* s, tReductToken *token ) {
+void stackPush ( tStack* s, tReductToken token ) {
 	if(stackFull(s))
 		stackIncrement(s);
 	s->arr[++(s->top)] = token;
 }
-void stackPushUnderTop(tStack* s, tReductToken *token)
+void stackPushUnderTop(tStack* s, tReductToken token)
 {
 	tReductToken *tmp = stackTopPop(s);
 	stackPush(s,token);

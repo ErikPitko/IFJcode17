@@ -1,5 +1,5 @@
-#ifndef _SCANNER_H_
-#define _SCANNER_H_
+#ifndef SCANNER_H_
+#define SCANNER_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "garbage.h"
-#include "garbage.c"
+//#include "garbage.c"
 
 typedef struct structToken{
 	unsigned type;
@@ -16,7 +16,8 @@ typedef struct structToken{
 }token;
 
 
-token getToken();
+token *getToken();
+token *tokenInit();
 int upper2lower(int c);
 
 int isKeyword(char* s);
@@ -104,4 +105,5 @@ int getchar0(int c);
 #define SEMICOLON 55
 #define TOKEN_END 55
 
-#endif
+
+#endif /* SCANNER_H_ */

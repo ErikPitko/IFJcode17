@@ -44,12 +44,12 @@ var_type 	->	Integer
 				Double
 				String
 
-print_exp	->	<assingment> ; <print_exp>
-				<assingment> ; EOL
+print_exp	->	<assingnment> ; <print_exp>
+				<assingnment> ; EOL
 
 command		->	Input <var_type> EOL
 				If ( EXP ) Then EOL <if_body> EOL
-				id = <assingment> EOL
+				id = <assingnment> EOL
 				Return <var_type> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>

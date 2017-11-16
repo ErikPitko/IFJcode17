@@ -7,14 +7,14 @@
 
 #include "error.h"
 
-void qWarning(const char *form, va_list args, int fatal){
+void qWarning(const char *form, va_list args, int errno){
 	fprintf(stderr, "%s", "ERROR: ");
 	vfprintf(stderr, form, args);
 	fprintf(stderr, "\n");
 
-	if(fatal){
+	if(errno){
 		garbageFree();
-		exit(1);
+		exit(errno);
 	}
 }
 
@@ -27,11 +27,11 @@ void warning_msg(const char *form, ...){
 	va_end(args);
 }
 
-void error_msg(const char *form, ...){
+void error_msg(int errno, const char *form, ...){
 	va_list args;
 	va_start(args, form);
 
-	qWarning(form, args, 1);
+	qWarning(form, args, errno);
 
 	va_end(args);
 }

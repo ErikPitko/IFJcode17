@@ -16,7 +16,8 @@ typedef struct structToken{
 }token;
 
 
-token getToken();
+token *getToken();
+token *tokenInit();
 int upper2lower(int c);
 
 int isKeyword(char* s);

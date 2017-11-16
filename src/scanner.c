@@ -8,39 +8,52 @@
 #include "garbage.h"
 //extern struct structToken;
 
-token tmpToken;
 int ungetcharpom = 0;
 
-token getToken();
+//token *getToken();
 //testove ucely 1. TOKEN_ID OBSAH
-
+/*
 int main (){
   garbageInit(400);
-	token myToken;
+	token* myToken;
+  myToken = getToken();
 	int i = 0;
-	while (myToken.type != EOF0){
+	while (myToken->type != EOF0){
 		i++;
-		myToken = getToken();
 
-		printf("%d. %d",i,myToken.type);
-		//if(myToken.info)
-			printf("     %s",myToken.info);
+
+		printf("%d. %d",i,myToken->type);
+		//if(myToken->info)
+			printf("     %s",myToken->info);
 		printf("\n");
+    myToken = getToken();
   }
 
 
 	return 0;
 }
-// vrati typ (token.type)a dani nazov v token.info
-token getToken() {
+*/
+token *tokenInit(){
+  token * tmpToken = myMalloc(sizeof(token));
+  tmpToken->type = NOPE;
+  tmpToken->info = NULL;
+}
+
+
+
+token* getToken() {
 		int c;
+
+    token *tmpToken;
+    tmpToken = tokenInit();
 		//char state[16];
 		int state;
     int pomoc;
 		//START OF FINDING TOKENS
 		//char tmp_s[256];
 		char* tmp_s;
-		tmp_s = malloc(256*sizeof(char));//problem
+		//tmp_s = malloc(256*sizeof(char));//problem
+    tmp_s = myMalloc(1*sizeof(char));
 		int i = 0;
     int eol_counter=0;
 
@@ -49,8 +62,8 @@ token getToken() {
 				ungetcharpom = c;
 			}
 			else{
-				tmpToken.type = EOF0;
-				 tmpToken.info = NULL;
+				tmpToken->type = EOF0;
+				 tmpToken->info = NULL;
 				return tmpToken;
 			}
 			// EOF first ,1
@@ -63,8 +76,8 @@ token getToken() {
           }//pre vypis len jedneho EOL
           ungetcharpom = c;
 
-					tmpToken.type = EOL;
-					 tmpToken.info = NULL;
+					tmpToken->type = EOL;
+					 tmpToken->info = NULL;
 					return tmpToken;
 				}
 				if(!(isspace(c))){
@@ -76,28 +89,28 @@ token getToken() {
 			c = getchar0(c);
 			//blokovy komentar + delenie pre double ,0
 			if(c == EOF){ ///888
-				tmpToken.type = EOF0;
-				 tmpToken.info = NULL;
+				tmpToken->type = EOF0;
+				 tmpToken->info = NULL;
 				return tmpToken;
 			} else
 			if (c == '('){
-				tmpToken.type = LEFT_PARENTHESIS;
-				 tmpToken.info = NULL;
+				tmpToken->type = LEFT_PARENTHESIS;
+				 tmpToken->info = NULL;
 				return tmpToken;
 			}else
 			if(c == ')'){
-				tmpToken.type = RIGHT_PARENTHESIS;
-				 tmpToken.info = NULL;
+				tmpToken->type = RIGHT_PARENTHESIS;
+				 tmpToken->info = NULL;
 				return tmpToken;
 			}else
       if(c == ','){
-        tmpToken.type = COMMA;
-				 tmpToken.info = NULL;
+        tmpToken->type = COMMA;
+				 tmpToken->info = NULL;
 				return tmpToken;
       }else
       if(c == ';'){
-        tmpToken.type = SEMICOLON;
-				 tmpToken.info = NULL;
+        tmpToken->type = SEMICOLON;
+				 tmpToken->info = NULL;
 				return tmpToken;
       }else
 			if (c == '/'){
@@ -131,12 +144,12 @@ token getToken() {
 				}
 				else {
 					ungetcharpom = c; // z podmienky == 39
-					tmpToken.type = DIV_DOUBLE;
-					 tmpToken.info = NULL;
+					tmpToken->type = DIV_DOUBLE;
+					 tmpToken->info = NULL;
 					return tmpToken; // / - token delenie pre double //////////////////////////////////////////////// /
 				}
-				tmpToken.type = NOPE; //bol blokovy komentar ak chceme zrusit NOPE vypisiovanie tak zmenit strukturu podmienky
-				 tmpToken.info = NULL;
+				tmpToken->type = NOPE; //bol blokovy komentar ak chceme zrusit NOPE vypisiovanie tak zmenit strukturu podmienky
+				 tmpToken->info = NULL;
 				return tmpToken;
 			}else
 
@@ -149,8 +162,8 @@ token getToken() {
 				}
         //ungetcharpom = c;
         if(c == '\n'){
-          tmpToken.type = NOPE; //bol blokovy komentar ak chceme zrusit NOPE vypisiovanie tak zmenit strukturu podmienky
-  				 tmpToken.info = NULL;
+          tmpToken->type = NOPE; //bol blokovy komentar ak chceme zrusit NOPE vypisiovanie tak zmenit strukturu podmienky
+  				 tmpToken->info = NULL;
 				  return tmpToken;
         }else
           ERR; //komentar ukonceny EOF
@@ -158,14 +171,14 @@ token getToken() {
 				if (c == EOF){
           ERR; // jednoriadkovy komentar musi byt ukonceny koncom riadku
 
-					tmpToken.type = EOF0;
-					 tmpToken.info = NULL;
+					tmpToken->type = EOF0;
+					 tmpToken->info = NULL;
 					return tmpToken;
 				}*/
         /*
 				if(c == '\n'){
-					tmpToken.type = EOL;
-					 tmpToken.info = NULL;
+					tmpToken->type = EOL;
+					 tmpToken->info = NULL;
 					return tmpToken;
 				}*/
 
@@ -201,25 +214,24 @@ token getToken() {
 
 			// switch ,0
 			switch(state){
-				//TODO case term //666 - je treba?
 				case 2://"POSSIBLE_NUMBER":
 					i= 1;
 					while (((c = getchar0(c)) >= '0') && (c<='9')){
-							tmp_s[i++] = c; // 222
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;} // 222
 					}
 					if(isspace(c) || isOperator(c)){
 						//if (c == '\n')
 							tmp_s[i] = '\0';
-						tmpToken.type = VALUE_INTEGER;
-						tmpToken.info = tmp_s;
+						tmpToken->type = VALUE_INTEGER;
+						tmpToken->info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
 					}
 
 					if (c == '.'){ // double?
-						tmp_s[i++] = c;
+						{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						while (((c = upper2lower(getchar0(c))) >= '0') && (c <='9')){
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						}
 						if(tmp_s[i-1] == '.'){
 							ungetcharpom = c;
@@ -228,11 +240,11 @@ token getToken() {
 						if (c != 'e'/*isspace(c) || isOperator(c)*/){
 							ungetcharpom = c;
 							tmp_s[i] = '\0';
-							tmpToken.info = tmp_s;
-							tmpToken.type = VALUE_DOUBLE;
+							tmpToken->info = tmp_s;
+							tmpToken->type = VALUE_DOUBLE;
 							return tmpToken; // 123.123
 						}else {
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						}
 						c = getchar0(c);
 						if(c == EOF){
@@ -242,29 +254,29 @@ token getToken() {
               ERR;
             }
 						if( c ==  '+' || c == '-')//{ // 123.132e+ // 111 dobrovolne znamenko?
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						else ungetcharpom = c;
 
 						while (((c = getchar0(c)) >= '0') && (c <='9')){ // 123.132e+123
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						}// konec cyklu
             ungetcharpom = c;
             tmp_s[i] = '\0';
-            tmpToken.info = tmp_s;
-            tmpToken.type = VALUE_DOUBLE;
+            tmpToken->info = tmp_s;
+            tmpToken->type = VALUE_DOUBLE;
             return tmpToken;
 
 					}else { // nebola .
 						tmp_s[i] = '\0';
 						ungetcharpom = c;
-						tmpToken.info = tmp_s;
-						tmpToken.type = VALUE_INTEGER;
+						tmpToken->info = tmp_s;
+						tmpToken->type = VALUE_INTEGER;
 						return tmpToken;
 					}
 /*
 						tmp_s[i] = '\0';
-						tmpToken.info = tmp_s;
-						tmpToken.type = DOUBLE;
+						tmpToken->info = tmp_s;
+						tmpToken->type = DOUBLE;
 						ungetcharpom = c;
 						return tmpToken; // vrati double
 */
@@ -276,7 +288,7 @@ token getToken() {
 				c = getchar0(c);
 				c = upper2lower(c);
 				while ((c == '_') || ((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z'))) {
-					tmp_s[i++] = c;
+					{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 					c = getchar0(c);
 					c = upper2lower(c);
 				}
@@ -286,14 +298,14 @@ token getToken() {
 
 				int pom = isKeyword(tmp_s);
 				if(pom){
-					tmpToken.info = NULL; // kvuli debugu inac NULL // 555
-					tmpToken.type = pom;
+					tmpToken->info = NULL; // kvuli debugu inac NULL // 555
+					tmpToken->type = pom;
 					return tmpToken; // keyword
 				}
 				else { // identifier
 						tmp_s[i] = '\0';
-						tmpToken.info = tmp_s;
-						tmpToken.type = IDENTIFIER; // navrat identifieru a jeho nazvu
+						tmpToken->info = tmp_s;
+						tmpToken->type = IDENTIFIER; // navrat identifieru a jeho nazvu
 						ungetcharpom = c;
 						return tmpToken; // identifier
 				}
@@ -312,19 +324,19 @@ token getToken() {
 						if (c == 92){//START OF ESC // c == '\'
 							//possible escape sequance
 
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 							c = getchar0(c);//\_
 							if(c == EOF){
 								ERR; // eof pocas esc 1
 							}
-							tmp_s[i++] = c;//0-2 default ERR
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}//0-2 default ERR
 							switch(c){
 								case '0': //0
 											c = getchar0(c);
 											if(c == EOF){
 												ERR;//eof pocas esc 2
 											}
-											tmp_s[i++] = c;//0x
+											{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}//0x
 											if (c == '0'){//00
 												c = getchar0(c);
                         if (c == EOF){
@@ -334,14 +346,14 @@ token getToken() {
 														ERR;//\000 wrong escape sequance
 												}
 												else if (c <='9'&& c>'0')//001-9
-															tmp_s[i++] = c;
+															{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 															else {
 																	ERR;// what did come? char?
 															}
 											//01-9
   										}else if ((c <= '9') && (c >='0'))
                               if (((c=getchar0(c)) <= '9') && (c >='0'))
-    														tmp_s[i++] = c;//01-9x
+    														{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}//01-9x
     														else{
     															ERR; // 01-9x x-neni cislo //some char nor number
     														}
@@ -352,29 +364,29 @@ token getToken() {
 								case '1'://1
 												c=getchar0(c);
 												if(c<='9'&& c>='0')
-													tmp_s[i++] = c;//1x
+													{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}//1x
 												else ERR; //wrong escape sequance
 
 												c=getchar0(c);
 												if (c<='9'&& c >='0')
-													tmp_s[i++] = c;//1xx
+													{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}//1xx
 												else ERR;//wrong ESC
 								break;
 								case '2'://2
 												c=getchar0(c);//2x
-												tmp_s[i++] = c;
+												{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 												if (c<='4'&& c>='0'){//20-4
 														c=getchar0(c);//20-4x
 														if(c == EOF){
 															ERR;
 														}
-														tmp_s[i++] = c;
+														{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 												}
 												else
 													if(c == '5'){
 														c = getchar0(c);//25x
 														if(c <= '5' && c >= '0'){
-															tmp_s[i++] = c;
+															{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 														}else ERR;//256+ wrong ESC or char
 													}else ERR; //26+ wrong esc or char
 								break;
@@ -398,65 +410,65 @@ token getToken() {
 						}// end of ESC
 						// ak nieje esc sekvencia
 						else {
-							tmp_s[i++] = c;
+							{myRealloc(tmp_s,(i+1)*sizeof(char)); tmp_s[i++] = c;}
 						}
 				}
 				tmp_s[i]='\0';
-				tmpToken.info = tmp_s;//"tohle tam je bez uvozovek\0"
-				tmpToken.type = VALUE_STRING;
+				tmpToken->info = tmp_s;//"tohle tam je bez uvozovek\0"
+				tmpToken->type = VALUE_STRING;
 				return tmpToken;
 			// STRING_END
 				break;
 				case 1://"OPERATOR":
 			// OPERATOR_START  ( c == '+'|| c == '-'|| c == '*'|| c == '\\' || c == '<' || c == '>' || c == '=' )
 					switch(c){
-						case '+':  tmpToken.info = NULL;
-											tmpToken.type = PLUS;
+						case '+':  tmpToken->info = NULL;
+											tmpToken->type = PLUS;
 											return tmpToken;
 											break;
-						case '-':  tmpToken.info = NULL;
-											tmpToken.type = MINUS;
+						case '-':  tmpToken->info = NULL;
+											tmpToken->type = MINUS;
 											return tmpToken;
 											break;
 
 						case '<':c = getchar0(c);
 										if(c == '>') {
-											 tmpToken.info = NULL;
-											tmpToken.type = INEQUALITY;
+											 tmpToken->info = NULL;
+											tmpToken->type = INEQUALITY;
 											return tmpToken; // <>
 										}else if (c == '='){
-												 tmpToken.info = NULL;
-												tmpToken.type = LESS_EQUAL;
+												 tmpToken->info = NULL;
+												tmpToken->type = LESS_EQUAL;
 												return tmpToken; // <=
 										}else {
 											ungetcharpom = c;
-											 tmpToken.info = NULL;
-											tmpToken.type = LESS;
+											 tmpToken->info = NULL;
+											tmpToken->type = LESS;
 											return tmpToken; // <
 										}
 						break;
-						case '=':  tmpToken.info = NULL;
-											tmpToken.type = EQUAL;
+						case '=':  tmpToken->info = NULL;
+											tmpToken->type = EQUAL;
 											return tmpToken;//=
 						break;
 						case '>': c = getchar0(c);
                         if (c == '='){
-													 tmpToken.info = NULL;
-													tmpToken.type = GREATER_EQUAL;
+													 tmpToken->info = NULL;
+													tmpToken->type = GREATER_EQUAL;
 													return tmpToken;// >=
 												}else{
 													ungetcharpom = c;
-													 tmpToken.info = NULL;
-													tmpToken.type = GREATER;
+													 tmpToken->info = NULL;
+													tmpToken->type = GREATER;
 													return tmpToken;//>
 												}
 						break;
-						case '*':  tmpToken.info = NULL;
-											tmpToken.type = ASTERIX;
+						case '*':  tmpToken->info = NULL;
+											tmpToken->type = ASTERIX;
 											return tmpToken;//*
 						break;
-						case 92:  tmpToken.info = NULL; // '\' == 92
-										 tmpToken.type = DIV_INT;
+						case 92:  tmpToken->info = NULL; // '\' == 92
+										 tmpToken->type = DIV_INT;
 										 return tmpToken;
 
 						break;

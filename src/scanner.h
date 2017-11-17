@@ -15,15 +15,32 @@ typedef struct structToken{
 	char *info; //Numbers will be in here too.
 }token;
 
-
+/**
+ *
+ *@return pointer to allocated token
+ *
+ */
 token *getToken();
+/**
+ *
+ *@return allocated token without allocation for info
+ *
+ */
 token *tokenInit();
+
+
 int upper2lower(int c);
 
+/*
+ *
+ *@return token->type of keyword
+ *
+ */
 int isKeyword(char* s);
 
 
 int isOperator(int c);
+
 // funkce pro simulaci ungetc(c,file);
 int getchar0(int c);
 

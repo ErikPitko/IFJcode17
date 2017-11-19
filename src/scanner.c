@@ -34,7 +34,7 @@ int main (){
 }
 */
 token *tokenInit(){
-  token * tmpToken = myMalloc(sizeof(token));
+  token * tmpToken = myMalloc(sizeof(struct structToken));
   tmpToken->type = NOPE;
   tmpToken->info = NULL;
 }

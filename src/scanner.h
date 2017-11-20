@@ -27,7 +27,7 @@ int isOperator(int c);
 // funkce pro simulaci ungetc(c,file);
 int getchar0(int c);
 
-#define ERR do{printf("ERR_1_\n");exit(1);}while(0)// printf("ERR_1_")//-2
+#define ERR do{fprintf(stderr,"ERR_1_\n");exit(1);}while(0)// printf("ERR_1_")//-2
 
 
 

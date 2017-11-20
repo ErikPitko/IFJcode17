@@ -6,6 +6,8 @@
 
 token *currToken;
 
+unsigned lineCount = 1;
+
 parse_errno ret;
 parse_errno prog_body();
 parse_errno main_body();
@@ -42,6 +44,7 @@ parse_errno check_EOL(){
 		return (SYNTAX_ERR);
 	}
 	puts("EOL correct");
+	lineCount++;
 	return (PARSE_OK);
 }
 
@@ -78,6 +81,9 @@ parse_errno prog_body(){
 		return (PARSE_OK);
 	case SCOPE:
 		puts("SCOPE correct");
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
 
 		if((ret =main_body()) != PARSE_OK)
 			return (ret);
@@ -148,6 +154,9 @@ parse_errno prog_body(){
 		if((ret = prog_body()) != PARSE_OK)
 			return (ret);
 		break;
+	default:
+		puts("Expected FUNCTION, DECLARE, SCOPE or EOF");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -369,6 +378,10 @@ parse_errno par_list(){
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
+		break;
+	default:
+		puts("Expected ) or IDENTIFIER");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 
@@ -395,6 +408,10 @@ parse_errno par_next(){
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
+		break;
+	default:
+		puts("Expected ) or ,");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -418,6 +435,10 @@ parse_errno arg_list(){
 		puts("constant correct");
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
+		break;
+	default:
+		puts("Expected ), IDENTIFIER or value");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -434,6 +455,10 @@ parse_errno arg_next(){
 
 		if((ret = arg_next2()) != PARSE_OK)
 			return (ret);
+		break;
+	default:
+		puts("Expected ) or ,");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -453,6 +478,10 @@ parse_errno arg_next2(){
 		puts("constant correct");
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
+		break;
+	default:
+		puts("Expected IDENTIFIER or value");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -473,14 +502,18 @@ parse_errno var_type(){
 	case BOOLEAN:
 		puts("boolean type correct");
 		break;
+	default:
+		puts("Expected var type");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno print_exp(){
 	puts("print_exp() entered");
+//	currToken = getToken();
 
-	if((ret = assingment()) != PARSE_OK)
+	if((ret = assingnment()) != PARSE_OK)
 		return (ret);
 
 	currToken = getToken();
@@ -506,11 +539,11 @@ parse_errno print_exp(){
 
 parse_errno command(){
 	puts("command() entered");
-	currToken = getToken();
+//	currToken = getToken();
 	switch(currToken->type){
 	case INPUT:
 		puts("INPUT correct");
-		if((ret = var_type()) != PARSE_OK)
+		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -521,6 +554,11 @@ parse_errno command(){
 		break;
 	case IDENTIFIER:
 		puts("ID correct");
+
+		char str[12];
+				sprintf(str, "%d", currToken->type);
+				printf("line: %d\n token: %s : %s\n", lineCount, currToken->info, str);
+
 		currToken = getToken();
 
 		if(currToken->type != EQUAL){
@@ -537,7 +575,7 @@ parse_errno command(){
 		break;
 	case RETURN0:
 		puts("RETURN correct");
-		if((ret = var_type()) != PARSE_OK)
+		if((ret = assingnment()) != PARSE_OK)
 			return (ret);
 
 		if((ret = check_EOL()) != PARSE_OK)
@@ -555,12 +593,15 @@ parse_errno command(){
 		//TODO EXP
 		puts("= correct");
 		break;
-//	case PRINT:
-//		puts("PRINT correct");
-//
-//		if((ret = print_exp()) != PARSE_OK)
-//			return (ret);
-//		break;
+	case PRINT:
+		puts("PRINT correct");
+
+		if((ret = print_exp()) != PARSE_OK)
+			return (ret);
+		break;
+	default:
+		puts("Unexpected command");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
@@ -580,10 +621,27 @@ parse_errno assingnment(){
 		if((ret = arg_list()) != PARSE_OK)
 			return (ret);
 		break;
+	default:
+		puts("Expected IDENTIFIER");
+		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
-
+/*
 int main(){
+	garbageInit(400);
+	parse_errno rett;
+	rett =prog_body();
+	puts("FILE PARSING COMPLETE:");
+	if(rett == PARSE_OK)
+		puts("\tSUCCESS");
+	else{
+		puts("\tFAILED");
+		char str[12];
+		sprintf(str, "%d", currToken->type);
+		printf("line: %d\n token: %s : %s\n", lineCount, currToken->info, str);
+	}
+	garbageFree();
 	return (EXIT_SUCCESS);
 }
+*/

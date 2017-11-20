@@ -143,6 +143,7 @@ int myFree(void* key) {
 	return (0);
 }
 
+/*
 int main(void){
 
 	if (!garbageInit(400))
@@ -154,3 +155,4 @@ int main(void){
 
 	garbageFree();
 }
+*/

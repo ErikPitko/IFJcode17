@@ -1,5 +1,5 @@
 prog_body	->	EOF
-				Scope <main_body> EOL <prog_body>
+				Scope EOL <main_body> EOL <prog_body>
 				Declare Function fncName ( <par_list> As <var_type> EOL <prog_body>
 				Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
 
@@ -47,10 +47,10 @@ var_type 	->	Integer
 print_exp	->	<assingnment> ; <print_exp>
 				<assingnment> ; EOL
 
-command		->	Input <var_type> EOL
+command		->	Input id EOL
 				If ( EXP ) Then EOL <if_body> EOL
 				id = <assingnment> EOL
-				Return <var_type> EOL
+				Return <assingnment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
 

@@ -10,5 +10,6 @@
 #include "ExpressionParser.h"
 #include "garbage.h"
 #include "error.h"
+#include <string.h>
 
 #endif /* PARSER_H_ */

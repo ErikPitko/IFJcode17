@@ -11,7 +11,7 @@ extern unsigned STACK_SIZE;
 /* ADT zásobník implementovaný ve statickém poli */
 typedef struct {
 	unsigned size;
-	struct structToken *arr; /* pole pro uložení hodnot */
+	tReductToken *arr; /* pole pro uložení hodnot */
 	int top; /* index prvku na vrcholu zásobníku */
 } tStack;
 
@@ -41,7 +41,7 @@ tReductToken *stackBeforeTop ( const tStack* s);
 /**
  * @brief Vrací velikost zásobníku.
  */
-int stackSize(tStack* s);
+int stackLenght(tStack *s);
 /**
  * @brief Odstraní prvek z vrcholu zásobníku
  */
@@ -51,10 +51,10 @@ tReductToken *stackTopPop ( tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */
-void stackPush(tStack* s, tReductToken *token);
+void stackPush(tStack* s, tReductToken token);
 /**
  * @brief Vloží znak pod vrchol zásobníku.
  */
-void stackPushUnderTop(tStack* s, tReductToken *token);
-
+void stackPushUnderTop(tStack* s, tReductToken token);
+void stackPrint(char* stackName, tStack* s);
 #endif

@@ -5,7 +5,6 @@
  *      Author: adam
  */
 #include "InstructionList.h"
-tInstructionList ListOfInstructions;
 
 void LInit(tInstructionList *Instr_List)
 {
@@ -16,15 +15,16 @@ void LInit(tInstructionList *Instr_List)
 
 void LClear(tInstructionList *instrList)
 {
-	for(tListElement elem;instrList->First != NULL;elem = instrList->First,instrList->First->nextPtr)
+	for(tListElement *elem;instrList->First != NULL;elem = instrList->First)
 	{
+		instrList->First = instrList->First->nextPtr;
 		myFree(elem);
 	}
 	instrList->Active = NULL;
 }
-void LSimpleInsert(tInstruction Instruction)
+void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction)
 {
-	tListElement elem;
+	tListElement *elem;
 	if((elem =myMalloc(sizeof(struct tListElement))) == NULL)
 	{
 		error_msg("Malloc elementu se nepovedl.");
@@ -33,28 +33,26 @@ void LSimpleInsert(tInstruction Instruction)
 	{
 		elem->Instruction = Instruction;
 		elem->nextPtr = NULL;
-		/*
+
 		if(instrList->First != NULL)
 		{
 			instrList->Last->nextPtr = elem;
 		}else
-			instrList ->First = elem;
-		 */
-		ListOfInstructions = ListOfInstructions->First!= NULL?ListOfInstructions->Last->nextPtr = elem: ListOfInstructions ->First = elem;
-		ListOfInstructions->Last = elem;
-		ListOfInstructions->Active = elem;
+			instrList->First = elem;
+		instrList->Last = elem;
+		instrList->Active = elem;
 	}
 
 }
 
-void LInsert(EINSTRUCTION instruction,void *result,void *arg1,void *arg2)
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,void *result,void *arg1,void *arg2)
 {
 	tInstruction instr;
 	instr.Instruction = instruction;
 	instr.arg1 = arg1;
 	instr.arg2 = arg2;
 	instr.result = result;
-	LInsert(ListOfInstructions,instr);
+	LSimpleInsert(instrList,&instr);
 }
 
 void LSetStart(tInstructionList *instrList)
@@ -63,7 +61,7 @@ void LSetStart(tInstructionList *instrList)
 }
 void LFind(tInstructionList *instrList, void* address)
 {
-	instrList->Active = (tListElement) address;
+	instrList->Active = (tListElement*) address;
 }
 void LNext(tInstructionList *instrList)
 {
@@ -81,6 +79,16 @@ tInstruction *GetInstructionFromActive(tInstructionList *instrList)
 {
 	return instrList->Active->Instruction;
 }
+
+void PrintInstrList(tInstructionList *instrList)
+{
+	if(instrList != NULL)
+	{
+		for(tListElement *elem = instrList->Last;elem != NULL; elem = elem->nextPtr)
+			printf("%i \n", (EINSTRUCTION)elem->Instruction->Instruction);
+	}
+}
+
 void *TokenToTypeConversion(token *tok)
 {
 	if(tok->type == VALUE_INTEGER)
@@ -110,7 +118,7 @@ void *TokenToTypeConversion(token *tok)
 		{
 			error_msg("Malloc elementu se nepovedl.");
 		}
-		strcpy(tmp,token);
+		strcpy(tmp,tok->info);
 		return tmp;
 	}
 	if(tok->type == TRUE)

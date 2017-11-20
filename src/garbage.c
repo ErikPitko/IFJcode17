@@ -145,7 +145,6 @@ int myFree(void* key) {
 
 /*
 int main(void){
-
 	if (!garbageInit(400))
 		return (EXIT_FAILURE);
 

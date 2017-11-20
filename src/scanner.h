@@ -7,44 +7,27 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "garbage.h"
-//#include "garbage.c"
+
 
 typedef struct structToken{
 	unsigned type;
 	char *info; //Numbers will be in here too.
 }token;
 
-/**
- *
- *@return pointer to allocated token
- *
- */
+
 token *getToken();
-/**
- *
- *@return allocated token without allocation for info
- *
- */
+token *getToken0();
 token *tokenInit();
-
-
 int upper2lower(int c);
 
-/*
- *
- *@return token->type of keyword
- *
- */
 int isKeyword(char* s);
 
 
 int isOperator(int c);
-
 // funkce pro simulaci ungetc(c,file);
 int getchar0(int c);
 
-#define ERR printf("ERR_1_")//-2
+#define ERR do{printf("ERR_1_\n");exit(1);}while(0)// printf("ERR_1_")//-2
 
 
 

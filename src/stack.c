@@ -34,7 +34,7 @@ int stackEmpty ( const tStack* s ) {
 }
 
 int stackFull ( const tStack* s ) {
-	return ((s->top < s->size) ? 0 : 1);
+	return ((s->top < (int)s->size) ? 0 : 1);
 }
 
 tReductToken *stackTop ( const tStack* s) {
@@ -57,15 +57,15 @@ void stackPop ( tStack* s ) {
 	s->top--;
 }
 
-int stackSize(tStack* s)
+int stackLenght(tStack *s)
 {
-	return s->top+1;
+	return (s->top)+1;
 }
 
 tReductToken *stackTopPop ( tStack* s) {
 	tReductToken *temp = stackTop(s);
 	stackPop(s);
-	return (temp);
+	return temp;
 }
 void stackPush ( tStack* s, tReductToken token ) {
 	if(stackFull(s))
@@ -74,9 +74,25 @@ void stackPush ( tStack* s, tReductToken token ) {
 }
 void stackPushUnderTop(tStack* s, tReductToken token)
 {
-	tReductToken *tmp = stackTopPop(s);
+	tReductToken tmp = *(stackTopPop(s));
 	stackPush(s,token);
 	stackPush(s,tmp);
+}
+
+void stackPrint(char* stackName, tStack* s)
+{
+	printf("%s:\n",stackName);
+	if(stackLenght(s) == 0)
+	{
+		printf("Stack is empty\n");
+		return;
+	}
+	for(int i =stackLenght(s)-1;i>=0;i--)
+	{
+		if((s->arr[i]).firstToken != NULL)
+		printf("\t%i-index = %s \n",i,(s->arr[i]).firstToken->info);
+		//else printf("%i-index = %i ",i,(s->arr[i]).priority);
+	}
 }
 /*
 int main(){

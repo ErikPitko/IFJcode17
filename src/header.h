@@ -7,6 +7,7 @@
 
 #ifndef HEADER_H_
 #define HEADER_H_
+#include "scanner.h"
 typedef enum
 {
 	H,
@@ -15,11 +16,7 @@ typedef enum
 	ERROR,
 	NONE
 }ePrecElem;
-typedef struct
-{
-	token *firstToken;
-	ePrecElem priority;
-}tReductToken;
+
 typedef enum
 {
 	/***************VOLÁNÍ FUNKCÍ*****************/
@@ -111,6 +108,12 @@ typedef enum
 
 typedef struct
 {
+	token *firstToken;
+	ePrecElem priority;
+}tReductToken;
+
+typedef struct
+{
 	EINSTRUCTION Instruction;
 	void *arg1;
 	void *arg2;
@@ -120,13 +123,13 @@ typedef struct
 typedef struct tListElement
 {
 	struct tListElement *nextPtr;
-	tInstruction Instruction;
+	tInstruction *Instruction;
 }tListElement;
 typedef struct
 {
-	tListElement First;
-	tListElement Last;
-	tListElement Active;
+	tListElement *First;
+	tListElement *Last;
+	tListElement *Active;
 }tInstructionList;
 
 #endif /* HEADER_H_ */

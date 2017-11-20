@@ -11,12 +11,11 @@
 #include "garbage.h"
 #include "scanner.h"
 #include "error.h"
-#include "scanner.h"
 #include <stdbool.h>
 void LInit(tInstructionList *instrList);
 void LClear(tInstructionList *instrList);
-void LSimpleInsert(tInstructionList *instrList,tInstruction Instruction);
-void LInsert(EINSTRUCTION instruction,void *result,void *arg1,void *arg2);
+void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction);
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,void *result,void *arg1,void *arg2);
 void LSetStart(tInstructionList *instrList);
 void LFind(tInstructionList *instrList, void* address);
 void LNext(tInstructionList *instrList);
@@ -24,5 +23,5 @@ void *LLast(tInstructionList *instrList);
 void *LAct(tInstructionList *instrList);
 tInstruction *GetInstructionFromActive(tInstructionList *instrList);
 void *TokenToTypeConversion(token *tok);
-
+void PrintInstrList(tInstructionList *instrList);
 #endif /* INSTRUCTIONLIST_H_ */

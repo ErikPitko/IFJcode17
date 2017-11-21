@@ -12,7 +12,7 @@
 //extern struct structToken;
 
 int ungetcharpom = 0;
-
+static token* lastToken;
 //token *getToken();
 //testove ucely 1. TOKEN_ID OBSAH
 /*
@@ -43,13 +43,13 @@ int main (){
 }
 */
 token *tokenInit(){
-  token * tmpToken;
-  tmpToken = myMalloc(sizeof(struct structToken));
-  if(tmpToken == NULL)
+  token * tmppToken;
+  tmppToken = myMalloc(sizeof(struct structToken));
+  if(tmppToken == NULL)
     return NULL;
-  tmpToken->type = NOPE;
-  tmpToken->info = NULL;
-  return tmpToken;
+  tmppToken->type = NOPE;
+  tmppToken->info = NULL;
+  return tmppToken;
 }
 
 token *getToken(){
@@ -57,12 +57,12 @@ token *getToken(){
   tmpToken = getToken0();
   while(tmpToken->type == NOPE)
     tmpToken = getToken0();
+  lastToken = tmpToken;
   return tmpToken;
 }
 
 token* getToken0() {
 		int c;
-
     token *tmpToken;
     tmpToken = tokenInit();
     if (tmpToken == NULL)
@@ -97,9 +97,10 @@ token* getToken0() {
             c = getchar0(c);
           }//pre vypis len jedneho EOL
           ungetcharpom = c;
-
-					tmpToken->type = EOL;
-					 tmpToken->info = NULL;
+          if(lastToken->type == EOL)
+            tmpToken->type = NOPE;
+					else tmpToken->type = EOL;
+					tmpToken->info = NULL;
 					return tmpToken;
 				}
 				if(!(isspace(c))){
@@ -185,8 +186,9 @@ token* getToken0() {
 				}
         //ungetcharpom = c;
         if(c == '\n'){
-          tmpToken->type = NOPE; //bol blokovy komentar ak chceme zrusit NOPE vypisiovanie tak zmenit strukturu podmienky
-  				 tmpToken->info = NULL;
+          tmpToken->type = NOPE;
+  				tmpToken->info = NULL;
+          ungetcharpom = '\n';
 				  return tmpToken;
         }else
           ERR; //komentar ukonceny EOF

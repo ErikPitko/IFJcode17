@@ -81,6 +81,8 @@ int list_insert_param(list *local_table, symbol sym, psymbol psym);
 void find(list *local_table, symbol sym);
 // Podla id najde zaznam parametru a vrati v tokene vsetky informacie... id, type
 void param_find(list *local_table, symbol sym, psymbol psym);
+// 
+void change_isdefine(list *local_table, symbol sym);
 
 // Zrusi celu tabulku
 void ltab_destroy(list *local_table);

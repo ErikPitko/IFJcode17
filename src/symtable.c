@@ -203,7 +203,22 @@ void param_find(list *local_table, symbol sym, psymbol psym)
 
 }
 
+void change_isdefine(list *local_table, symbol sym)
+{
+	int i = hash_code(sym.id);		
 
+	local_table[i].Act = local_table[i].First;
+
+	while(local_table[i].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if(strcmp(local_table[i].Act->id, sym.id) == 0) // Porovna retazce
+		{
+			local_table[i].Act->is_define = true;
+		}			
+
+		local_table[i].Act = local_table[i].Act->next_item; // Posunieme sa o prvok dalej
+	}
+}
 
 
 /*

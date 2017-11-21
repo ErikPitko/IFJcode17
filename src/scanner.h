@@ -6,9 +6,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
-
 #include "garbage.h"
-//#include "garbage.c"
+
 
 typedef struct structToken{
 	unsigned type;
@@ -17,6 +16,7 @@ typedef struct structToken{
 
 
 token *getToken();
+token *getToken0();
 token *tokenInit();
 int upper2lower(int c);
 
@@ -25,16 +25,15 @@ int isKeyword(char* s);
 
 int isOperator(int c);
 // funkce pro simulaci ungetc(c,file);
-int getchar0(int c);
-
-#define ERR printf("ERR_1_")//-2
+int getchar0();
+#define ERR do{fprintf(stderr,"ERR_1_\n");exit(1);}while(0)// printf("ERR_1_")//-2
 
 
 
 
 #define EOF0 -1
 
-#define NOPE 0  // pri blokovom komentary vrati NOPE
+#define NOPE 0  // pri blokovom komentary vrati NOPE //getToken() nevraci nope
 //nemenit poradie pre keyword
 #define KEYWORD_START 1
 #define AS 1

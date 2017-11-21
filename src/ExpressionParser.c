@@ -34,6 +34,12 @@ ePrecElem precTable[15][15] =
 4.token => .type == VALUE_INTEGER; .info =="5"
  */
 
+/*
+ * int b;
+ * a = foo();
+ * a = foo + b;
+ * */
+
 char* strValueOfEnum(int enumValue)
 {
 	switch(enumValue)
@@ -77,6 +83,7 @@ int tableIndexSelect(tReductToken *tok)
 
 token *parseExpression(token *getSetToken)
 {
+
 	tStack stack;
 	tStack rStack;
 	stackInit(&rStack);
@@ -92,8 +99,16 @@ token *parseExpression(token *getSetToken)
 	tReductToken priority;
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	if(getSetToken == NULL)
+	{
+		printf("PARSER GIVES ME NULL");
 		actToken.firstToken = getToken();
-	else actToken.firstToken = getSetToken;
+	}
+	else
+	{
+		printf("PARSER GIVES ME %s",getSetToken->info);
+		actToken.firstToken = getSetToken;
+	}
+
 	do
 		{
 		int select;
@@ -129,13 +144,11 @@ token *parseExpression(token *getSetToken)
 				else stackPushUnderTop(&stack,priority);	//push <E
 				reduct = false;
 				stackPush(&stack,actToken);	//push b
-				getSetToken = actToken.firstToken;
 				actToken.firstToken = getToken();
 				break;
 			case EQ:
 				printf("!!EQUAL!!\n");
 				stackPush(&stack,actToken);
-				getSetToken = actToken.firstToken;
 				actToken.firstToken = getToken();
 				break;
 			case ERROR:
@@ -148,7 +161,6 @@ token *parseExpression(token *getSetToken)
 				goto exit;
 		}
 	}
-	//!(!reduct &&(actToken.firstToken->type == EOL && stackTop(&stack)->firstToken->type == EOL)) || !(reduct &&(actToken.firstToken->type == EOL && stackBeforeTop(&stack)->firstToken->type == EOL))
 	while(!((actToken.firstToken->type == EOL) && stackBeforeTop(&stack)->firstToken->type == EOL));
 	exit:
 	printf("****RETURNS: %i ****",actToken.firstToken->type);

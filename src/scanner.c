@@ -44,7 +44,7 @@ int main (){
 */
 token *tokenInit(){
   token * tmppToken;
-  tmppToken = myMalloc(sizeof(struct structToken));
+  tmppToken = (token*)myMalloc(sizeof(struct structToken));
   if(tmppToken == NULL)
     return NULL;
   tmppToken->type = NOPE;
@@ -74,12 +74,10 @@ token* getToken0() {
 		//char tmp_s[256];
 		char* tmp_s;
 		//tmp_s = malloc(256*sizeof(char));//problem
-    tmp_s = myMalloc(256*sizeof(char));
+    tmp_s = (char*)myMalloc(256*sizeof(char));
 		int i = 0;
-    int eol_counter=0;
-
 			//EOF first ,0
-      c = getchar0(c);
+      c = getchar0();
 			if(c != EOF){
 				ungetcharpom = c;
 			}
@@ -91,10 +89,10 @@ token* getToken0() {
 			// EOF first ,1
 
 			//mazanie prazdnych znakov s vynimkou EOL ,0
-			while (c = getchar0(c)) {
+			while ((c = getchar0())) {
 				if (c == '\n'){
           while(isspace(c)){
-            c = getchar0(c);
+            c = getchar0();
           }//pre vypis len jedneho EOL
           ungetcharpom = c;
           if(lastToken->type == EOL)
@@ -109,7 +107,7 @@ token* getToken0() {
 				}
 			}
 			//mazanie prazdnych znakov aj EOL ,1
-			c = getchar0(c);
+			c = getchar0();
 
       if(c == EOF)
       {
@@ -138,8 +136,8 @@ token* getToken0() {
 				return tmpToken;
       }else//blokovy komentar + delenie pre double ,0
 			if (c == '/'){
-				if ((c = getchar0(c)) == 39) {// /' blokovy komentar zaciatok
-						c = getchar0(c);
+				if ((c = getchar0()) == 39) {// /' blokovy komentar zaciatok
+						c = getchar0();
 						if(c == EOF){
 							ERR; // EOF v blokovom komentare
 						}/*
@@ -150,7 +148,7 @@ token* getToken0() {
             pomoc = 1;
             while(pomoc){
               if(c == 39){
-                c = getchar0(c);
+                c = getchar0();
                 if (c == EOF){
                   ERR;
                 }
@@ -158,7 +156,7 @@ token* getToken0() {
                   pomoc=0;
                 }
               }else{
-                c = getchar0(c);
+                c = getchar0();
                 if (c == EOF){
                   ERR;
                 }
@@ -182,7 +180,7 @@ token* getToken0() {
 			// ' -jednoriadkovy komentar ,0
 			if (c == 39){
 				while ((c != '\n') && (c != EOF)) {
-					c = getchar0(c);
+					c = getchar0();
 				}
         //ungetcharpom = c;
         if(c == '\n'){
@@ -216,7 +214,7 @@ token* getToken0() {
 			}
 			else
 			if (c == 33){// '!' == 33
-				if ((c = getchar0(c)) == 34){ //34 "
+				if ((c = getchar0()) == 34){ //34 "
 				 	state = 4;//"POSSIBLE_STRING";
 					if(c == EOF){
 						ERR;
@@ -232,7 +230,7 @@ token* getToken0() {
 			switch(state){
 				case 2://"POSSIBLE_NUMBER":
 					i= 1;
-					while (((c = getchar0(c)) >= '0') && (c<='9')) {
+					while (((c = getchar0()) >= '0') && (c<='9')) {
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;} // 222
 					}
 					if(isspace(c) || isOperator(c)){
@@ -246,7 +244,7 @@ token* getToken0() {
 
 					if (c == '.'){ // double?
 						{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
-						while (((c = upper2lower(getchar0(c))) >= '0') && (c <='9')){
+						while (((c = upper2lower(getchar0())) >= '0') && (c <='9')){
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
 						if(tmp_s[i-1] == '.'){
@@ -262,7 +260,7 @@ token* getToken0() {
 						}else {
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
-						c = getchar0(c);
+						c = getchar0();
 						if(c == EOF){
 							ERR;//123.123e'EOF'
 						}
@@ -273,7 +271,7 @@ token* getToken0() {
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						else ungetcharpom = c;
 
-						while (((c = getchar0(c)) >= '0') && (c <='9')){ // 123.132e+123
+						while (((c = getchar0()) >= '0') && (c <='9')){ // 123.132e+123
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}// konec cyklu
             ungetcharpom = c;
@@ -301,11 +299,11 @@ token* getToken0() {
 				//IDENTIFIER OR KEYWORD
 				case 3://"POSSIBLE_IDENTIFIER":
 				i=1;//first char is already in
-				c = getchar0(c);
+				c = getchar0();
 				c = upper2lower(c);
 				while ((c == '_') || ((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z'))) {
 					{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
-					c = getchar0(c);
+					c = getchar0();
 					c = upper2lower(c);
 				}
 				tmp_s[i] = '\0';
@@ -333,7 +331,7 @@ token* getToken0() {
 				//TODO check if inside string chars are good
 
 					i= 0;
-					while((c = getchar0(c)) != 34) { // c != '"'
+					while((c = getchar0()) != 34) { // c != '"'
 						if(c == EOF){
 							ERR;// eof pocas stringu
 						}
@@ -341,20 +339,20 @@ token* getToken0() {
 							//possible escape sequance
 
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
-							c = getchar0(c);//\_
+							c = getchar0();//\_
 							if(c == EOF){
 								ERR; // eof pocas esc 1
 							}
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//0-2 default ERR
 							switch(c){
 								case '0': //0
-											c = getchar0(c);
+											c = getchar0();
 											if(c == EOF){
 												ERR;//eof pocas esc 2
 											}
 											{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//0x
 											if (c == '0'){//00
-												c = getchar0(c);
+												c = getchar0();
                         if (c == EOF){
                           ERR; // eof pocas esc 3
                         }
@@ -368,7 +366,7 @@ token* getToken0() {
 															}
 											//01-9
   										}else if ((c <= '9') && (c >='0'))
-                              if (((c=getchar0(c)) <= '9') && (c >='0'))
+                              if (((c=getchar0()) <= '9') && (c >='0'))
     														{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//01-9x
     														else{
     															ERR; // 01-9x x-neni cislo //some char nor number
@@ -378,21 +376,21 @@ token* getToken0() {
                               }
 								break;
 								case '1'://1
-												c=getchar0(c);
+												c=getchar0();
 												if(c<='9'&& c>='0')
 													{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//1x
 												else ERR; //wrong escape sequance
 
-												c=getchar0(c);
+												c=getchar0();
 												if (c<='9'&& c >='0')
 													{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//1xx
 												else ERR;//wrong ESC
 								break;
 								case '2'://2
-												c=getchar0(c);//2x
+												c=getchar0();//2x
 												{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 												if (c<='4'&& c>='0'){//20-4
-														c=getchar0(c);//20-4x
+														c=getchar0();//20-4x
 														if(c == EOF){
 															ERR;
 														}
@@ -400,7 +398,7 @@ token* getToken0() {
 												}
 												else
 													if(c == '5'){
-														c = getchar0(c);//25x
+														c = getchar0();//25x
 														if(c <= '5' && c >= '0'){
 															{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 														}else ERR;//256+ wrong ESC or char
@@ -448,7 +446,7 @@ token* getToken0() {
 											return tmpToken;
 											break;
 
-						case '<':c = getchar0(c);
+						case '<':c = getchar0();
 										if(c == '>') {
 											 tmpToken->info = NULL;
 											tmpToken->type = INEQUALITY;
@@ -468,7 +466,7 @@ token* getToken0() {
 											tmpToken->type = EQUAL;
 											return tmpToken;//=
 						break;
-						case '>': c = getchar0(c);
+						case '>': c = getchar0();
                         if (c == '='){
 													 tmpToken->info = NULL;
 													tmpToken->type = GREATER_EQUAL;
@@ -569,7 +567,7 @@ int isOperator(int c){
 	else return 0;
 }
 // funkce pro simulaci ungetc(c,file);
-int getchar0(int c){
+int getchar0(){
 	if(ungetcharpom){
 		int pom;
 		pom = ungetcharpom;

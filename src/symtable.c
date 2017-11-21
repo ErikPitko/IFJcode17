@@ -101,6 +101,7 @@ int list_insert(list *local_table, symbol sym)
  * Parametre: Ukazatel na tabulku, ukazatel na token
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
+
 int list_insert_param(list *local_table, symbol sym, psymbol psym)
 {
 	if(find_param_test(local_table, sym.id, psym.id) != -1)
@@ -113,7 +114,7 @@ int list_insert_param(list *local_table, symbol sym, psymbol psym)
 		{
 			if(strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
 			{
-				param pom = myMalloc(sizeof(struct paramP));
+				param *pom = myMalloc(sizeof(struct paramP));
 
 				if(pom == NULL)
 					return 0;
@@ -141,6 +142,7 @@ int list_insert_param(list *local_table, symbol sym, psymbol psym)
 	
 	return 0;
 }
+
 /*
  * Funkcia: find(list *local_table, symbol sym)
  * Popis: 
@@ -165,6 +167,7 @@ void find(list *local_table, symbol sym)
 	}
 
 }
+
 /*
  * Funkcia: param_find(list *local_table, symbol sym, psymbol psym)
  * Popis: 
@@ -209,6 +212,7 @@ void param_find(list *local_table, symbol sym, psymbol psym)
  * Parametre: Ukazatel na tabulku
  * Vracia: nic
  */
+
 void ltab_destroy(list *local_table)
 {
 	for(int i = 0; i < MAX_SIZE; i++) // Pre kazdy zoznam v tabulke
@@ -222,7 +226,7 @@ void ltab_destroy(list *local_table)
  					local_table[i].Act->param->Act = NULL;
  				}
 	
- 				param pom2 = local_table[i].First->param->First;
+ 				param *pom2 = local_table[i].First->param->First;
  				local_table[i].First->param->First = local_table[i].First->param->First->next_param;
  				myFree(pom2->id);
  				myFree(pom2);
@@ -255,6 +259,7 @@ void ltab_destroy(list *local_table)
  * Parametre: Ukazatel na tabulku, premennu "id"
  * Vracia: 0 v pripade nenajdenia prvku, -1 v pripade najdenia prvku
  */
+
 int find_test(list *local_table, char *id)
 {
 	int i = hash_code(id);
@@ -278,6 +283,7 @@ int find_test(list *local_table, char *id)
  * Parametre: Ukazatel na tabulku, premennu "id"
  * Vracia: 0 v pripade nenajdenia prvku, -1 v pripade najdenia prvku
  */
+
 int find_param_test(list *local_table, char *id_fnc, char *id_param)
 {
 	int idx = hash_code(id_fnc);
@@ -309,6 +315,7 @@ int find_param_test(list *local_table, char *id_fnc, char *id_param)
 }
 
 // Funkcia ktora vracia pocet parametrov funkcie 
+
 int number_param(list *local_table, symbol sym)
 {
 	int idx = hash_code(sym.id);
@@ -335,7 +342,4 @@ int number_param(list *local_table, symbol sym)
 	
 	return counter;
 }
-
-
-
 

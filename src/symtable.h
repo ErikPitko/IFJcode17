@@ -14,7 +14,6 @@
 
 #include "garbage.h"
 #include "error.h"
-#include "parser.c"
 
 #define MAX_SIZE 100 // Pocet zoznamov v tabulke 
 
@@ -34,20 +33,18 @@ typedef struct
 	
 } psymbol;
 
-/******* Lokalna tabulka zo zoznamami ******/
-
 typedef struct paramP // Prvky podzoznamu
 {
 	char *id; // odlis nazov
 	unsigned type; // odlis nazov
 
 	struct paramP *next_param;
-} *param;	
+} param;	
 
 typedef struct listPL // Podzoznam
 {
-	param First;
-	param Act;
+	param *First;
+	param *Act;
 } list_param;
 
 typedef struct itemI
@@ -92,8 +89,8 @@ void ltab_destroy(list *local_table);
 int find_test(list *local_table, char *id);
 // Pomocna funkcia kontrolujuca duplicitu paramtrov 
 int find_param_test(list *local_table, char *id_fnc, char *id_param);
-// Pomocna funkcia vracajuca pocet parametrov funkcie
-int number_param(list *local_table, symbol sym);
 
+// Testovacie funkcie
+int test_nubmer_param(list *local_table, char *id);
 #endif // SYMTABLE_H_
 

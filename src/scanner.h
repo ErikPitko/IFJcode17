@@ -34,7 +34,7 @@ int getchar0(int c);
 
 #define EOF0 -1
 
-#define NOPE 0  // pri blokovom komentary vrati NOPE
+#define NOPE 0  // pri blokovom komentary vrati NOPE //getToken() nevraci nope
 //nemenit poradie pre keyword
 #define KEYWORD_START 1
 #define AS 1

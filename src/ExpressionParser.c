@@ -75,7 +75,7 @@ int tableIndexSelect(tReductToken *tok)
 	return EOL;
 }
 
-int parseExpression(token *retValue)
+token *parseExpression(token *getSetToken)
 {
 	tStack stack;
 	tStack rStack;
@@ -91,7 +91,9 @@ int parseExpression(token *retValue)
 	tReductToken top;
 	tReductToken priority;
 	priority.firstToken = (token*)myMalloc(sizeof(token));
-	actToken.firstToken = getToken();
+	if(getSetToken == NULL)
+		actToken.firstToken = getToken();
+	else actToken.firstToken = getSetToken;
 	do
 		{
 		int select;
@@ -127,11 +129,13 @@ int parseExpression(token *retValue)
 				else stackPushUnderTop(&stack,priority);	//push <E
 				reduct = false;
 				stackPush(&stack,actToken);	//push b
+				getSetToken = actToken.firstToken;
 				actToken.firstToken = getToken();
 				break;
 			case EQ:
 				printf("!!EQUAL!!\n");
 				stackPush(&stack,actToken);
+				getSetToken = actToken.firstToken;
 				actToken.firstToken = getToken();
 				break;
 			case ERROR:
@@ -147,13 +151,9 @@ int parseExpression(token *retValue)
 	//!(!reduct &&(actToken.firstToken->type == EOL && stackTop(&stack)->firstToken->type == EOL)) || !(reduct &&(actToken.firstToken->type == EOL && stackBeforeTop(&stack)->firstToken->type == EOL))
 	while(!((actToken.firstToken->type == EOL) && stackBeforeTop(&stack)->firstToken->type == EOL));
 	exit:
-	if (actToken.firstToken!= NULL)
-	{
-		retValue = actToken.firstToken;
-	}
 	printf("****RETURNS: %i ****",actToken.firstToken->type);
 	//PrintInstrList(&instList);
-	return 0;
+	return actToken.firstToken;
 }
 
 bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast)

@@ -14,10 +14,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
-
-int main(int argc, char *argv[]) {
-	
-  if (argc == 2){
+#include "ExpressionParser.h"
+int main(int argc, char *argv[])
+{
+	(void) argc;
+	(void) argv;
+	garbageInit(2000);
+	token tok;
+	parseExpression(&tok);
+  /*if (argc == 2){
 	FILE *file;
 	char *file_name = argv[1];
 	
@@ -26,6 +31,6 @@ int main(int argc, char *argv[]) {
 		perror ("The following error occurred");//
   } else fprintf(stderr,"Wrong number of arguments");
 	
-	puts(""); /* prints  */
+	puts("");*/
 	return EXIT_SUCCESS;
 }

@@ -5,8 +5,8 @@
 #include "parser.h"
 
 token *currToken;
-
-unsigned lineCount = 1;
+token *lastToken;
+int tokenGetPos = 0;
 
 parse_errno ret;
 parse_errno prog_body();
@@ -44,7 +44,6 @@ parse_errno check_EOL(){
 		return (SYNTAX_ERR);
 	}
 	puts("EOL correct");
-	lineCount++;
 	return (PARSE_OK);
 }
 
@@ -68,7 +67,6 @@ parse_errno check_AS(){
 	return (PARSE_OK);
 
 }
-
 
 
 /*--------------------------------------------*/
@@ -547,7 +545,7 @@ parse_errno command(){
 	case IF:
 		puts("IF correct");
 
-		currToken = parseExpression();
+		currToken = parseExpression(NULL);
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -577,6 +575,7 @@ parse_errno command(){
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
+
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
 			return (SYNTAX_ERR);
@@ -602,7 +601,7 @@ parse_errno command(){
 		}
 		puts("WHILE correct");
 
-		currToken = parseExpression();
+		currToken = parseExpression(NULL);
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -630,7 +629,7 @@ parse_errno command(){
 
 parse_errno assignment(){
 	puts("assignment() entered");
-//	currToken = getToken();
+	currToken = getToken();
 
 	switch(currToken->type){
 	case IDENTIFIER:
@@ -643,7 +642,11 @@ parse_errno assignment(){
 			return (ret);
 		break;
 	default:
-		currToken = parseExpression();
+	{
+		lastToken = myMalloc(sizeof(token));
+		memcpy(lastToken, currToken, sizeof(token));
+		currToken = parseExpression(lastToken);
+	}
 	}
 	return (PARSE_OK);
 }

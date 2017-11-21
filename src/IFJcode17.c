@@ -15,13 +15,13 @@
 #include <stdlib.h>
 #include "error.h"
 #include "ExpressionParser.h"
+#include "parser.h"
 int main(int argc, char *argv[])
 {
 	(void) argc;
 	(void) argv;
 	garbageInit(2000);
-	token tok;
-	parseExpression(&tok);
+	parse();
   /*if (argc == 2){
 	FILE *file;
 	char *file_name = argv[1];
@@ -32,5 +32,6 @@ int main(int argc, char *argv[])
   } else fprintf(stderr,"Wrong number of arguments");
 	
 	puts("");*/
-	return EXIT_SUCCESS;
+	garbageFree();
+	return (EXIT_SUCCESS);
 }

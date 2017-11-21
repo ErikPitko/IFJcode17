@@ -23,7 +23,7 @@ parse_errno arg_next2();
 parse_errno var_type();
 parse_errno print_exp();
 parse_errno command();
-parse_errno assingnment();
+parse_errno assignment();
 
 /*--------------------------------------------*/
 
@@ -511,15 +511,12 @@ parse_errno var_type(){
 
 parse_errno print_exp(){
 	puts("print_exp() entered");
-//	currToken = getToken();
 
-	if((ret = assingnment()) != PARSE_OK)
+	if((ret = assignment()) != PARSE_OK)
 		return (ret);
 
-	currToken = getToken();
-
 	if(currToken->type != SEMICOLON){
-		warning_msg("expected ; after expression in Print");
+		warning_msg("expected ; after assignment() in Print");
 		return (SYNTAX_ERR);
 	}
 	puts("; correct");
@@ -539,7 +536,6 @@ parse_errno print_exp(){
 
 parse_errno command(){
 	puts("command() entered");
-//	currToken = getToken();
 	switch(currToken->type){
 	case INPUT:
 		puts("INPUT correct");
@@ -549,16 +545,27 @@ parse_errno command(){
 			return (ret);
 		break;
 	case IF:
-		//TODO EXP
 		puts("IF correct");
+
+		currToken = parseExpression();
+
+		if(currToken->type != THEN){
+			warning_msg("expected THEN after EXP");
+			return (SYNTAX_ERR);
+		}
+		puts("THEN correct");
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
+
+		if((ret = if_body()) != PARSE_OK)
+			return (ret);
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
 		break;
 	case IDENTIFIER:
 		puts("ID correct");
-
-		char str[12];
-				sprintf(str, "%d", currToken->type);
-				printf("line: %d\n token: %s : %s\n", lineCount, currToken->info, str);
-
 		currToken = getToken();
 
 		if(currToken->type != EQUAL){
@@ -567,31 +574,46 @@ parse_errno command(){
 		}
 		puts("= correct");
 
-		if((ret = assingnment()) != PARSE_OK)
+		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
+		if(currToken->type != EOL){
+			warning_msg("expected EOL after assignment()");
+			return (SYNTAX_ERR);
+		}
+		puts("EOL correct");
 		break;
 	case RETURN0:
 		puts("RETURN correct");
-		if((ret = assingnment()) != PARSE_OK)
+		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
+		if(currToken->type != EOL){
+			warning_msg("expected EOL after assignment()");
+			return (SYNTAX_ERR);
+		}
 		break;
 	case DO:
 		puts("DO correct");
-
 		currToken = getToken();
 		if(currToken->type != WHILE){
 			warning_msg("expected WHILE after DO");
 			return (SYNTAX_ERR);
 		}
+		puts("WHILE correct");
 
-		//TODO EXP
-		puts("= correct");
+		currToken = parseExpression();
+
+		if(currToken->type != EOL){
+			warning_msg("expected EOL after assignment()");
+			return (SYNTAX_ERR);
+		}
+
+		if((ret = while_body()) != PARSE_OK)
+			return (ret);
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
 		break;
 	case PRINT:
 		puts("PRINT correct");
@@ -606,12 +628,11 @@ parse_errno command(){
 	return (PARSE_OK);
 }
 
-parse_errno assingnment(){
+parse_errno assignment(){
 	puts("assignment() entered");
-	currToken = getToken();
+//	currToken = getToken();
 
 	switch(currToken->type){
-	//TODO EXP
 	case IDENTIFIER:
 		puts("ID correct");
 
@@ -622,16 +643,14 @@ parse_errno assingnment(){
 			return (ret);
 		break;
 	default:
-		puts("Expected IDENTIFIER");
-		return (SYNTAX_ERR);
+		currToken = parseExpression();
 	}
 	return (PARSE_OK);
 }
-/*
-int main(){
-	garbageInit(400);
+
+parse_errno parse(){
 	parse_errno rett;
-	rett =prog_body();
+	rett = prog_body();
 	puts("FILE PARSING COMPLETE:");
 	if(rett == PARSE_OK)
 		puts("\tSUCCESS");
@@ -639,9 +658,8 @@ int main(){
 		puts("\tFAILED");
 		char str[12];
 		sprintf(str, "%d", currToken->type);
-		printf("line: %d\n token: %s : %s\n", lineCount, currToken->info, str);
+		printf("failure at token: %s : %s\n", currToken->info, str);
 	}
-	garbageFree();
-	return (EXIT_SUCCESS);
+	return (rett);
 }
-*/
+

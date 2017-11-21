@@ -48,7 +48,7 @@ print_exp	->	<assingnment> ; <print_exp>
 				<assingnment> ; EOL
 
 command		->	Input id EOL
-				If ( EXP ) Then EOL <if_body> EOL
+				If EXP Then EOL <if_body> EOL
 				id = <assingnment> EOL
 				Return <assingnment> EOL
 				Do While EXP EOL <while_body> EOL

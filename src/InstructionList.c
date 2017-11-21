@@ -27,7 +27,7 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction)
 	tListElement *elem;
 	if((elem =myMalloc(sizeof(struct tListElement))) == NULL)
 	{
-		error_msg("Malloc elementu se nepovedl.");
+		error_msg(0,"Malloc elementu se nepovedl.");
 	}
 	else
 	{
@@ -97,7 +97,7 @@ void *TokenToTypeConversion(token *tok)
 		*((int*)tmp) = atoi(tok->info);
 		if(tmp == NULL)
 		{
-			error_msg("Malloc elementu se nepovedl.");
+			error_msg(0,"Malloc elementu se nepovedl.");
 		}
 		return tmp;
 	}
@@ -107,7 +107,7 @@ void *TokenToTypeConversion(token *tok)
 		*((double*)tmp) = atoi(tok->info);
 		if(tmp == NULL)
 		{
-			error_msg("Malloc elementu se nepovedl.");
+			error_msg(0,"Malloc elementu se nepovedl.");
 		}
 		return tmp;
 	}
@@ -116,7 +116,7 @@ void *TokenToTypeConversion(token *tok)
 		void *tmp = myMalloc(((sizeof(char))*strlen(tok->info))+1);
 		if(tmp== NULL)
 		{
-			error_msg("Malloc elementu se nepovedl.");
+			error_msg(0,"Malloc elementu se nepovedl.");
 		}
 		strcpy(tmp,tok->info);
 		return tmp;
@@ -127,7 +127,7 @@ void *TokenToTypeConversion(token *tok)
 		*((bool*)tmp) = true;
 		if(tmp == NULL)
 		{
-			error_msg("Malloc elementu se nepovedl.");
+			error_msg(0,"Malloc elementu se nepovedl.");
 		}
 		return tmp;
 	}
@@ -137,7 +137,7 @@ void *TokenToTypeConversion(token *tok)
 		*((bool*)tmp) = false;
 		if(tmp == NULL)
 		{
-			error_msg("Malloc elementu se nepovedl.");
+			error_msg(0,"Malloc elementu se nepovedl.");
 		}
 		return tmp;
 	}

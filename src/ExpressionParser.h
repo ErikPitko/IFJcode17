@@ -14,7 +14,7 @@
 #include "error.h"
 #include "InstructionList.h"
 #define EXPR 999
-int parseExpression(token *retValue);
+token *parseExpression(token *getSetToken);
 int tableIndexSelect(tReductToken *tok);
 bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast);
 bool areOperandsSame(token *firstOperand,token *secondOperand);

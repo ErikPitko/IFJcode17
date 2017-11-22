@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "garbage.h"
+#include "error.h"
 
 
 typedef struct structToken{
@@ -26,7 +27,7 @@ int isKeyword(char* s);
 int isOperator(int c);
 // funkce pro simulaci ungetc(c,file);
 int getchar0();
-#define ERR do{fprintf(stderr,"ERR_1_\n");exit(1);}while(0)// printf("ERR_1_")//-2
+#define ERR do{error_msg(1, "ERR_1_") ;}while(0)// printf("ERR_1_")//-2
 
 
 

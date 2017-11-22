@@ -133,7 +133,7 @@ int tableIndexSelect(tReductToken *tok)
 //returnVar je a = b+8 (jaký datový typ je a)
 //localTable lokální tabulka symbolů
 //datové typy:
-token *parseExpression(token *getSetToken,param *returnVar,tHashTable *localTable)
+token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *localTable)
 {
 	tStack stack;
 	tStack rStack;

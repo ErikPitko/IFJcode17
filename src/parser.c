@@ -11,6 +11,7 @@ tHashTable *hTable;
 tHashTable *lTable;
 param curr_function;
 param *returnVal;
+bool curr_function_declared = false;
 int tokenGetPos = 0;
 
 parse_errno ret;
@@ -147,7 +148,6 @@ parse_errno prog_body(){
 		break;
 	case FUNCTION:
 		puts("FUNCTION correct");
-
 		lTable = ltab_init();
 
 		if((ret = check_ID()) != PARSE_OK)
@@ -155,7 +155,9 @@ parse_errno prog_body(){
 
 		curr_function.id = currToken->info;
 		curr_function.is_define = false;
-		list_insert(hTable, curr_function);
+
+		if(list_insert(hTable, curr_function))
+			curr_function_declared = true;
 
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
@@ -183,6 +185,7 @@ parse_errno prog_body(){
 
 //		ltab_destroy(lTable);
 		curr_function.id = NULL;
+		curr_function_declared = false;
 
 		if((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -324,7 +327,6 @@ parse_errno par_list(){
 	case IDENTIFIER:
 		puts("ID correct");
 
-
 		param p;
 		p.id = currToken->info;
 
@@ -335,6 +337,8 @@ parse_errno par_list(){
 			return (ret);
 
 		p.type = currToken->type;
+
+		if()
 		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
 

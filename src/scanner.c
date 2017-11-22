@@ -498,6 +498,7 @@ token* getToken0() {
 
 
 	ERR;
+	return tmpToken; // never gonna happen 
 }
 
 int upper2lower(int c){

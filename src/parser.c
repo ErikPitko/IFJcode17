@@ -9,7 +9,8 @@ token *lastToken;
 
 list *hTable;
 list *lTable;
-symbol curr_function;
+param curr_function;
+param *returnVal;
 int tokenGetPos = 0;
 
 parse_errno ret;
@@ -247,6 +248,10 @@ parse_errno if_body(){
 	switch(currToken->type){
 	case ELSE:
 		puts("ELSE correct");
+
+		if((ret = check_EOL()) != PARSE_OK)
+					return (ret);
+
 		if((ret = else_body()) != PARSE_OK)
 			return (ret);
 		break;
@@ -320,7 +325,7 @@ parse_errno par_list(){
 		puts("ID correct");
 
 
-		psymbol p;
+		param p;
 		p.id = currToken->info;
 
 		if((ret = check_AS()) != PARSE_OK)
@@ -332,6 +337,10 @@ parse_errno par_list(){
 		p.type = currToken->type;
 		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
+
+		if(lTable)
+			if(list_insert(lTable, p))
+				return (SEMANTIC_REDEF);
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
@@ -357,7 +366,7 @@ parse_errno par_next(){
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
-		psymbol p;
+		param p;
 		p.id = currToken->info;
 
 		if((ret = check_AS()) != PARSE_OK)
@@ -369,6 +378,10 @@ parse_errno par_next(){
 		p.type = currToken->type;
 		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
+
+		if(lTable)
+			if(list_insert(lTable, p))
+				return (SEMANTIC_REDEF);
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
@@ -516,7 +529,7 @@ parse_errno command(){
 	case IF:
 		puts("IF correct");
 
-		currToken = parseExpression(NULL);
+		currToken = parseExpression(NULL, NULL, lTable);
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -539,6 +552,8 @@ parse_errno command(){
 		if(curr_function.id && !(find_test(lTable, currToken->info)))
 			return(SEMANTIC_REDEF);
 		puts("ID defined");
+
+		returnVal = find(lTable, currToken->info);
 
 		currToken = getToken();
 
@@ -576,7 +591,7 @@ parse_errno command(){
 		}
 		puts("WHILE correct");
 
-		currToken = parseExpression(NULL);
+		currToken = parseExpression(NULL, NULL, lTable);
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -606,8 +621,8 @@ parse_errno command(){
 				return(SEMANTIC_REDEF);
 			}
 
-			symbol sym;
-			sym.id = currToken->info;
+			param p;
+			p.id = currToken->info;
 
 			if((ret = check_AS()) != PARSE_OK)
 				return (ret);
@@ -615,9 +630,9 @@ parse_errno command(){
 			if((ret = var_type()) != PARSE_OK)
 				return (ret);
 
-			sym.type = currToken->type;
+			p.type = currToken->type;
 
-			if(list_insert(lTable, sym))
+			if(list_insert(lTable, p))
 				return(SEMANTIC_REDEF);
 
 			if((ret = check_EOL()) != PARSE_OK)
@@ -638,12 +653,13 @@ parse_errno assignment(){
 	case IDENTIFIER:
 		puts("ID correct");
 
+
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
 				return (SEMANTIC_REDEF);
 			}
 			puts("NOT FUNCTION -> ExpressionParser");
-			currToken = parseExpression(currToken);
+			currToken = parseExpression(currToken, returnVal, lTable);
 			break;
 		}
 
@@ -659,7 +675,7 @@ parse_errno assignment(){
 	{
 		lastToken = myMalloc(sizeof(token));
 		memcpy(lastToken, currToken, sizeof(token));
-		currToken = parseExpression(lastToken);
+		currToken = parseExpression(lastToken, returnVal, lTable);
 	}
 	}
 	return (PARSE_OK);

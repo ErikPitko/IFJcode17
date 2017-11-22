@@ -188,7 +188,7 @@ param *param_find (list *local_table, param sym, param psym)
 		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
 	}
 
-	return psym;
+	return NULL;
 }
 
 

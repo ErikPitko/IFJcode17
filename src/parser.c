@@ -84,6 +84,13 @@ parse_errno prog_body(){
 	case SCOPE:
 		puts("SCOPE correct");
 
+		lTable = ltab_init();
+
+		curr_function.id = "SCOPE";
+		curr_function.is_define = true;
+		curr_function.type = -1;
+		list_insert(hTable, curr_function);
+
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
@@ -92,6 +99,8 @@ parse_errno prog_body(){
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
+
+//		ltab_destroy(lTable);
 
 		if ((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -130,20 +139,22 @@ parse_errno prog_body(){
 		if ((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
+		curr_function.id = NULL;
+
 		if ((ret = prog_body()) != PARSE_OK)
 			return (ret);
 		break;
 	case FUNCTION:
 		puts("FUNCTION correct");
 
+		lTable = ltab_init();
+
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
-
-
-		symbol temp;
-		temp.id = currToken->info;
-		list_insert(hTable, temp);
+		curr_function.id = currToken->info;
+		curr_function.is_define = false;
+		list_insert(hTable, curr_function);
 
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
@@ -157,8 +168,8 @@ parse_errno prog_body(){
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
 
-		temp.type = currToken->type;
-		change_isdefine(hTable, temp);
+		curr_function.type = currToken->type;
+		change_isdefine(hTable, curr_function);
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -168,6 +179,9 @@ parse_errno prog_body(){
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
+
+//		ltab_destroy(lTable);
+		curr_function.id = NULL;
 
 		if((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -204,7 +218,6 @@ parse_errno main_body(){
 
 parse_errno fnc_body(){
 	puts("fnc_body() entered");
-	lTable = ltab_init();
 	currToken = getToken();
 	switch(currToken->type){
 	case END:
@@ -317,9 +330,8 @@ parse_errno par_list(){
 			return (ret);
 
 		p.type = currToken->type;
-		if(list_insert_param(hTable, curr_function, p)){
+		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
-		}
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
@@ -493,6 +505,11 @@ parse_errno command(){
 		puts("INPUT correct");
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
+
+		if(curr_function.id && !(find_test(lTable, currToken->info)))
+			return(SEMANTIC_REDEF);
+		puts("ID defined");
+
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 		break;
@@ -518,6 +535,11 @@ parse_errno command(){
 		break;
 	case IDENTIFIER:
 		puts("ID correct");
+
+		if(curr_function.id && !(find_test(lTable, currToken->info)))
+			return(SEMANTIC_REDEF);
+		puts("ID defined");
+
 		currToken = getToken();
 
 		if(currToken->type != EQUAL){
@@ -528,7 +550,6 @@ parse_errno command(){
 
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
-
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -576,14 +597,28 @@ parse_errno command(){
 		break;
 	case DIM:
 			puts("DIM correct");
+
 			if((ret = check_ID()) != PARSE_OK)
 				return (ret);
+
+			if(!lTable){
+				warning_msg("ID: %s declared outside of function", currToken->info);
+				return(SEMANTIC_REDEF);
+			}
+
+			symbol sym;
+			sym.id = currToken->info;
 
 			if((ret = check_AS()) != PARSE_OK)
 				return (ret);
 
 			if((ret = var_type()) != PARSE_OK)
 				return (ret);
+
+			sym.type = currToken->type;
+
+			if(list_insert(lTable, sym))
+				return(SEMANTIC_REDEF);
 
 			if((ret = check_EOL()) != PARSE_OK)
 				return (ret);
@@ -603,11 +638,22 @@ parse_errno assignment(){
 	case IDENTIFIER:
 		puts("ID correct");
 
+		if(!find_test(hTable, currToken->info)){
+			if(!find_test(lTable, currToken->info)){
+				return (SEMANTIC_REDEF);
+			}
+			puts("NOT FUNCTION -> ExpressionParser");
+			currToken = parseExpression(currToken);
+			break;
+		}
+
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
 
 		if((ret = arg_list()) != PARSE_OK)
 			return (ret);
+
+		currToken = getToken();
 		break;
 	default:
 	{

@@ -18,10 +18,11 @@
 #include "parser.h"
 int main(int argc, char *argv[])
 {
+	parse_errno ret;
 	(void) argc;
 	(void) argv;
 	garbageInit(2000);
-	parse();
+	ret = parse();
   /*if (argc == 2){
 	FILE *file;
 	char *file_name = argv[1];
@@ -32,6 +33,16 @@ int main(int argc, char *argv[])
   } else fprintf(stderr,"Wrong number of arguments");
 	
 	puts("");*/
-	garbageFree();
-	return (EXIT_SUCCESS);
+	if (ret == PARSE_OK){
+		garbageFree();
+		return (EXIT_SUCCESS);
+	}
+	else if(ret == SYNTAX_ERR)
+		error_msg(2, "Syntax error");
+	else if(ret == SEMANTIC_REDEF)
+		error_msg(3, "Semantic ERR");
+	else{
+		garbageFree();
+		return(EXIT_SUCCESS);
+	}
 }

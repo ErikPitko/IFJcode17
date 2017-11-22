@@ -21,24 +21,24 @@
 typedef struct 
 {
 	char *id;
-	unsigned type;
+	int type;
 	
-	bool is_define; // Kontrola ci je to param
+	bool is_define; 
 } symbol;
 
 typedef struct 
 {
 	char *id;
-	unsigned type;
+	int type;
 	
 } psymbol;
 
 typedef struct paramP // Prvky podzoznamu
 {
-	char *id; // odlis nazov
-	unsigned type; // odlis nazov
+	char *id; // Identifikator
+	int type; // Datovy typ
 
-	struct paramP *next_param;
+	struct paramP *next_param; // Ukazatel na dalsi parameter
 } param;	
 
 typedef struct listPL // Podzoznam
@@ -49,9 +49,9 @@ typedef struct listPL // Podzoznam
 
 typedef struct itemI
 {
-	char *id; // sluzi ako kluc
-	unsigned type; // typ
-	bool is_define; // Kontrola ci je to param... Nechat alebo dat doprec??
+	char *id; // Identifikator
+	int type; // Datovy typ
+	bool is_define; // Kontrola ci je funkcia definovana
 	
 	list_param *param;
 
@@ -68,31 +68,39 @@ typedef list list_array[MAX_SIZE]; // Pole zoznamov
 
 /*********** Funkcie ***********/
 
+// Vypocita index zo zadaneho stringu
 int hash_code (const char *string);
 
 // Inicializacia
-list *ltab_init();
+list *ltab_init ();
 
 // Vkladanie funkcii a premennych
-int list_insert(list *local_table, symbol sym);
+int list_insert (list *local_table, symbol sym);
 // Vkladanie parametrov
-int list_insert_param(list *local_table, symbol sym, psymbol psym);
+int list_insert_param (list *local_table, symbol sym, psymbol psym);
+
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
-void find(list *local_table, symbol sym);
-// Podla id najde zaznam parametru a vrati v tokene vsetky informacie... id, type
-void param_find(list *local_table, symbol sym, psymbol psym);
-// 
-void change_isdefine(list *local_table, symbol sym);
+symbol find (list *local_table, symbol sym);
+// Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
+psymbol param_find (list *local_table, symbol sym, psymbol psym);
+
+// Podla id najde zoznam parametru a vrati ukazatel na dany zoznam
+param *param_list_find (list *local_table, symbol sym, psymbol psym);
+
+// Nastavuje isdefine na true
+int change_isdefine (list *local_table, symbol sym);
+// Funkcia, ktora vracia index hladaneho parametru
+int return_index_parameter (list *local_table, symbol sym, psymbol psym);
+
+// Zisti pocet parametrov vo funkcii
+int test_nubmer_param (list *local_table, char *id);
 
 // Zrusi celu tabulku
-void ltab_destroy(list *local_table);
+void ltab_destroy (list *local_table);
 
-// Pomocna funkcia kontrolujuca duplicitu funkcii a premennych
-int find_test(list *local_table, char *id);
-// Pomocna funkcia kontrolujuca duplicitu paramtrov 
-int find_param_test(list *local_table, char *id_fnc, char *id_param);
 
-// Testovacie funkcie
-int test_nubmer_param(list *local_table, char *id);
+//Pomocne funkcie
+int find_test (list *local_table, char *id);
+int find_param_test (list *local_table, char *id_fnc, char *id_param);
+
 #endif // SYMTABLE_H_
-

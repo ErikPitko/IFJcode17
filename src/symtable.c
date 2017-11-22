@@ -7,62 +7,61 @@
 #include "symtable.h"
 
 /*
- * Funkcia: *ltab_init()
- * Popis: Funkcia inicializuje tabulku
+ * Funkcia: hash_code()
+ * Popis: Funkcia vypocita index zo zadaneho stringu
  * Vracia: ukazatel
  */
 
-int hash_code ( const char *string ) 
+int hash_code (const char *string) 
 {
 	int retval = 1;
 	int keylen = strlen(string);
-	for ( int i=0; i < keylen; i++ )
+	for (int i = 0; i < keylen; i++)
 		retval += string[i];
 
-	return ( retval % MAX_SIZE );
+	return (retval % MAX_SIZE);
 }
 
 /*
  * Funkcia: *ltab_init()
- * Popis: Funkcia inicializuje tabulku
+ * Popis: Funkcia inicializuje tabulku zoznamov
  * Vracia: ukazatel na tabulku
  */
 
-list *ltab_init()
+list *ltab_init ()
 {
-	list *local_table = myMalloc(sizeof(list) * MAX_SIZE); //naalokujeme miesto pre hash tabulku
+	list *local_table = myMalloc(sizeof(list) * MAX_SIZE); // Alokujeme miesto pre hash tabulku
 
- 	for(int i = 0; i < MAX_SIZE; i++) //pre kazdy zoznam v tabulke
+ 	for (int i = 0; i < MAX_SIZE; i++)
  	{
  		local_table[i].Act = NULL;
  		local_table[i].First = NULL;
  	}
 
- 	return local_table; //vratime adresu
+ 	return local_table;
 }
 
 /*
- * Funkcia: list_insert
- * Popis: Funkcia  zavola funkciu find_test(local_table, sym.id), podla ktorej
- * bud vytvarame novy prvok, alebo vraciame chybu
- * Parametre: Ukazatel na tabulku, ukazatel na token
+ * Funkcia: list_insert()
+ * Popis: Funkcia kontroluje duplicitu prvkov, v pripade ze duplicita nenastala 
+ * vytvori novy prvok v zozname
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
 
-int list_insert(list *local_table, symbol sym)
+int list_insert (list *local_table, symbol sym)
 {
-	if(find_test(local_table, sym.id) != -1)
+	if (find_test(local_table, sym.id) != -1)
 	{
 		int idx = hash_code(sym.id);
 
 		list_item pom = myMalloc(sizeof(struct itemI));
 
-		if(pom == NULL)
+		if (pom == NULL)
 			return 0;
 
  		pom->id = myMalloc(strlen(sym.id) * sizeof(char));
 
- 		if (pom->id == NULL) // Kontrola malloc
+ 		if (pom->id == NULL)
  		{
 			myFree(pom);
 			return 0;
@@ -70,7 +69,7 @@ int list_insert(list *local_table, symbol sym)
 
 		pom->param = myMalloc(sizeof(list_param));
 
-		if (pom->param == NULL) // Kontrola malloc
+		if (pom->param == NULL)
 		{
 			myFree(pom);
 			myFree(pom->id);
@@ -93,30 +92,28 @@ int list_insert(list *local_table, symbol sym)
 	return 0;
 }
 
-
 /*
- * Funkcia: list_insert_param
+ * Funkcia: list_insert_param()
  * Popis: Funkcia kontroluje duplicitu parametrov a v pripade, ze duplicita nie je
- * tak vklada parametre do tabulky
- * Parametre: Ukazatel na tabulku, ukazatel na token
+ * tak vklada parametre do zoznamu
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
 
-int list_insert_param(list *local_table, symbol sym, psymbol psym)
+int list_insert_param (list *local_table, symbol sym, psymbol psym)
 {
-	if(find_param_test(local_table, sym.id, psym.id) != -1)
+	if (find_param_test(local_table, sym.id, psym.id) != -1)
 	{
 		int idx = hash_code(sym.id);
 
 		local_table[idx].Act = local_table[idx].First;
 
-		while(local_table[idx].Act != NULL) //prejde vsetky prvky zoznamu
+		while (local_table[idx].Act != NULL) //prejde vsetky prvky zoznamu
 		{
-			if(strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
+			if (strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
 			{
 				param *pom = myMalloc(sizeof(struct paramP));
 
-				if(pom == NULL)
+				if (pom == NULL)
 					return 0;
 				
 	 			pom->id = myMalloc(strlen(psym.id) * sizeof(char));
@@ -144,101 +141,160 @@ int list_insert_param(list *local_table, symbol sym, psymbol psym)
 }
 
 /*
- * Funkcia: find(list *local_table, symbol sym)
- * Popis: 
- * Vracia:
+ * Funkcia: find()
+ * Popis: Funkcia prejde zoznam a najde prvok zo spravym "sym.id" a do tokenu priradi vsetko
+ * Vracia: ukazatel na token
  */
 
-void find(list *local_table, symbol sym)
+symbol find (list *local_table, symbol sym)
 {
 	int idx = hash_code(sym.id);
 
 	local_table[idx].Act = local_table[idx].First;
 
-	while(local_table[idx].Act != NULL) //prejde vsetky prvky zoznamu
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
 	{
-		if(strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
 		{
 			sym.id = local_table[idx].Act->id;
 			sym.type = local_table[idx].Act->type;
 			sym.is_define = local_table[idx].Act->is_define;
-		}
-		local_table[idx].Act = local_table[idx].Act->next_item; //posunieme sa o prvok dalej
-	}
 
+			break;
+		}
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+	
+	return sym;
 }
 
 /*
- * Funkcia: param_find(list *local_table, symbol sym, psymbol psym)
- * Popis: 
- * Vracia:
+ * Funkcia: param_find()
+ * Popis: Funkcia prejde zoznam a najde prvok zo spravym "sym.id" a potom prechadza
+ * zoznam parametrov az kym nenajde spravny, nasledne do tokenu priradi vsetko
+ * Vracia: ukazatel na token
  */
 
-void param_find(list *local_table, symbol sym, psymbol psym)
+psymbol param_find (list *local_table, symbol sym, psymbol psym)
 {
 	int idx = hash_code(sym.id);
 
 	local_table[idx].Act = local_table[idx].First;
 
-	while(local_table[idx].Act != NULL) //prejde vsetky prvky zoznamu
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
 	{
-		if(strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
 		{
 			local_table[idx].Act->param->Act = local_table[idx].First->param->First;
 	
-			while(local_table[idx].Act->param->Act != NULL) //prejde vsetky prvky zoznamu
+			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
 			{
-				if(strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) //porovna retazce
+				if(strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) // Porovna retazce
 				{
 					psym.id = local_table[idx].Act->param->Act->id;
 					psym.type = local_table[idx].Act->param->Act->type;
+					
+					return psym;
 				}
 
-				local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param; //posunieme sa o prvok dalej
+				local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param; // Posunieme sa o prvok dalej v zozname parametrov
 			}
 		}
 
-		local_table[idx].Act = local_table[idx].Act->next_item; //posunieme sa o prvok dalej
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
 	}
 
+	return psym;
 }
 
-void change_isdefine(list *local_table, symbol sym)
+
+/*
+ * Funkcia: return_index_parameter ()
+ * Popis: Funkcia prejde zoznam a najde prvok zo spravym "sym.id" a potom prechadza
+ * zoznam parametrov az kym nenajde spravny, nasledne do tokenu priradi vsetko
+ * Vracia: index parametru, alebo ak tam nie je -1
+ */
+int return_index_parameter (list *local_table, symbol sym, psymbol psym)
+{
+	int idx = hash_code(sym.id);
+	int counter = 0;
+	
+
+	local_table[idx].Act = local_table[idx].First;
+
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
+		{
+			local_table[idx].Act->param->Act = local_table[idx].First->param->First;
+	
+			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
+			{ 
+				if(strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) // Porovna retazce
+				{
+					return counter;
+				}
+				
+				counter++;
+
+				local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param; // Posunieme sa o prvok dalej v zozname parametrov
+			}
+		}
+
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+
+	return -1;
+}
+
+/*
+ * Funkcia: change_isdefine()
+ * Popis: Funkcia prejde zoznam a najde prvoku zo spravym "sym.id" nastavi is_define na true
+ * Vracia: Ak bol "sym.type" nastaveny na nieco ine ako NULL vracia -1, inak 0
+ */
+int change_isdefine (list *local_table, symbol sym)
 {
 	int i = hash_code(sym.id);		
 
 	local_table[i].Act = local_table[i].First;
 
-	while(local_table[i].Act != NULL) // Prejde vsetky prvky zoznamu
+	while  (local_table[i].Act != NULL) // Prejde vsetky prvky zoznamu
 	{
-		if(strcmp(local_table[i].Act->id, sym.id) == 0) // Porovna retazce
+		if (strcmp(local_table[i].Act->id, sym.id) == 0) // Porovna retazce
 		{
-			local_table[i].Act->is_define = true;
+			if((local_table[i].Act->type == -1) && (local_table[i].Act->type == sym.type))
+			{
+				local_table[i].Act->is_define = true;
+				return 0;
+			}
+			else
+			
+				return -1;
 		}			
 
 		local_table[i].Act = local_table[i].Act->next_item; // Posunieme sa o prvok dalej
 	}
+	
+	return 0;
 }
-
 
 /*
  * Funkcia: ltab_destroy
  * Popis: Funkcia zmaze celu tabulku
  * Parametre: Ukazatel na tabulku
- * Vracia: nic
  */
 
-void ltab_destroy(list *local_table)
+void ltab_destroy (list *local_table)
 {
-	for(int i = 0; i < MAX_SIZE; i++) // Pre kazdy zoznam v tabulke
+	for (int i = 0; i < MAX_SIZE; i++) // Pre kazdy zoznam v tabulke
  	{
- 		while(local_table[i].First != NULL) // Prejde vsetky prvky zoznamu
+ 		while (local_table[i].First != NULL) // Prejde vsetky prvky zoznamu
  		{
-			while(local_table[i].First->param->Act != NULL)
+			while (local_table[i].First->param->Act != NULL)
 			{
-				if(local_table[i].First->param->First == local_table[i].Act->param->Act) // Zrusi aj aktivny prvok
+				if ((local_table[i].First->param->First) == (local_table[i].Act->param->Act)) // Zrusi aj aktivny prvok
  				{
- 					local_table[i].Act->param->Act = NULL;
+ 					myFree(local_table[i].Act->param->Act);
  				}
 	
  				param *pom2 = local_table[i].First->param->First;
@@ -247,12 +303,10 @@ void ltab_destroy(list *local_table)
  				myFree(pom2);
 			}			
 
- 			if(local_table[i].First == local_table[i].Act) // Zrusi aj aktivny prvok
+ 			if (local_table[i].First == local_table[i].Act) // Zrusi aj aktivny prvok
  			{
- 				local_table[i].Act = NULL;
+ 				myFree(local_table[i].Act = NULL);
  			}
-
-			
 
  			list_item pom = local_table[i].First;
  			local_table[i].First = local_table[i].First->next_item;
@@ -357,4 +411,3 @@ int number_param(list *local_table, symbol sym)
 	
 	return counter;
 }
-

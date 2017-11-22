@@ -48,7 +48,7 @@ list *ltab_init ()
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
 
-int list_insert (list *local_table, symbol sym)
+int list_insert (list *local_table, param sym)
 {
 	if (find_test(local_table, sym.id) != -1)
 	{
@@ -100,7 +100,7 @@ int list_insert (list *local_table, symbol sym)
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
 
-int list_insert_param (list *local_table, symbol sym, psymbol psym)
+int list_insert_param (list *local_table, param sym, param psym)
 {
 	if (find_param_test(local_table, sym.id, psym.id) != -1)
 	{
@@ -147,7 +147,7 @@ int list_insert_param (list *local_table, symbol sym, psymbol psym)
  * Vracia: ukazatel na token
  */
 
-symbol *find (list *local_table, char* symId)
+param *find (list *local_table, char* symId)
 {
 	int idx = hash_code(symId);
 	for (local_table[idx].Act = local_table[idx].First;local_table[idx].Act != NULL; local_table[idx].Act = local_table[idx].Act->next_item) // Prejde vsetky prvky zoznamu
@@ -167,7 +167,7 @@ symbol *find (list *local_table, char* symId)
  * Vracia: ukazatel na token
  */
 
-psymbol param_find (list *local_table, symbol sym, psymbol psym)
+param *param_find (list *local_table, param sym, param psym)
 {
 	int idx = hash_code(sym.id);
 
@@ -178,19 +178,11 @@ psymbol param_find (list *local_table, symbol sym, psymbol psym)
 		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
 		{
 			local_table[idx].Act->param->Act = local_table[idx].First->param->First;
-	
-			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
-			{
+			for(local_table[idx].Act->param->Act = local_table[idx].First->param->First;local_table[idx].Act->param->Act != NULL;local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param)
 				if(strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) // Porovna retazce
 				{
-					psym.id = local_table[idx].Act->param->Act->id;
-					psym.type = local_table[idx].Act->param->Act->type;
-					
-					return psym;
+					return local_table[idx].Act->param->Act;
 				}
-
-				local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param; // Posunieme sa o prvok dalej v zozname parametrov
-			}
 		}
 
 		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
@@ -206,7 +198,7 @@ psymbol param_find (list *local_table, symbol sym, psymbol psym)
  * zoznam parametrov az kym nenajde spravny, nasledne do tokenu priradi vsetko
  * Vracia: index parametru, alebo ak tam nie je -1
  */
-int return_index_parameter (list *local_table, symbol sym, psymbol psym)
+int return_index_parameter (list *local_table, param sym, param psym)
 {
 	int idx = hash_code(sym.id);
 	int counter = 0;
@@ -244,7 +236,7 @@ int return_index_parameter (list *local_table, symbol sym, psymbol psym)
  * Popis: Funkcia prejde zoznam a najde prvoku zo spravym "sym.id" nastavi is_define na true
  * Vracia: Ak bol "sym.type" nastaveny na nieco ine ako NULL vracia -1, inak 0
  */
-int change_isdefine (list *local_table, symbol sym)
+int change_isdefine (list *local_table, param sym)
 {
 	int idx = hash_code(sym.id);		
 
@@ -378,7 +370,7 @@ int find_param_test(list *local_table, char *id_fnc, char *id_param)
 
 // Funkcia ktora vracia pocet parametrov funkcie 
 
-int number_param(list *local_table, symbol sym)
+int number_param(list *local_table, param sym)
 {
 	int idx = hash_code(sym.id);
 	int counter = 0;	

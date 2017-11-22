@@ -107,7 +107,7 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction)
 	instrList->Active = elem;
 }
 
-void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,symbol *result,symbol *arg1,symbol *arg2)
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,param *result,param *arg1,param *arg2)
 {
 	tInstruction *instr;
 	if((instr =myMalloc(sizeof(tInstruction))) == NULL)

@@ -18,7 +18,7 @@ extern tInstructionList globalInstrList;
 void LInit(tInstructionList *instrList);
 void LClear(tInstructionList *instrList);
 void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction);
-void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,symbol *result,symbol *arg1,symbol *arg2);
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,param *result,param *arg1,param *arg2);
 void LSetStart(tInstructionList *instrList);
 void LFind(tInstructionList *instrList, void* address);
 void LNext(tInstructionList *instrList);

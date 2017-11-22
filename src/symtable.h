@@ -18,26 +18,11 @@
 #define MAX_SIZE 100 // Pocet zoznamov v tabulke 
 
 // Pomocna struktura simulujuca "token" z syntaktickej analyzy
-typedef struct 
-{
-	char *id;
-	int type;
-	
-	bool is_define; 
-} symbol;
-
-typedef struct 
-{
-	char *id;
-	int type;
-	
-} psymbol;
-
 typedef struct paramP // Prvky podzoznamu
 {
 	char *id; // Identifikator
 	int type; // Datovy typ
-
+	bool is_define;
 	struct paramP *next_param; // Ukazatel na dalsi parameter
 } param;	
 
@@ -75,22 +60,19 @@ int hash_code (const char *string);
 list *ltab_init ();
 
 // Vkladanie funkcii a premennych
-int list_insert (list *local_table, symbol sym);
+int list_insert (list *local_table, param sym);
 // Vkladanie parametrov
-int list_insert_param (list *local_table, symbol sym, psymbol psym);
+int list_insert_param (list *local_table, param sym, param psym);
 
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
-symbol *find (list *local_table, char* symId);
+param *find (list *local_table, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
-psymbol param_find (list *local_table, symbol sym, psymbol psym);
-
-// Podla id najde zoznam parametru a vrati ukazatel na dany zoznam
-param *param_list_find (list *local_table, symbol sym, psymbol psym);
+param *param_find (list *local_table, param sym, param psym);
 
 // Nastavuje isdefine na true
-int change_isdefine (list *local_table, symbol sym);
+int change_isdefine (list *local_table, param sym);
 // Funkcia, ktora vracia index hladaneho parametru
-int return_index_parameter (list *local_table, symbol sym, psymbol psym);
+int return_index_parameter (list *local_table, param sym, param psym);
 
 // Zisti pocet parametrov vo funkcii
 int test_nubmer_param (list *local_table, char *id);

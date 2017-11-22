@@ -116,9 +116,9 @@ typedef struct
 typedef struct
 {
 	EINSTRUCTION Instruction;
-	symbol *arg1;
-	symbol *arg2;
-	symbol *result;
+	param *arg1;
+	param *arg2;
+	param *result;
 }tInstruction;
 
 typedef struct tListElement

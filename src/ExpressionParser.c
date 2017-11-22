@@ -47,7 +47,7 @@ bool areOperandsSame(token *firstOperand,token *secondOperand);
 bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand);
 bool isOperand(token *operand, bool isArithmethic);
 bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic);
-void applyRule(tStack *st,tStack *rStack,bool *reduct,symbol *returnVar,list *localTable);
+void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar,list *localTable);
 char* strValueOfEnum(int enumValue);
 /**************************************HEADER***************************************/
 
@@ -132,8 +132,8 @@ int tableIndexSelect(tReductToken *tok)
 
 //returnVar je a = b+8 (jaký datový typ je a)
 //localTable lokální tabulka symbolů
-
-token *parseExpression(token *getSetToken,symbol *returnVar,list *localTable)
+//datové typy:
+token *parseExpression(token *getSetToken,param *returnVar,list *localTable)
 {
 	tStack stack;
 	tStack rStack;
@@ -311,7 +311,7 @@ bool isOperatorExpr(token *tok)
 	return false;
 }
 
-void applyRule(tStack *st,tStack *rStack,bool *reduct,symbol *returnVar, list *localTable)
+void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, list *localTable)
 {
 	//E -> i
 	if(stackLenght(rStack)==1)

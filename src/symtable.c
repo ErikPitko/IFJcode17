@@ -291,7 +291,7 @@ void ltab_destroy (list *local_table)
  	{
  		while (local_table[i].First != NULL) // Prejde vsetky prvky zoznamu
  		{
-			while (local_table[i].First->param->Act != NULL)
+			while (local_table[i].First->param->First != NULL)
 			{
 				if ((local_table[i].First->param->First) == (local_table[i].Act->param->Act)) // Zrusi aj aktivny prvok
  				{
@@ -312,6 +312,7 @@ void ltab_destroy (list *local_table)
  			list_item pom = local_table[i].First;
  			local_table[i].First = local_table[i].First->next_item;
  			myFree(pom->id);
+			myFree(pom->param);
  			myFree(pom); // Uvolnime prvok zoznamu
  		}
  	}

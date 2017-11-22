@@ -31,7 +31,7 @@ int hash_code (const char *string)
 list *ltab_init ()
 {
 	list *local_table = myMalloc(sizeof(list) * MAX_SIZE); // Alokujeme miesto pre hash tabulku
-
+	
  	for (int i = 0; i < MAX_SIZE; i++)
  	{
  		local_table[i].Act = NULL;
@@ -57,14 +57,15 @@ int list_insert (list *local_table, symbol sym)
 		list_item pom = myMalloc(sizeof(struct itemI));
 
 		if (pom == NULL)
-			return 0;
+			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 
+		
  		pom->id = myMalloc(strlen(sym.id) * sizeof(char));
 
  		if (pom->id == NULL)
  		{
 			myFree(pom);
-			return 0;
+			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 		}
 
 		pom->param = myMalloc(sizeof(list_param));
@@ -73,7 +74,7 @@ int list_insert (list *local_table, symbol sym)
 		{
 			myFree(pom);
 			myFree(pom->id);
-			return 0;
+			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 		}
 		
 		pom->param->First = NULL;		
@@ -114,14 +115,14 @@ int list_insert_param (list *local_table, symbol sym, psymbol psym)
 				param *pom = myMalloc(sizeof(struct paramP));
 
 				if (pom == NULL)
-					return 0;
+					error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 				
 	 			pom->id = myMalloc(strlen(psym.id) * sizeof(char));
 	
 	 			if (pom->id == NULL) // Kontrola malloc	
 				{
 					free(pom);
-					return 0;
+					error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 				}
 		
 				strcpy(pom->id, psym.id);
@@ -254,25 +255,25 @@ int return_index_parameter (list *local_table, symbol sym, psymbol psym)
  */
 int change_isdefine (list *local_table, symbol sym)
 {
-	int i = hash_code(sym.id);		
+	int idx = hash_code(sym.id);		
 
-	local_table[i].Act = local_table[i].First;
+	local_table[idx].Act = local_table[idx].First;
 
-	while  (local_table[i].Act != NULL) // Prejde vsetky prvky zoznamu
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
 	{
-		if (strcmp(local_table[i].Act->id, sym.id) == 0) // Porovna retazce
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
 		{
-			if((local_table[i].Act->type == -1) && (local_table[i].Act->type == sym.type))
+			if(local_table[idx].Act->is_define == false)
 			{
-				local_table[i].Act->is_define = true;
-				return 0;
+				local_table[idx].Act->is_define = true;
+				break;
 			}
 			else
 			
-				return -1;
+				return -1; // Vraciam semanticku chybu
 		}			
 
-		local_table[i].Act = local_table[i].Act->next_item; // Posunieme sa o prvok dalej
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
 	}
 	
 	return 0;

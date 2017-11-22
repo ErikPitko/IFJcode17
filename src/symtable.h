@@ -66,7 +66,7 @@ int list_insert_param (tHashTable *local_table, tFooListElem sym, param psym);
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
 param *param_find (tHashTable *local_table,char* fooId, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
-tFooListElem *function_find (tHashTable *local_table, tFooListElem sym, param psym);
+tFooListElem *function_find (tHashTable *local_table, char *fooId);
 
 // Nastavuje isdefine na true
 int change_isdefine (tHashTable *local_table, tFooListElem sym);

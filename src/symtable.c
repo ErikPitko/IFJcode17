@@ -167,13 +167,12 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
  */
 
 
-tFooListElem *function_find(tHashTable *local_table, tFooListElem sym,
-		param psym) {
-	int idx = hash_code(sym.id);
+tFooListElem *function_find(tHashTable *local_table, char *fooId) {
+	int idx = hash_code(fooId);
 	for (local_table[idx].Act = local_table[idx].First;
 			local_table[idx].Act != NULL; local_table[idx].Act =
 					local_table[idx].Act->next_item)
-		if (strcmp(local_table[idx].Act->id, psym.id) == 0) // Porovna retazce
+		if (strcmp(local_table[idx].Act->id, fooId) == 0) // Porovna retazce
 				{
 			return local_table[idx].Act;
 		}

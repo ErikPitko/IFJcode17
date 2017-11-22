@@ -562,7 +562,7 @@ parse_errno command(){
 			return(SEMANTIC_REDEF);
 		puts("ID defined");
 
-		returnVal = param_find(lTable, curr_function.id, currToken->info);
+		returnVal = function_find(lTable, currToken->info);
 
 		currToken = getToken();
 

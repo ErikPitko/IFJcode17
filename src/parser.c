@@ -6,6 +6,10 @@
 
 token *currToken;
 token *lastToken;
+
+list *hTable;
+list *lTable;
+symbol curr_function;
 int tokenGetPos = 0;
 
 parse_errno ret;
@@ -104,6 +108,10 @@ parse_errno prog_body(){
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
+		curr_function.id = currToken->info;
+		curr_function.is_define = false;
+
+
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
 
@@ -115,6 +123,9 @@ parse_errno prog_body(){
 
 		if ((ret = var_type()) != PARSE_OK)
 			return (ret);
+
+		curr_function.type = currToken->type;
+		list_insert(hTable, curr_function);
 
 		if ((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -128,6 +139,12 @@ parse_errno prog_body(){
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
+
+
+		symbol temp;
+		temp.id = currToken->info;
+		list_insert(hTable, temp);
+
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
 
@@ -139,6 +156,9 @@ parse_errno prog_body(){
 
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
+
+		temp.type = currToken->type;
+		change_isdefine(hTable, temp);
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -163,23 +183,6 @@ parse_errno main_body(){
 	puts("main_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
-	case DIM:
-		puts("DIM correct");
-		if((ret = check_ID()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_AS()) != PARSE_OK)
-			return (ret);
-
-		if((ret = var_type()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = main_body()) != PARSE_OK)
-			return (ret);
-		break;
 	case END:
 		puts("END correct");
 		currToken = getToken();
@@ -201,25 +204,9 @@ parse_errno main_body(){
 
 parse_errno fnc_body(){
 	puts("fnc_body() entered");
+	lTable = ltab_init();
 	currToken = getToken();
 	switch(currToken->type){
-	case DIM:
-		puts("DIM correct");
-		if((ret = check_ID()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_AS()) != PARSE_OK)
-			return (ret);
-
-		if((ret = var_type()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = fnc_body()) != PARSE_OK)
-			return (ret);
-		break;
 	case END:
 		puts("END correct");
 		currToken = getToken();
@@ -228,6 +215,8 @@ parse_errno fnc_body(){
 			return (SYNTAX_ERR);
 		}
 		puts("FUNCTION correct");
+//		ltab_destroy(lTable);
+		lTable = NULL;
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -243,23 +232,6 @@ parse_errno if_body(){
 	puts("if_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
-	case DIM:
-		puts("DIM correct");
-		if((ret = check_ID()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_AS()) != PARSE_OK)
-			return (ret);
-
-		if((ret = var_type()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = if_body()) != PARSE_OK)
-			return (ret);
-		break;
 	case ELSE:
 		puts("ELSE correct");
 		if((ret = else_body()) != PARSE_OK)
@@ -288,23 +260,6 @@ parse_errno else_body(){
 	puts("else_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
-	case DIM:
-		puts("DIM correct");
-		if((ret = check_ID()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_AS()) != PARSE_OK)
-			return (ret);
-
-		if((ret = var_type()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = else_body()) != PARSE_OK)
-			return (ret);
-		break;
 	case END:
 		puts("END correct");
 		currToken = getToken();
@@ -328,23 +283,6 @@ parse_errno while_body(){
 	puts("while_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
-	case DIM:
-		puts("DIM correct");
-		if((ret = check_ID()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_AS()) != PARSE_OK)
-			return (ret);
-
-		if((ret = var_type()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = while_body()) != PARSE_OK)
-			return (ret);
-		break;
 	case LOOP:
 		puts("LOOP correct");
 		break;
@@ -368,11 +306,20 @@ parse_errno par_list(){
 	case IDENTIFIER:
 		puts("ID correct");
 
+
+		psymbol p;
+		p.id = currToken->info;
+
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
 
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
+
+		p.type = currToken->type;
+		if(list_insert_param(hTable, curr_function, p)){
+			return (SEMANTIC_REDEF);
+		}
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
@@ -398,11 +345,18 @@ parse_errno par_next(){
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
+		psymbol p;
+		p.id = currToken->info;
+
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
 
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
+
+		p.type = currToken->type;
+		if(list_insert_param(hTable, curr_function, p))
+			return (SEMANTIC_REDEF);
 
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
@@ -620,6 +574,20 @@ parse_errno command(){
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
 		break;
+	case DIM:
+			puts("DIM correct");
+			if((ret = check_ID()) != PARSE_OK)
+				return (ret);
+
+			if((ret = check_AS()) != PARSE_OK)
+				return (ret);
+
+			if((ret = var_type()) != PARSE_OK)
+				return (ret);
+
+			if((ret = check_EOL()) != PARSE_OK)
+				return (ret);
+			break;
 	default:
 		puts("Unexpected command");
 		return (SYNTAX_ERR);
@@ -652,6 +620,7 @@ parse_errno assignment(){
 }
 
 parse_errno parse(){
+	hTable = ltab_init();
 	parse_errno rett;
 	rett = prog_body();
 	puts("FILE PARSING COMPLETE:");
@@ -663,6 +632,7 @@ parse_errno parse(){
 		sprintf(str, "%d", currToken->type);
 		printf("failure at token: %s : %s\n", currToken->info, str);
 	}
+	ltab_destroy(hTable);
 	return (rett);
 }
 

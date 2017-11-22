@@ -4,24 +4,19 @@ prog_body	->	EOF
 				Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
 
 main_body	->	<command><main_body>
-				Dim id As <var_type>EOL<main_body>
 				End Scope
 
 fnc_body	->	<command><fnc_body>
-				Dim id As <var_type>EOL<fnc_body>
 				End Function
 
 if_body		->	<command><if_body>
-				Dim id As <var_type>EOL<if_body>
 				Else <else_body>
 				End If
 
 else_body	->	<command><else_body>
-				Dim id As <var_type>EOL<else_body>
 				End If
 
 while_body	->	<command><while_body>
-				Dim id As <var_type>EOL<while_body>
 				Loop
 
 par_list	->	)
@@ -53,6 +48,7 @@ command		->	Input id EOL
 				Return <assingnment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
+				Dim id As <var_type>EOL
 
 assingment	->	EXP
 				id ( <arg_list>

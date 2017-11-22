@@ -3,7 +3,7 @@ CFLAGS=-O0 -Wall -Wextra -g
 
 all: IFJcode17
 
-OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o InstructionList.o
+OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o InstructionList.o symtable.o
 
 IFJcode17: IFJcode17.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -24,10 +24,11 @@ ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
  scanner.h garbage.h header.h error.h InstructionList.h
 garbage.o: garbage.c garbage.h
 IFJcode17.o: IFJcode17.c error.h garbage.h ExpressionParser.h stack.h \
- scanner.h header.h InstructionList.h parser.h
+ scanner.h header.h InstructionList.h parser.h symtable.h
 InstructionList.o: InstructionList.c InstructionList.h header.h scanner.h \
  garbage.h error.h
 parser.o: parser.c parser.h scanner.h garbage.h ExpressionParser.h \
- stack.h header.h error.h InstructionList.h
+ stack.h header.h error.h InstructionList.h symtable.h
 scanner.o: scanner.c scanner.h garbage.h
 stack.o: stack.c stack.h scanner.h garbage.h header.h
+symtable.o: symtable.c symtable.h garbage.h error.h

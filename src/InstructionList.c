@@ -137,7 +137,7 @@ void *TokenToTypeConversion(token *tok)
 		*((bool*)tmp) = false;
 		if(tmp == NULL)
 		{
-			error_msg(0,"Malloc elementu se nepovedl.");
+			error_msg(INTERNAL_ERROR,"Malloc elementu se nepovedl.");
 		}
 		return tmp;
 	}

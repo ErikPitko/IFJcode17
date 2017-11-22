@@ -3,7 +3,10 @@ CFLAGS=-O0 -Wall -Wextra -g
 
 all: IFJcode17
 
-OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o InstructionList.o symtable.o
+OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o symtable.o InstructionList.o
+
+run: all
+	./IFJcode17 ${ARGS}
 
 IFJcode17: IFJcode17.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@

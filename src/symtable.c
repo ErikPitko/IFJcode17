@@ -49,7 +49,7 @@ int list_insert(tHashTable *local_table, tFooListElem sym) {
 	if (find_test(local_table, sym.id) != -1) {
 		int idx = hash_code(sym.id);
 
-		tFooListElem pom = myMalloc(sizeof(struct tSymFoo));
+		tFooListElem *pom = myMalloc(sizeof(struct tSymFoo));
 
 		if (pom == NULL)
 			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
@@ -91,7 +91,8 @@ int list_insert(tHashTable *local_table, tFooListElem sym) {
  * Vracia: 0 v pripade uspechu, -1 v pripade duplicity
  */
 
-int list_insert_param(tHashTable *local_table, param sym, param psym) {
+
+int list_insert_param(tHashTable *local_table, tFooListElem sym, param psym) {
 	if (find_param_test(local_table, sym.id, psym.id) != -1) {
 		int idx = hash_code(sym.id);
 
@@ -152,7 +153,6 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
 						{
 					return (local_table[idx].Act->param->Act);
 				}
-
 			}
 		}
 	}
@@ -166,7 +166,9 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
  * Vracia: ukazatel na token
  */
 
-tFooListElem *function_find(tHashTable *local_table, param sym, param psym) {
+
+tFooListElem *function_find(tHashTable *local_table, tFooListElem sym,
+		param psym) {
 	int idx = hash_code(sym.id);
 	for (local_table[idx].Act = local_table[idx].First;
 			local_table[idx].Act != NULL; local_table[idx].Act =
@@ -184,7 +186,9 @@ tFooListElem *function_find(tHashTable *local_table, param sym, param psym) {
  * zoznam parametrov az kym nenajde spravny, nasledne do tokenu priradi vsetko
  * Vracia: index parametru, alebo ak tam nie je -1
  */
-int return_index_parameter(tHashTable *local_table, param sym, param psym) {
+
+int return_index_parameter(tHashTable *local_table, tFooListElem sym,
+		param psym) {
 	int idx = hash_code(sym.id);
 	int counter = 0;
 
@@ -222,7 +226,8 @@ int return_index_parameter(tHashTable *local_table, param sym, param psym) {
  * Popis: Funkcia prejde zoznam a najde prvoku zo spravym "sym.id" nastavi is_define na true
  * Vracia: Ak bol "sym.type" nastaveny na nieco ine ako NULL vracia -1, inak 0
  */
-int change_isdefine(tHashTable *local_table, param sym) {
+
+int change_isdefine(tHashTable *local_table, tFooListElem sym) {
 	int idx = hash_code(sym.id);
 
 	local_table[idx].Act = local_table[idx].First;
@@ -275,7 +280,7 @@ void ltab_destroy(tHashTable *local_table) {
 				myFree(local_table[i].Act = NULL);
 			}
 
-			tFooListElem pom = local_table[i].First;
+			tFooListElem *pom = local_table[i].First;
 			local_table[i].First = local_table[i].First->next_item;
 			myFree(pom->id);
 			myFree(pom->param);
@@ -352,7 +357,7 @@ int find_param_test(tHashTable *local_table, char *id_fnc, char *id_param) {
 
 // Funkcia ktora vracia pocet parametrov funkcie 
 
-int number_param(tHashTable *local_table, param sym) {
+int number_param(tHashTable *local_table, tFooListElem sym) {
 	int idx = hash_code(sym.id);
 	int counter = 0;
 

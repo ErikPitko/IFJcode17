@@ -8,6 +8,7 @@
 #ifndef HEADER_H_
 #define HEADER_H_
 #include "scanner.h"
+#include "symtable.h"
 typedef enum
 {
 	H,
@@ -115,15 +116,15 @@ typedef struct
 typedef struct
 {
 	EINSTRUCTION Instruction;
-	void *arg1;
-	void *arg2;
-	void *result;
+	symbol *arg1;
+	symbol *arg2;
+	symbol *result;
 }tInstruction;
 
 typedef struct tListElement
 {
 	struct tListElement *nextPtr;
-	tInstruction *Instruction;
+	tInstruction *ptrIntruction;
 }tListElement;
 typedef struct
 {

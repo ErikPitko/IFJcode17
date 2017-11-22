@@ -14,5 +14,5 @@
 #include "error.h"
 #include "InstructionList.h"
 #define EXPR 999
-token *parseExpression(token *getSetToken);
+token *parseExpression(token *getSetToken,symbol *returnVar,list *localTable);
 #endif /* EXPRESSIONPARSER_H_ */

@@ -147,26 +147,17 @@ int list_insert_param (list *local_table, symbol sym, psymbol psym)
  * Vracia: ukazatel na token
  */
 
-symbol find (list *local_table, symbol sym)
+symbol *find (list *local_table, char* symId)
 {
-	int idx = hash_code(sym.id);
-
-	local_table[idx].Act = local_table[idx].First;
-
-	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	int idx = hash_code(symId);
+	for (local_table[idx].Act = local_table[idx].First;local_table[idx].Act != NULL; local_table[idx].Act = local_table[idx].Act->next_item) // Prejde vsetky prvky zoznamu
 	{
-		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
+		if (strcmp(local_table[idx].Act->id, symId) == 0) // Porovna retazce
 		{
-			sym.id = local_table[idx].Act->id;
-			sym.type = local_table[idx].Act->type;
-			sym.is_define = local_table[idx].Act->is_define;
-
-			break;
+			return local_table[idx].Act;
 		}
-		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
 	}
-	
-	return sym;
+	return NULL;
 }
 
 /*

@@ -12,16 +12,18 @@
 #include "scanner.h"
 #include "error.h"
 #include <stdbool.h>
+
+extern tInstructionList globalInstrList;
+
 void LInit(tInstructionList *instrList);
 void LClear(tInstructionList *instrList);
 void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction);
-void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,void *result,void *arg1,void *arg2);
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,symbol *result,symbol *arg1,symbol *arg2);
 void LSetStart(tInstructionList *instrList);
 void LFind(tInstructionList *instrList, void* address);
 void LNext(tInstructionList *instrList);
 void *LLast(tInstructionList *instrList);
 void *LAct(tInstructionList *instrList);
 tInstruction *GetInstructionFromActive(tInstructionList *instrList);
-void *TokenToTypeConversion(token *tok);
 void PrintInstrList(tInstructionList *instrList);
 #endif /* INSTRUCTIONLIST_H_ */

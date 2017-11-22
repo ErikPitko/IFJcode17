@@ -39,30 +39,79 @@ ePrecElem precTable[15][15] =
  * a = foo();
  * a = foo + b;
  * */
+/**************************************HEADER***************************************/
+int tableIndexSelect(tReductToken *tok);
+bool isOperatorExpr(token *tok);
+bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast);
+bool areOperandsSame(token *firstOperand,token *secondOperand);
+bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand);
+bool isOperand(token *operand, bool isArithmethic);
+bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic);
+void applyRule(tStack *st,tStack *rStack,bool *reduct);
+char* strValueOfEnum(int enumValue);
+/**************************************HEADER***************************************/
 
 char* strValueOfEnum(int enumValue)
 {
 	switch(enumValue)
 	{
-	case 51: return "IDENTIFIER";
-	case 999: return"EXPR";
-	case 47: return "VALUE_INTEGER";
-	case 48: return "VALUE_DOUBLE";
-	case 49: return "VALUE_STRING";
+	case 0: return "BLOCK_COMMENT";
+	case 1: return "AS";
+	case 2: return "ASC";
+	case 3: return "DECLARE";
+	case 4: return "DIM";
+	case 5: return "DO";
+	case 6: return "DOUBLE";
+	case 7: return "ELSE";
+	case 8: return "END";
+	case 9: return "CHR";
+	case 10: return "FUNCTION";
+	case 11: return "IF";
+	case 12: return "INPUT";
+	case 13: return "INTEGER";
+	case 14: return "LENGHT";
+	case 15: return "LOOP";
+	case 16: return "PRINT";
+	case 17: return "RETURN0";
+	case 18: return "SCOPE";
+	case 19: return "STRING";
+	case 20: return "SUBSTR";
+	case 21: return "THEN";
+	case 22: return "WHILE";
+	case 23: return "AND";
+	case 24: return "BOOLEAN";
+	case 25: return "CONTINUE";
+	case 26: return "ELSEIF";
+	case 27: return "EXIT";
+	case 28: return "FALSE";
+	case 29: return "FOR";
+	case 30: return "NEXT";
+	case 31: return "NOT";
+	case 32: return "OR";
+	case 33: return "SHARED";
+	case 34: return "STATIC";
+	case 35: return "TRUE";
+	case 36: return "LESS";
+	case 37: return "INEQUALITY";
+	case 38: return "LESS_EQUAL";
+	case 39: return "EQUAL";
+	case 40: return "GREATER";
+	case 41: return "GREATER_EQUAL";
 	case 42: return "PLUS";
 	case 43: return "MINUS";
 	case 44: return "ASTERIX";
 	case 45: return "DIV_INT";
 	case 46: return "DIV_DOUBLE";
-	case 39: return "EQUAL";
-	case 36: return "LESS";
-	case 40: return "GREATER";
-	case 41: return "GREATER_EQUAL";
-	case 38: return "LESS_EQUAL";
-	case 37: return "INEQUALITY";
+	case 47: return "VALUE_INTEGER";
+	case 48: return "VALUE_DOUBLE";
+	case 49: return "VALUE_STRING";
+	case 50: return "EOL";
+	case 51: return "IDENTIFIER";
 	case 52: return "LEFT_PARENTHESIS";
 	case 53: return "RIGHT_PARENTHESIS";
-	case 50: return "EOL";
+	case 54: return "COMMA";
+	case 55: return "SEMICOLON";
+	case 999: return"EXPR";
 	}
 	return "*Unknown*";
 }
@@ -97,18 +146,19 @@ token *parseExpression(token *getSetToken)
 	tReductToken actToken;
 	tReductToken top;
 	tReductToken priority;
+	bool wasOperand = false;
+	bool operatorRead = false;
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	if(getSetToken == NULL)
 	{
-		printf("PARSER GIVES ME NULL");
+		printf("\n****Parser gives me: NULL****\n");
 		actToken.firstToken = getToken();
 	}
 	else
 	{
-		printf("PARSER GIVES ME %s",getSetToken->info);
+		printf("\n****Parser gives me: %s****\n",strValueOfEnum(getSetToken->type));
 		actToken.firstToken = getSetToken;
 	}
-
 	do
 		{
 		int select;
@@ -137,6 +187,26 @@ token *parseExpression(token *getSetToken)
 				//	goto exit;
 				break;
 			case L:
+				if(operatorRead &&!isOperand(actToken.firstToken,false) && actToken.firstToken->type != LEFT_PARENTHESIS)
+				{
+					printf("%s \n",strValueOfEnum(actToken.firstToken->type));
+					error_msg(SYNTAX_ERR,"Two operators in row");
+				}
+				if(isOperatorExpr(actToken.firstToken))
+				{
+					printf("%s \n",strValueOfEnum(actToken.firstToken->type));
+					operatorRead = true;
+				}
+				if(isOperand(actToken.firstToken,false))
+				{
+					wasOperand = true;
+					operatorRead = false;
+					printf("WAS THERE %s \n",actToken.firstToken->info);
+				}
+				if(!isOperand(actToken.firstToken,false) && !wasOperand && actToken.firstToken->type != LEFT_PARENTHESIS)
+				{
+					error_msg(SYNTAX_ERR,"The first token of expression wasn't operand or function call");
+				}
 				priority.priority = L;
 				priority.firstToken->info = "<";
 				if(reduct == false)
@@ -147,23 +217,23 @@ token *parseExpression(token *getSetToken)
 				actToken.firstToken = getToken();
 				break;
 			case EQ:
-				printf("!!EQUAL!!\n");
 				stackPush(&stack,actToken);
 				actToken.firstToken = getToken();
 				break;
 			case ERROR:
 				printf("%i  %i\n",select,tableIndexSelect(&actToken));
-				warning_msg("Spatna kombinace tokenu");
+				error_msg(SYNTAX_ERR,"Syntaktická chyba");
 				goto exit;
 			default:
 				printf("%i  %i\n",select,tableIndexSelect(&actToken));
-				warning_msg("Syntaktická chyba");
+				error_msg(SYNTAX_ERR,"Syntaktická chyba");
 				goto exit;
 		}
 	}
 	while(!((actToken.firstToken->type == EOL) && stackBeforeTop(&stack)->firstToken->type == EOL));
 	exit:
-	printf("****RETURNS: %i ****",actToken.firstToken->type);
+	printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
+
 	//PrintInstrList(&instList);
 	return actToken.firstToken;
 }
@@ -214,7 +284,7 @@ bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand)
 bool isOperand(token *operand, bool isArithmethic)
 {
 	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
-	if(/*operand->type == IDENTIFIER||*/operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || (operand->type == VALUE_STRING && !isArithmethic))
+	if(operand->type == IDENTIFIER||operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || (operand->type == VALUE_STRING && !isArithmethic))
 		return true;
 	return false;
 }
@@ -224,6 +294,13 @@ bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic)
 	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
 	/*operand->type == IDENTIFIER||*/
 	if(isOperand(firstOperand,isArithmethic) && isOperand(secondOperand,isArithmethic))
+		return true;
+	return false;
+}
+
+bool isOperatorExpr(token *tok)
+{
+	if(tok->type >=36 && tok->type <=46)
 		return true;
 	return false;
 }
@@ -242,10 +319,10 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct)
 	}
 	else if(stackLenght(rStack)>1)
 	{
+
 		//if(isOperand(stackTop(rStack)->firstToken,false))
 		{
 			//tReductToken fID = *(stackTopPop(rStack));
-
 			stackPop(rStack);	//MUSÍ BÝT JINAK NEBUDE FUNGOVAT BACHA NA HORNÍ ŘÁDEK POKUD BUDEME PRACOVAT JAKO TOP POP MUSÍME VYMAZAT
 			//E -> E+E
 			if(stackTop(rStack)->firstToken->type == PLUS)
@@ -521,7 +598,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct)
 					(*reduct) = true;
 				//}
 			}
-			else if(stackTop(rStack)->firstToken->type==  LESS_EQUAL)
+			else if(stackTop(rStack)->firstToken->type ==  LESS_EQUAL)
 			{
 				stackPop(rStack);
 				printf("****E -> E<=E****\n");
@@ -544,6 +621,30 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct)
 					stackPush(st,(*result));
 					(*reduct) = true;
 			//}
+			}
+			else if(stackTop(rStack)->firstToken->type == INEQUALITY)
+			{
+				stackPop(rStack);
+				printf("****E -> E<>E****\n");
+				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
+				result->firstToken = (token*)myMalloc(sizeof(token));
+				result->firstToken->type = EXPR;
+				result->firstToken->info = "EXPR";
+				stackPop(rStack);
+				stackPush(st,(*result));
+				(*reduct) = true;
+			}
+			else if(stackTop(rStack)->firstToken->type == EXPR)
+			{
+				stackPop(rStack);
+				printf("****E -> (E)****\n");
+				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
+				result->firstToken = (token*)myMalloc(sizeof(token));
+				result->firstToken->type = EXPR;
+				result->firstToken->info = "EXPR";
+				stackPop(rStack);
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 		}
 	}

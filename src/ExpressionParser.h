@@ -15,12 +15,4 @@
 #include "InstructionList.h"
 #define EXPR 999
 token *parseExpression(token *getSetToken);
-int tableIndexSelect(tReductToken *tok);
-bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast);
-bool areOperandsSame(token *firstOperand,token *secondOperand);
-bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand);
-bool isOperand(token *operand, bool isArithmethic);
-bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic);
-void applyRule(tStack *st,tStack *rStack,bool *reduct);
-char* strValueOfEnum(int enumValue);
 #endif /* EXPRESSIONPARSER_H_ */

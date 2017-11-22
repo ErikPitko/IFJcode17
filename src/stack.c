@@ -94,6 +94,13 @@ void stackPrint(char* stackName, tStack* s)
 		//else printf("%i-index = %i ",i,(s->arr[i]).priority);
 	}
 }
+void stackClear(tStack* s)
+{
+	if(s!= NULL)
+	{
+		myFree(s->arr);
+	}
+}
 /*
 int main(){
 	garbageInit(400);

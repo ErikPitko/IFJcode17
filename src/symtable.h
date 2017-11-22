@@ -80,7 +80,7 @@ int list_insert (list *local_table, symbol sym);
 int list_insert_param (list *local_table, symbol sym, psymbol psym);
 
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
-symbol find (list *local_table, symbol sym);
+symbol *find (list *local_table, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
 psymbol param_find (list *local_table, symbol sym, psymbol psym);
 

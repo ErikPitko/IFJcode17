@@ -57,4 +57,5 @@ void stackPush(tStack* s, tReductToken token);
  */
 void stackPushUnderTop(tStack* s, tReductToken token);
 void stackPrint(char* stackName, tStack* s);
+void stackClear(tStack* s);
 #endif

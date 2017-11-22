@@ -47,7 +47,7 @@ bool areOperandsSame(token *firstOperand,token *secondOperand);
 bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand);
 bool isOperand(token *operand, bool isArithmethic);
 bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic);
-void applyRule(tStack *st,tStack *rStack,bool *reduct);
+void applyRule(tStack *st,tStack *rStack,bool *reduct,symbol *returnVar,list *localTable);
 char* strValueOfEnum(int enumValue);
 /**************************************HEADER***************************************/
 
@@ -130,9 +130,11 @@ int tableIndexSelect(tReductToken *tok)
 	return EOL;
 }
 
-token *parseExpression(token *getSetToken)
-{
+//returnVar je a = b+8 (jaký datový typ je a)
+//localTable lokální tabulka symbolů
 
+token *parseExpression(token *getSetToken,symbol *returnVar,list *localTable)
+{
 	tStack stack;
 	tStack rStack;
 	stackInit(&rStack);
@@ -148,6 +150,7 @@ token *parseExpression(token *getSetToken)
 	tReductToken priority;
 	bool wasOperand = false;
 	bool operatorRead = false;
+	int semanticError = 0;
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	if(getSetToken == NULL)
 	{
@@ -160,7 +163,7 @@ token *parseExpression(token *getSetToken)
 		actToken.firstToken = getSetToken;
 	}
 	do
-		{
+	{
 		int select;
 		if(reduct == false)
 			select = tableIndexSelect(stackTop(&stack));
@@ -180,7 +183,7 @@ token *parseExpression(token *getSetToken)
 				while(1);
 				stackPrint("rstack",&rStack);
 				printf("######Apply rule######\n");
-				applyRule(&stack,&rStack,&reduct);
+				applyRule(&stack,&rStack,&reduct,returnVar,localTable);
 				printf("#####Rule apllied#####\n");
 				stackPrint("stack",&stack);
 				//if(top.firstToken == NULL)
@@ -233,7 +236,10 @@ token *parseExpression(token *getSetToken)
 	while(!((actToken.firstToken->type == EOL) && stackBeforeTop(&stack)->firstToken->type == EOL));
 	exit:
 	printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
-
+	if(semanticError != 0)
+	{
+		error_msg(semanticError,"Semantic error in expression");
+	}
 	//PrintInstrList(&instList);
 	return actToken.firstToken;
 }
@@ -305,7 +311,7 @@ bool isOperatorExpr(token *tok)
 	return false;
 }
 
-void applyRule(tStack *st,tStack *rStack,bool *reduct)
+void applyRule(tStack *st,tStack *rStack,bool *reduct,symbol *returnVar, list *localTable)
 {
 	//E -> i
 	if(stackLenght(rStack)==1)
@@ -319,318 +325,247 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct)
 	}
 	else if(stackLenght(rStack)>1)
 	{
-
-		//if(isOperand(stackTop(rStack)->firstToken,false))
 		{
-			//tReductToken fID = *(stackTopPop(rStack));
-			stackPop(rStack);	//MUSÍ BÝT JINAK NEBUDE FUNGOVAT BACHA NA HORNÍ ŘÁDEK POKUD BUDEME PRACOVAT JAKO TOP POP MUSÍME VYMAZAT
+			tReductToken fID = *(stackTopPop(rStack));	//pop a top stacku (je tam operátor)
+			//stackPop(rStack);	//MUSÍ BÝT JINAK NEBUDE FUNGOVAT BACHA NA HORNÍ ŘÁDEK POKUD BUDEME PRACOVAT JAKO TOP POP MUSÍME VYMAZAT
 			//E -> E+E
 			if(stackTop(rStack)->firstToken->type == PLUS)
 			{
 				printf("****E -> E+E****\n");
-				stackPop(rStack);
+				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				//if(isOperand(stackTop(rStack)->firstToken,true))
-				//{
-				/*if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
 				{
 					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),NULL);
-						fID = (*result);
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
 					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(stackTopPop(rStack)->firstToken),NULL);
-						stackPush(rStack,(*result));
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
 					}
-				}*/
-				//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-				//LInsert(instList,I_ADD,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
-				stackPop(rStack);
+				}
+				//LInsert(&globalInstrList,I_ADD,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
-				//}
 			}
 			//E -> E-E
 			else if(stackTop(rStack)->firstToken->type== MINUS)
 			{
 				printf("****E -> E-E****\n");
-				stackPop(rStack);
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				//if(isOperand(stackTop(rStack)->firstToken,true))
-				//{
-
-				/*if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
 				{
 					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),NULL);
-						fID = (*result);
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
 					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(stackTopPop(rStack)->firstToken),NULL);
-						stackPush(rStack,(*result));
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
 					}
-				}*/
-
-				//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-				//LInsert(instList,I_SUB,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
-				stackPop(rStack);
+				}
+				//LInsert(&globalInstrList,I_SUB,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
-				//}
 			}
 			//E -> E*E
 			else if(stackTop(rStack)->firstToken->type== ASTERIX)
 			{
 				printf("****E -> E*E****\n");
-				stackPop(rStack);
-				tReductToken *result =(tReductToken*)myMalloc(sizeof(tReductToken));
+				stackPop(rStack);	//popnutí NASOBENI
+				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				/*//tReductToken *fOper = stackTopPop(rStack);
-				//if(isOperand(stackTop(rStack)->firstToken,true))
-				//{
-				//tReductToken *result = myMalloc(sizeof(tReductToken));
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
 				{
 					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),NULL);
-						fID = (*result);
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
 					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
 					{
-						LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(stackTopPop(rStack)->firstToken),NULL);
-						stackPush(rStack,(*result));
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
 					}
 				}
-				//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-				//LInsert(instList,I_MUL,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-				stackPop(rStack);
+				//LInsert(&globalInstrList,I_MUL,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
-				//}
 			}
 			//E -> E\E
 			else if(stackTop(rStack)->firstToken->type==  DIV_INT)
 			{
-				stackPop(rStack);
 				printf("****E -> E\E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				/*tReductToken *fOper = stackTopPop(rStack);
-				if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
 				{
-					bool cast;
-					if(canIDiv(stackTop(rStack)->firstToken,fID.firstToken,false,&cast)== false)
+					if(stackTop(rStack)->firstToken->type != VALUE_INTEGER)
 					{
-						error_msg("Spatne operandy u deleni.", 53);
-					//}
-					if(*(int*)(TokenToTypeConversion(stackTop(rStack)->firstToken))==0)
-						error_msg("Deleni nulou", 57);
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					if(cast)
-					{
-
-						if(stackTop(rStack)->firstToken->type != VALUE_INTEGER)
-						{
-							LInsert(instList,I_FLOAT2INT,(void*)result->firstToken,TokenToTypeConversion(stackTopPop(rStack)->firstToken),NULL);
-							stackPush(rStack,(*result));
-						}
-						if(fID.firstToken->type != VALUE_INTEGER)
-						{
-							LInsert(instList,I_FLOAT2INT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),NULL);
-							fID = *(result);
-						}
+						//LInsert(&globalInstrList,I_FLOAT2INT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					LInsert(instList,I_DIV,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-				//}
+					if(fID.firstToken->type != VALUE_INTEGER)
+					{
+						//LInsert(&globalInstrList,I_FLOAT2INT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
+					}
+				}
+				//LInsert(&globalInstrList,I_DIV,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			//E -> E/E
 			else if(stackTop(rStack)->firstToken->type== DIV_DOUBLE)
 			{
-				stackPop(rStack);
 				printf("****E -> E/E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
 				{
-					bool cast;
-					if(canIDiv(stackTop(rStack)->firstToken,fID.firstToken,true,&cast)== false)
+					if(stackTop(rStack)->firstToken->type != VALUE_DOUBLE)
 					{
-						error_msg("Spatne operandy u deleni.", 53);
+					//	LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					if(*(double*)(TokenToTypeConversion(stackTop(rStack)->firstToken))==0)
-						error_msg("Deleni nulou.", 57);
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					if(cast)
+					if(fID.firstToken->type != VALUE_DOUBLE)
 					{
-
-						if(stackTop(rStack)->firstToken->type != VALUE_DOUBLE)
-						{
-							//LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(stackTopPop(rStack)->firstToken),NULL);
-							stackPush(rStack,(*result));
-						}
-						if(fID.firstToken->type != VALUE_DOUBLE)
-						{
-							//LInsert(instList,I_INT2FLOAT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),NULL);
-							fID = *(result);
-						}
+					//	LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
 					}
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_DIV,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-			//}
+				}
+				//LInsert(&globalInstrList,I_DIV,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type== LESS)
 			{
-				stackPop(rStack);
 				printf("****E -> E<E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
 				{
-					if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
-					{
-						// ******************CHYBAAAAAA****************
-					}
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_LT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-				//}
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_LT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER)
 			{
-				stackPop(rStack);
 				printf("****E -> E>E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
 				{
-					if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
-					{
-						// ******************CHYBAAAAAA****************
-					}
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_GT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-				//}
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_GT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type== EQUAL)
 			{
-				stackPop(rStack);
 				printf("****E -> E=E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
 				{
-					if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
-					{
-						// ******************CHYBAAAAAA****************
-					}
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_EQ,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-				//}
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_EQ,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER_EQUAL)
 			{
-				stackPop(rStack);
 				printf("****E -> E>=E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
 				{
-					if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
-					{
-						// ******************CHYBAAAAAA****************
-					}
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_LT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
-					//LInsert(instList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-				//}
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_LT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type ==  LESS_EQUAL)
 			{
-				stackPop(rStack);
 				printf("****E -> E<=E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				//tReductToken *fOper = stackTopPop(rStack);
-				/*if(isOperand(stackTop(rStack)->firstToken,true))
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
 				{
-					if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
-					{
-						// ******************CHYBAAAAAA****************
-					}
-					tReductToken *result = myMalloc(sizeof(tReductToken));
-					//EINSTRUCTION instruction,void *arg1,void *arg2,void *result
-					//LInsert(instList,I_GT,(void*)result->firstToken,TokenToTypeConversion(fID.firstToken),TokenToTypeConversion(stackTop(rStack)->firstToken));
-					//LInsert(instList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);*/
-					stackPop(rStack);
-					stackPush(st,(*result));
-					(*reduct) = true;
-			//}
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_GT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
+				stackPush(st,(*result));
+				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type == INEQUALITY)
 			{
-				stackPop(rStack);
-				printf("****E -> E<>E****\n");
+				printf("****E -> E<=E****\n");
+				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
 				result->firstToken->info = "EXPR";
-				stackPop(rStack);
+				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				{
+					// ******************CHYBAAAAAA****************
+				}
+				//LInsert(&globalInstrList,I_EQ,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
+				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
+				PrintInstrList(&globalInstrList);
+				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
 			}

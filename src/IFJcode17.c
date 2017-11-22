@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 	(void) argc;
 	(void) argv;
 	garbageInit(2000);
+	LInit(&globalInstrList);
 	ret = parse();
   /*if (argc == 2){
 	FILE *file;

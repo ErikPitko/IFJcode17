@@ -7,8 +7,8 @@
 token *currToken;
 token *lastToken;
 
-list *hTable;
-list *lTable;
+tHashTable *hTable;
+tHashTable *lTable;
 param curr_function;
 param *returnVal;
 bool curr_function_declared = false;
@@ -557,7 +557,7 @@ parse_errno command(){
 			return(SEMANTIC_REDEF);
 		puts("ID defined");
 
-		returnVal = find(lTable, currToken->info);
+		returnVal = param_find(lTable, currToken->info);
 
 		currToken = getToken();
 

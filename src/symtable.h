@@ -26,30 +26,29 @@ typedef struct paramP // Prvky podzoznamu
 	struct paramP *next_param; // Ukazatel na dalsi parameter
 } param;	
 
-typedef struct listPL // Podzoznam
+typedef struct // Podzoznam
 {
 	param *First;
 	param *Act;
-} list_param;
+} tParamListElem;
 
-typedef struct itemI
+typedef struct tSymFoo
 {
 	char *id; // Identifikator
 	int type; // Datovy typ
 	bool is_define; // Kontrola ci je funkcia definovana
-	
-	list_param *param;
+	tParamListElem *param;
 
-	struct itemI *next_item; // Ukazatel na dalsi prvok	
-} *list_item;
+	struct tSymFoo *next_item; // Ukazatel na dalsi prvok	
+} *tFooListElem;
 
-typedef struct listL // Zoznam
+typedef struct  // Zoznam
 {
- 	list_item Act; // Ukazatel na aktualny prvok
-	list_item First; // Ukazatel na prvy prvok
-} list;
+ 	tFooListElem Act; // Ukazatel na aktualny prvok
+	tFooListElem First; // Ukazatel na prvy prvok
+} tHashTable;
 
-typedef list list_array[MAX_SIZE]; // Pole zoznamov
+typedef tHashTable list_array[MAX_SIZE]; // Pole zoznamov
 
 /*********** Funkcie ***********/
 
@@ -57,32 +56,32 @@ typedef list list_array[MAX_SIZE]; // Pole zoznamov
 int hash_code (const char *string);
 
 // Inicializacia
-list *ltab_init ();
+tHashTable *ltab_init ();
 
 // Vkladanie funkcii a premennych
-int list_insert (list *local_table, param sym);
+int list_insert (tHashTable *local_table, tFooListElem sym);
 // Vkladanie parametrov
-int list_insert_param (list *local_table, param sym, param psym);
+int list_insert_param (tHashTable *local_table, param sym, param psym);
 
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
-param *find (list *local_table, char* symId);
+param *param_find (tHashTable *local_table,char* fooId, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
-param *param_find (list *local_table, param sym, param psym);
+tFooListElem *function_find (tHashTable *local_table, param sym, param psym);
 
 // Nastavuje isdefine na true
-int change_isdefine (list *local_table, param sym);
+int change_isdefine (tHashTable *local_table, param sym);
 // Funkcia, ktora vracia index hladaneho parametru
-int return_index_parameter (list *local_table, param sym, param psym);
+int return_index_parameter (tHashTable *local_table, param sym, param psym);
 
 // Zisti pocet parametrov vo funkcii
-int test_nubmer_param (list *local_table, char *id);
+int test_nubmer_param (tHashTable *local_table, char *id);
 
 // Zrusi celu tabulku
-void ltab_destroy (list *local_table);
+void ltab_destroy (tHashTable *local_table);
 
 
 //Pomocne funkcie
-int find_test (list *local_table, char *id);
-int find_param_test (list *local_table, char *id_fnc, char *id_param);
+int find_test (tHashTable *local_table, char *id);
+int find_param_test (tHashTable *local_table, char *id_fnc, char *id_param);
 
 #endif // SYMTABLE_H_

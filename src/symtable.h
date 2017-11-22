@@ -40,12 +40,12 @@ typedef struct tSymFoo
 	tParamListElem *param;
 
 	struct tSymFoo *next_item; // Ukazatel na dalsi prvok	
-} *tFooListElem;
+} tFooListElem;
 
 typedef struct  // Zoznam
 {
- 	tFooListElem Act; // Ukazatel na aktualny prvok
-	tFooListElem First; // Ukazatel na prvy prvok
+ 	tFooListElem *Act; // Ukazatel na aktualny prvok
+	tFooListElem *First; // Ukazatel na prvy prvok
 } tHashTable;
 
 typedef tHashTable list_array[MAX_SIZE]; // Pole zoznamov
@@ -61,17 +61,17 @@ tHashTable *ltab_init ();
 // Vkladanie funkcii a premennych
 int list_insert (tHashTable *local_table, tFooListElem sym);
 // Vkladanie parametrov
-int list_insert_param (tHashTable *local_table, param sym, param psym);
+int list_insert_param (tHashTable *local_table, tFooListElem sym, param psym);
 
 // Podla id najde zaznam a vrati v tokene vsetky informacie... id, type, is_define
 param *param_find (tHashTable *local_table,char* fooId, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
-tFooListElem *function_find (tHashTable *local_table, param sym, param psym);
+tFooListElem *function_find (tHashTable *local_table, tFooListElem sym, param psym);
 
 // Nastavuje isdefine na true
-int change_isdefine (tHashTable *local_table, param sym);
+int change_isdefine (tHashTable *local_table, tFooListElem sym);
 // Funkcia, ktora vracia index hladaneho parametru
-int return_index_parameter (tHashTable *local_table, param sym, param psym);
+int return_index_parameter (tHashTable *local_table, tFooListElem sym, param psym);
 
 // Zisti pocet parametrov vo funkcii
 int test_nubmer_param (tHashTable *local_table, char *id);

@@ -9,8 +9,8 @@ token *lastToken;
 
 tHashTable *hTable;
 tHashTable *lTable;
-param curr_function;
-param *returnVal;
+tFooListElem curr_function;
+tFooListElem *returnVal;
 bool curr_function_declared = false;
 int tokenGetPos = 0;
 
@@ -327,7 +327,9 @@ parse_errno par_list(){
 	case IDENTIFIER:
 		puts("ID correct");
 
+		tFooListElem sym;
 		param p;
+		sym.id = currToken->info;
 		p.id = currToken->info;
 
 		if((ret = check_AS()) != PARSE_OK)
@@ -336,14 +338,14 @@ parse_errno par_list(){
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
 
+		sym.type = currToken->type;
 		p.type = currToken->type;
 
-		if()
 		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
 
 		if(lTable)
-			if(list_insert(lTable, p))
+			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
 		if((ret = par_next()) != PARSE_OK)
@@ -370,7 +372,9 @@ parse_errno par_next(){
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
+		tFooListElem sym;
 		param p;
+		sym.id = currToken->info;
 		p.id = currToken->info;
 
 		if((ret = check_AS()) != PARSE_OK)
@@ -379,12 +383,13 @@ parse_errno par_next(){
 		if((ret = var_type()) != PARSE_OK)
 			return (ret);
 
+		sym.type = currToken->type;
 		p.type = currToken->type;
 		if(list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
 
 		if(lTable)
-			if(list_insert(lTable, p))
+			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
 		if((ret = par_next()) != PARSE_OK)
@@ -557,7 +562,7 @@ parse_errno command(){
 			return(SEMANTIC_REDEF);
 		puts("ID defined");
 
-		returnVal = param_find(lTable, currToken->info);
+		returnVal = param_find(lTable, curr_function.id, currToken->info);
 
 		currToken = getToken();
 
@@ -625,7 +630,7 @@ parse_errno command(){
 				return(SEMANTIC_REDEF);
 			}
 
-			param p;
+			tFooListElem p;
 			p.id = currToken->info;
 
 			if((ret = check_AS()) != PARSE_OK)

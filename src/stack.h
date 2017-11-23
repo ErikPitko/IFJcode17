@@ -23,21 +23,17 @@ void stackInit(tStack* s);
 /**
  * @brief Vrací nenulovou hodnotu, pokud je zásobník prázdný, jinak vrací hodnotu 0.
  */
-int stackEmpty(const tStack* s);
+int stackEmpty(tStack* s);
 
 /**
  * @brief Vrací nenulovou hodnotu, je-li zásobník plný, jinak vrací hodnotu 0.
  */
-int stackFull(const tStack* s);
+int stackFull(tStack* s);
 
 /**
  * @brief Vrací znak z vrcholu zásobníku.
  */
-tReductToken *stackTop( const tStack* s);
-/**
- * @brief Vrací předposlední znak z vrcholu zásobníku.
- */
-tReductToken *stackBeforeTop ( const tStack* s);
+tReductToken *stackTop(tStack* s);
 /**
  * @brief Vrací velikost zásobníku.
  */
@@ -52,10 +48,6 @@ tReductToken *stackTopPop ( tStack* s);
  * @brief Vloží znak na vrchol zásobníku.
  */
 void stackPush(tStack* s, tReductToken token);
-/**
- * @brief Vloží znak pod vrchol zásobníku.
- */
-void stackPushUnderTop(tStack* s, tReductToken token);
 void stackPrint(char* stackName, tStack* s);
 void stackClear(tStack* s);
 #endif

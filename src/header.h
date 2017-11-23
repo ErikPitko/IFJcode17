@@ -15,7 +15,8 @@ typedef enum
 	L,
 	EQ,
 	ERROR,
-	NONE
+	NONE,
+	EXITPARSE
 }ePrecElem;
 
 typedef enum
@@ -111,14 +112,15 @@ typedef struct
 {
 	token *firstToken;
 	ePrecElem priority;
+	bool isReduced;
 }tReductToken;
 
 typedef struct
 {
 	EINSTRUCTION Instruction;
-	param *arg1;
-	param *arg2;
-	param *result;
+	tFooListElem *arg1;
+	tFooListElem *arg2;
+	tFooListElem *result;
 }tInstruction;
 
 typedef struct tListElement

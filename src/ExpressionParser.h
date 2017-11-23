@@ -16,4 +16,5 @@
 #include "symtable.h"
 #define EXPR 999
 token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *localTable);
+char* strValueOfEnum(int enumValue);
 #endif /* EXPRESSIONPARSER_H_ */

@@ -202,7 +202,7 @@ int return_index_parameter(tHashTable *local_table, tFooListElem sym,
 
 			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
 			{
-				if (strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) // Porovna retazce
+				if ((strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0) && (strcmp(local_table[idx].Act->param->Act->id, psym.id) == 0)) // Porovna retazce
 						{
 					return counter;
 				}

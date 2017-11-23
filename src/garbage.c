@@ -60,8 +60,9 @@ static htab_listitem* create_item(void *key) {
 }
 void *myMalloc(size_t n) {
 	void *key = malloc(n);
-	if(key == NULL)
-		return NULL;
+	if(key == NULL){
+		error_msg(99, "Could not allocate memory");
+	}
 	unsigned index = hash_function(key) % htable->arr_size;
 
 	htab_listitem* item = htable->list[index];
@@ -113,6 +114,8 @@ void *myRealloc(void* key, size_t n){
 	htab_listitem *temp;
 	if((temp = htab_find(key)) != NULL){
 		void* new = realloc(key, n);
+		if(!new)
+			error_msg(99, "Could not allocate memory");
 		temp->key = new;
 		return (new);
 	}
@@ -122,6 +125,8 @@ void *myRealloc(void* key, size_t n){
 }
 
 int myFree(void* key) {
+	if(!key)
+		return(0);
 	unsigned index = hash_function(key) % htable->arr_size;
 	htab_listitem* prev = htable->list[index];
 
@@ -136,22 +141,9 @@ int myFree(void* key) {
 			free(item->key);
 			free(item);
 			htable->n--;
-			return (1);
+			return (0);
 		}
 		prev = item;
 	}
-	return (0);
+	return (1);
 }
-
-/*
-int main(void){
-	if (!garbageInit(400))
-		return (EXIT_FAILURE);
-
-	for (int i = 0; i < 500000; ++i) {
-		myMalloc(500 * sizeof(int));
-	}
-
-	garbageFree();
-}
-*/

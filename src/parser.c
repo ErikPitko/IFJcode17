@@ -693,7 +693,7 @@ parse_errno command(){
 				return (ret);
 			break;
 	case RETURN0:
-		if(curr_function.id == "SCOPE"){
+		if(!strcmp(curr_function.id, "SCOPE")){
 			warning_msg("Unexpected RETURN in SCOPE");
 			return (SYNTAX_ERR);
 		}

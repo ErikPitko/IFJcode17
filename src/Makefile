@@ -24,14 +24,14 @@ clean:
 
 error.o: error.c error.h garbage.h
 ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
- scanner.h garbage.h header.h error.h InstructionList.h
-garbage.o: garbage.c garbage.h
+ scanner.h garbage.h error.h header.h symtable.h InstructionList.h
+garbage.o: garbage.c garbage.h error.h
 IFJcode17.o: IFJcode17.c error.h garbage.h ExpressionParser.h stack.h \
- scanner.h header.h InstructionList.h parser.h symtable.h
+ scanner.h header.h symtable.h InstructionList.h parser.h
 InstructionList.o: InstructionList.c InstructionList.h header.h scanner.h \
- garbage.h error.h
-parser.o: parser.c parser.h scanner.h garbage.h ExpressionParser.h \
- stack.h header.h error.h InstructionList.h symtable.h
-scanner.o: scanner.c scanner.h garbage.h
-stack.o: stack.c stack.h scanner.h garbage.h header.h
+ garbage.h error.h symtable.h
+parser.o: parser.c parser.h scanner.h garbage.h error.h \
+ ExpressionParser.h stack.h header.h symtable.h InstructionList.h
+scanner.o: scanner.c scanner.h garbage.h error.h
+stack.o: stack.c stack.h scanner.h garbage.h error.h header.h symtable.h
 symtable.o: symtable.c symtable.h garbage.h error.h

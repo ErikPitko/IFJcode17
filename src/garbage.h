@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "error.h"
 
 /**
  * @brief calculates index for given string

@@ -42,12 +42,13 @@ ePrecElem precTable[15][15] =
 /**************************************HEADER***************************************/
 int tableIndexSelect(tReductToken *tok);
 bool isOperatorExpr(token *tok);
-bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast);
-bool areOperandsSame(token *firstOperand,token *secondOperand);
-bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand);
-bool isOperand(token *operand, bool isArithmethic);
-bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic);
-void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar,tHashTable *localTable);
+bool canIDiv(tFooListElem *firstOperand,tFooListElem *secondOperand,bool isDouble, bool *cast);
+bool areOperandsSame(tFooListElem *firstOperand,tFooListElem *secondOperand);
+bool areOperandsSameArithmethic(tFooListElem *firstOperand,tFooListElem *secondOperand);
+bool isTokenOperand(token *operand, bool isArithmethic);
+bool isSymbolOperand(tFooListElem *operand, bool isArithmethic);
+bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool isArithmethic);
+void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar,tHashTable *localTable);
 char* strValueOfEnum(int enumValue);
 /**************************************HEADER***************************************/
 
@@ -171,8 +172,6 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		switch (precTable[select][tableIndexSelect(&actToken)])
 		{
 			case H:
-				if(stackTop(&stack)->firstToken->type == EXPR && stackBeforeTop(&stack)->firstToken->type == EOL)
-					goto exit;
 				do
 				{
 					top = *(stackTopPop(&stack));
@@ -183,14 +182,14 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				while(1);
 				stackPrint("rstack",&rStack);
 				printf("######Apply rule######\n");
-				applyRule(&stack,&rStack,&reduct,returnVar,localTable);
+				applyRule(&stack,&rStack,&reduct,&semanticError,returnVar,localTable);
 				printf("#####Rule apllied#####\n");
 				stackPrint("stack",&stack);
 				//if(top.firstToken == NULL)
 				//	goto exit;
 				break;
 			case L:
-				if(operatorRead &&!isOperand(actToken.firstToken,false) && actToken.firstToken->type != LEFT_PARENTHESIS)
+				if(operatorRead &&!isTokenOperand(actToken.firstToken,false) && actToken.firstToken->type != LEFT_PARENTHESIS)
 				{
 					printf("%s \n",strValueOfEnum(actToken.firstToken->type));
 					error_msg(SYNTAX_ERR,"Two operators in row");
@@ -200,13 +199,13 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 					printf("%s \n",strValueOfEnum(actToken.firstToken->type));
 					operatorRead = true;
 				}
-				if(isOperand(actToken.firstToken,false))
+				if(isTokenOperand(actToken.firstToken,false))
 				{
 					wasOperand = true;
 					operatorRead = false;
 					printf("WAS THERE %s \n",actToken.firstToken->info);
 				}
-				if(!isOperand(actToken.firstToken,false) && !wasOperand && actToken.firstToken->type != LEFT_PARENTHESIS)
+				if(!isTokenOperand(actToken.firstToken,false) && !wasOperand && actToken.firstToken->type != LEFT_PARENTHESIS)
 				{
 					error_msg(SYNTAX_ERR,"The first token of expression wasn't operand or function call");
 				}
@@ -224,6 +223,8 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				actToken.firstToken = getToken();
 				break;
 			case ERROR:
+				if(select == 13 && tableIndexSelect(&actToken) == 13)
+					goto exit;
 				printf("%i  %i\n",select,tableIndexSelect(&actToken));
 				error_msg(SYNTAX_ERR,"Syntaktická chyba");
 				goto exit;
@@ -233,20 +234,19 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				goto exit;
 		}
 	}
-	while(!((actToken.firstToken->type == EOL) && stackBeforeTop(&stack)->firstToken->type == EOL));
+	while(!((actToken.firstToken->type == EOL) && stackTop(&stack)->firstToken->type == EOL));
 	exit:
 	printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
 	if(semanticError != 0)
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
-	//PrintInstrList(&instList);
 	return actToken.firstToken;
 }
 
-bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast)
+bool canIDiv(tFooListElem *firstOperand,tFooListElem *secondOperand,bool isDouble, bool *cast)
 {
-	if(isOperand(firstOperand,true) && isOperand(secondOperand,true))
+	if(isSymbolOperand(firstOperand,true) && isSymbolOperand(secondOperand,true))
 	{
 
 		if(firstOperand->type == secondOperand->type)
@@ -273,21 +273,21 @@ bool canIDiv(token *firstOperand,token *secondOperand,bool isDouble, bool *cast)
 	return false;
 }
 
-bool areOperandsSame(token *firstOperand,token *secondOperand)
+bool areOperandsSame(tFooListElem *firstOperand,tFooListElem *secondOperand)
 {
 	if(areOperandsSameArithmethic(firstOperand,secondOperand) || firstOperand->type == VALUE_STRING)
 		return firstOperand->type == secondOperand->type;
 	return false;
 }
 
-bool areOperandsSameArithmethic(token *firstOperand,token *secondOperand)
+bool areOperandsSameArithmethic(tFooListElem *firstOperand,tFooListElem *secondOperand)
 {
 	if(firstOperand->type == VALUE_INTEGER || firstOperand->type == VALUE_DOUBLE)
 		return firstOperand->type == secondOperand->type;
 	return false;
 }
 
-bool isOperand(token *operand, bool isArithmethic)
+bool isTokenOperand(token *operand, bool isArithmethic)
 {
 	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
 	if(operand->type == IDENTIFIER||operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || (operand->type == VALUE_STRING && !isArithmethic))
@@ -295,11 +295,19 @@ bool isOperand(token *operand, bool isArithmethic)
 	return false;
 }
 
-bool areOperands(token *firstOperand,token *secondOperand, bool isArithmethic)
+bool isSymbolOperand(tFooListElem *operand, bool isArithmethic)
+{
+	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
+	if(operand->type == IDENTIFIER||operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || (operand->type == VALUE_STRING && !isArithmethic))
+		return true;
+	return false;
+}
+
+bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool isArithmethic)
 {
 	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
 	/*operand->type == IDENTIFIER||*/
-	if(isOperand(firstOperand,isArithmethic) && isOperand(secondOperand,isArithmethic))
+	if(isSymbolOperand(firstOperand,isArithmethic) && isSymbolOperand(secondOperand,isArithmethic))
 		return true;
 	return false;
 }
@@ -311,15 +319,13 @@ bool isOperatorExpr(token *tok)
 	return false;
 }
 
-void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTable *localTable)
+void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable)
 {
 	//E -> i
 	if(stackLenght(rStack)==1)
 	{
 		printf("****E -> i****\n");
 		tReductToken *tmp = stackTopPop(rStack);
-		tmp->firstToken->type = EXPR;
-		tmp->firstToken->info = "EXPR";
 		stackPush(st,*(tmp));
 		(*reduct) = true;
 	}
@@ -335,21 +341,47 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
 					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
 						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
 					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
 						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == VALUE_STRING && secondOper->type == VALUE_STRING)
+					{
+						printf("1: VALUE_STRING 2: VALUE_STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == STRING && secondOper->type == STRING)
+					{
+						printf("1: STRING 2: STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
 					}
 				}
 				//LInsert(&globalInstrList,I_ADD,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
-				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -361,21 +393,37 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
 					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
 						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
 					{
-						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
 					}
 				}
 				//LInsert(&globalInstrList,I_SUB,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
-				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -387,21 +435,37 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí NASOBENI
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					if(stackTop(rStack)->firstToken->type == VALUE_DOUBLE && fID.firstToken->type == VALUE_INTEGER)
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
 					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
 						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					else if(stackTop(rStack)->firstToken->type == VALUE_INTEGER && fID.firstToken->type == VALUE_DOUBLE)
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
 					{
-						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
 					}
 				}
 				//LInsert(&globalInstrList,I_MUL,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
-				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -413,21 +477,37 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					if(stackTop(rStack)->firstToken->type != VALUE_INTEGER)
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
 					{
-						//LInsert(&globalInstrList,I_FLOAT2INT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					if(fID.firstToken->type != VALUE_INTEGER)
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
 					{
-						//LInsert(&globalInstrList,I_FLOAT2INT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
 					}
 				}
 				//LInsert(&globalInstrList,I_DIV,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
-				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -439,21 +519,37 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSameArithmethic(stackTop(rStack)->firstToken,fID.firstToken) == false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					if(stackTop(rStack)->firstToken->type != VALUE_DOUBLE)
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
 					{
-					//	LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
 					}
-					if(fID.firstToken->type != VALUE_DOUBLE)
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
 					{
-					//	LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)stackTop(rStack)->firstToken,NULL);
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
 					}
 				}
 				//LInsert(&globalInstrList,I_DIV,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
-				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -464,11 +560,35 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
 				//LInsert(&globalInstrList,I_LT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				PrintInstrList(&globalInstrList);
@@ -482,13 +602,36 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
-				//LInsert(&globalInstrList,I_GT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				PrintInstrList(&globalInstrList);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
@@ -500,11 +643,45 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == VALUE_STRING && secondOper->type == VALUE_STRING)
+					{
+						printf("1: VALUE_STRING 2: VALUE_STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == STRING && secondOper->type == STRING)
+					{
+						printf("1: STRING 2: STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
 				//LInsert(&globalInstrList,I_EQ,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				PrintInstrList(&globalInstrList);
@@ -518,11 +695,35 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
 				//LInsert(&globalInstrList,I_LT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
@@ -537,11 +738,35 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
 				//LInsert(&globalInstrList,I_GT,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
@@ -552,15 +777,50 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 			}
 			else if(stackTop(rStack)->firstToken->type == INEQUALITY)
 			{
-				printf("****E -> E<=E****\n");
+				printf("****E -> E<>E****\n");
 				stackPop(rStack);	//popnutí MINUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
-				if(areOperandsSame(stackTop(rStack)->firstToken,fID.firstToken)== false)
+				tFooListElem *firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+				tFooListElem *secondOper = function_find(localTable,fID.firstToken->info);
+				if(firstOper != NULL && secondOper != NULL)
+				if(areOperandsSame(firstOper,secondOper) == false)
 				{
-					// ******************CHYBAAAAAA****************
+					if(firstOper->type == VALUE_DOUBLE && secondOper->type == VALUE_INTEGER)
+					{
+						printf("1: VALUE_DOUBLE 2: VALUE_INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == DOUBLE && secondOper->type == INTEGER)
+					{
+						printf("1: DOUBLE 2: INTEGER\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == INTEGER && secondOper->type ==  DOUBLE)
+					{
+						printf("1: INTEGER 2: DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken,(void*)fID.firstToken,NULL);
+					}
+					else if(firstOper->type == VALUE_INTEGER && secondOper->type == VALUE_DOUBLE)
+					{
+						printf("1: VALUE_INTEGER 2: VALUE_DOUBLE\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == VALUE_STRING && secondOper->type == VALUE_STRING)
+					{
+						printf("1: VALUE_STRING 2: VALUE_STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else if(firstOper->type == STRING && secondOper->type == STRING)
+					{
+						printf("1: STRING 2: STRING\n");
+						//LInsert(&globalInstrList,I_INT2FLOAT,(void*)result->firstToken->info,(void*)stackTop(rStack)->firstToken->info,NULL);
+					}
+					else
+					{
+						(*semanticError) = SEMANTIC_TYPE;
+					}
 				}
 				//LInsert(&globalInstrList,I_EQ,(void*)result->firstToken,fID.firstToken,stackTop(rStack)->firstToken);
 				//LInsert(&globalInstrList,I_NOT,(void*)result->firstToken,(void*)result->firstToken,NULL);
@@ -575,8 +835,6 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,param *returnVar, tHashTab
 				printf("****E -> (E)****\n");
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->type = EXPR;
-				result->firstToken->info = "EXPR";
 				stackPop(rStack);
 				stackPush(st,(*result));
 				(*reduct) = true;

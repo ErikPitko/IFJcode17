@@ -252,17 +252,6 @@ parse_errno fnc_body(){
 //		ltab_destroy(lTable);
 		lTable = NULL;
 		break;
-	case RETURN0:
-		puts("RETURN correct");
-		currToken = getToken();
-		if((ret = assignment()) != PARSE_OK)
-			return (ret);
-
-		if(currToken->type != EOL){
-			warning_msg("expected EOL after assignment()");
-			return (SYNTAX_ERR);
-		}
-		break;
 	default:
 		if((ret = command()) != PARSE_OK)
 			return (ret);
@@ -703,6 +692,21 @@ parse_errno command(){
 			if((ret = check_EOL()) != PARSE_OK)
 				return (ret);
 			break;
+	case RETURN0:
+		if(curr_function.id == "SCOPE"){
+			warning_msg("Unexpected RETURN in SCOPE");
+			return (SYNTAX_ERR);
+		}
+		puts("RETURN correct");
+		currToken = getToken();
+		if((ret = assignment()) != PARSE_OK)
+			return (ret);
+
+		if(currToken->type != EOL){
+			warning_msg("expected EOL after assignment()");
+			return (SYNTAX_ERR);
+		}
+		break;
 	default:
 		puts("Unexpected command");
 		return (SYNTAX_ERR);

@@ -87,11 +87,11 @@ int  where = 0;
   if(type == STRING){
     if(where){
       printf("DEFVAR GF@_%s\n",id);
-      printf("MOVE GF@_%s string@!""\n")
+      printf("MOVE GF@_%s string@!""\n");
     }
     else{
       printf("DEFVAR LF@_%s\n",id);
-      printf("MOVE LF@_%s int@0\n")
+      printf("MOVE LF@_%s int@0\n");
     }
   }//else error
 }
@@ -108,18 +108,18 @@ void I_input_id(char *id, int type){//READ var type
   int where = 0;
   if(type == STRING){
     if(where){
-      printf("READ GF@_%s\n",id)
-    }else printf("READ LF@_%s\n",id)
+      printf("READ GF@_%s\n",id);
+    }else printf("READ LF@_%s\n",id);
   }else
     if(type == DOUBLE){
       if(where){
-        printf("READ GF@_%s\n",id)
-      }else printf("READ LF@_%s\n",id)
+        printf("READ GF@_%s\n",id);
+      }else printf("READ LF@_%s\n",id);
     }else
     if(type == INTEGER){
       if(where){
-        printf("READ GF@_%s\n",id)
-      }else printf("READ LF@_%s\n",id)
+        printf("READ GF@_%s\n",id);
+      }else printf("READ LF@_%s\n",id);
     }//else error
 
 }
@@ -222,7 +222,7 @@ void I_arg_i_const(char *_const, int type, char *idD){
     printf("MOVE TF@_%s double@%s\n", idD, _const);
   else if(type == STRING)
   {
-    id = reformString(_const);
+    _const = reformString(_const);
     printf("MOVE TF@_%s integer@%s\n", idD, _const);
   }
 }
@@ -260,5 +260,5 @@ void I_define_return(){
 *
 */
 void I_print(){ // type z expression
-  printf("PRINT EXP\n")
+  printf("PRINT EXP\n");
 }

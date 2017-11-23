@@ -3,7 +3,7 @@ CFLAGS=-O0 -Wall -Wextra -g
 
 all: IFJcode17
 
-OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o symtable.o InstructionList.o
+OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o symtable.o InstructionList.o address_code.o
 
 run: all
 	./IFJcode17 ${ARGS}
@@ -22,6 +22,7 @@ clean:
 
 ##############################################################
 
+address_code.o: address_code.c address_code.h scanner.h garbage.h error.h
 error.o: error.c error.h garbage.h
 ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
  scanner.h garbage.h error.h header.h symtable.h InstructionList.h

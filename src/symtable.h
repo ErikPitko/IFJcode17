@@ -22,7 +22,7 @@ typedef struct paramP // Prvky podzoznamu
 {
 	char *id; // Identifikator
 	int type; // Datovy typ
-	bool is_define;
+	
 	struct paramP *next_param; // Ukazatel na dalsi parameter
 } param;	
 
@@ -37,6 +37,8 @@ typedef struct tSymFoo
 	char *id; // Identifikator
 	int type; // Datovy typ
 	bool is_define; // Kontrola ci je funkcia definovana
+	int is_main; // Kontrola ci je funkcia main	
+
 	tParamListElem *param;
 
 	struct tSymFoo *next_item; // Ukazatel na dalsi prvok	
@@ -74,7 +76,7 @@ int change_isdefine (tHashTable *local_table, tFooListElem sym);
 int return_index_parameter (tHashTable *local_table, tFooListElem sym, param psym);
 
 // Zisti pocet parametrov vo funkcii
-int nubmer_param (tHashTable *local_table, char *id);
+int number_param (tHashTable *local_table, char *id);
 
 // Zrusi celu tabulku
 void ltab_destroy (tHashTable *local_table);

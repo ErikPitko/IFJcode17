@@ -54,7 +54,12 @@ token *tokenInit(){
 
 token *getToken(){
   token * tmpToken;
+	
+  lastToken = myMalloc(sizeof(struct structToken));
+  lastToken->type = NOPE;
   tmpToken = getToken0();
+  lastToken = tmpToken;
+	
   while(tmpToken->type == NOPE)
     tmpToken = getToken0();
   lastToken = tmpToken;

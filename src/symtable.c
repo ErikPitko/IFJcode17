@@ -168,14 +168,17 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
 
 
 tFooListElem *function_find(tHashTable *local_table, char *fooId) {
+	if(local_table == NULL)
+		return;
 	int idx = hash_code(fooId);
 	for (local_table[idx].Act = local_table[idx].First;
 			local_table[idx].Act != NULL; local_table[idx].Act =
 					local_table[idx].Act->next_item)
+	{
 		if (strcmp(local_table[idx].Act->id, fooId) == 0) // Porovna retazce
 				{
 			return local_table[idx].Act;
-		}
+		}}
 	return NULL;
 }
 
@@ -260,11 +263,12 @@ void ltab_destroy(tHashTable *local_table) {
 	{
 		for(local_table[i].Act = local_table[i].First;local_table[i].First != NULL;local_table[i].First = local_table[i].First->next_item,local_table[i].Act = local_table[i].First)
 		{
-			for(local_table[i].Act->param->Act = local_table[i].Act->param->First;local_table[i].Act->param->First != NULL;local_table[i].Act->param->First = local_table[i].Act->param->First->next_param,local_table[i].Act->param->Act = local_table[i].Act->param->First)
-			{
-				myFree(local_table[i].Act->param->Act->id);
-				myFree(local_table[i].Act->param->Act);
-			}
+			if(local_table[i].Act->param != NULL)
+				for(local_table[i].Act->param->Act = local_table[i].Act->param->First;local_table[i].Act->param->First != NULL;local_table[i].Act->param->First = local_table[i].Act->param->First->next_param,local_table[i].Act->param->Act = local_table[i].Act->param->First)
+				{
+					myFree(local_table[i].Act->param->Act->id);
+					myFree(local_table[i].Act->param->Act);
+				}
 			myFree(local_table[i].Act->id);
 			myFree(local_table[i].Act);
 		}
@@ -283,6 +287,17 @@ void ltab_destroy(tHashTable *local_table) {
  * Parametre: Ukazatel na tabulku, premennu "id"
  * Vracia: 0 v pripade nenajdenia prvku, -1 v pripade najdenia prvku
  */
+
+void print_Table(tHashTable *local_table)
+{
+	for(int i =0;i<MAX_SIZE;i++)
+	{
+		for(local_table[i].Act = local_table[i].First;local_table[i].Act != NULL;local_table[i].Act = local_table[i].Act->next_item)
+		{
+			printf("********************** %s ***************************\n",local_table[i].Act->id);
+		}
+	}
+}
 
 int find_test(tHashTable *local_table, char *id) {
 	int i = hash_code(id);

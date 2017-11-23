@@ -13,6 +13,7 @@
 #include "scanner.h"
 #include "error.h"
 #include "InstructionList.h"
+#include "symtable.h"
 #define EXPR 999
 token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *localTable);
 #endif /* EXPRESSIONPARSER_H_ */

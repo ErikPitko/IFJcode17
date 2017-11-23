@@ -54,7 +54,7 @@ typedef tHashTable list_array[MAX_SIZE]; // Pole zoznamov
 
 // Vypocita index zo zadaneho stringu
 int hash_code (const char *string);
-
+void print_Table(tHashTable *local_table);
 // Inicializacia
 tHashTable *ltab_init ();
 

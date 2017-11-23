@@ -1,4 +1,5 @@
 prog_body	->	EOF
+				EOL <prog_body>
 				Scope EOL <main_body> EOL <prog_body>
 				Declare Function fncName ( <par_list> As <var_type> EOL <prog_body>
 				Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
@@ -40,7 +41,8 @@ var_type 	->	Integer
 				String
 
 print_exp	->	<assingnment> ; <print_exp>
-				<assingnment> ; EOL
+				; <print_exp>
+				EOL
 
 command		->	Input id EOL
 				If EXP Then EOL <if_body> EOL

@@ -11,8 +11,8 @@ tHashTable *hTable;
 tHashTable *lTable;
 tFooListElem curr_function;
 tFooListElem *returnVal;
+int param_counter = 0;
 bool curr_function_declared = false;
-int tokenGetPos = 0;
 
 parse_errno ret;
 parse_errno prog_body();
@@ -82,7 +82,13 @@ parse_errno prog_body(){
 
 	switch(currToken->type){
 	case EOF0:
+		puts("EOF correct");
 		return (PARSE_OK);
+	case EOL:
+		puts("EOL correct");
+		if ((ret = prog_body()) != PARSE_OK)
+			return (ret);
+		break;
 	case SCOPE:
 		puts("SCOPE correct");
 
@@ -121,6 +127,7 @@ parse_errno prog_body(){
 
 		curr_function.id = currToken->info;
 		curr_function.is_define = false;
+		list_insert(hTable, curr_function);
 
 
 		if((ret = check_LEFTP()) != PARSE_OK)
@@ -136,7 +143,7 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.type = currToken->type;
-		list_insert(hTable, curr_function);
+		change_isdefine(hTable, curr_function);
 
 		if ((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -149,6 +156,7 @@ parse_errno prog_body(){
 	case FUNCTION:
 		puts("FUNCTION correct");
 		lTable = ltab_init();
+		param_counter = 0;
 
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
@@ -183,9 +191,15 @@ parse_errno prog_body(){
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
-//		ltab_destroy(lTable);
+		if(number_param(hTable, curr_function.id) != param_counter)
+			return (SEMANTIC_TYPE);
+
+//				ltab_destroy(lTable);
 		curr_function.id = NULL;
 		curr_function_declared = false;
+		param_counter = 0;
+
+
 
 		if((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -341,10 +355,23 @@ parse_errno par_list(){
 		sym.type = currToken->type;
 		p.type = currToken->type;
 
-		if(list_insert_param(hTable, curr_function, p))
+
+		if(curr_function_declared){
+			int index;
+			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
+				return(SEMANTIC_REDEF);
+			else
+				puts("index OK");
+			if(index != param_counter)
+				return(SEMANTIC_TYPE);
+			param_counter++;
+			puts("called parameter correct");
+		}
+
+		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		if(lTable)
+		if(!curr_function_declared && lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
@@ -385,10 +412,23 @@ parse_errno par_next(){
 
 		sym.type = currToken->type;
 		p.type = currToken->type;
-		if(list_insert_param(hTable, curr_function, p))
+
+		if(curr_function_declared){
+			int index;
+			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
+				return(SEMANTIC_REDEF);
+			else
+				puts("index OK");
+			if(index != param_counter)
+				return(SEMANTIC_TYPE);
+			param_counter++;
+			puts("called parameter correct");
+		}
+
+		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		if(lTable)
+		if(!curr_function_declared && lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
@@ -498,26 +538,30 @@ parse_errno var_type(){
 parse_errno print_exp(){
 	puts("print_exp() entered");
 
-	if((ret = assignment()) != PARSE_OK)
-		return (ret);
-
-	if(currToken->type != SEMICOLON){
-		warning_msg("expected ; after assignment() in Print");
-		return (SYNTAX_ERR);
-	}
-	puts("; correct");
-
 	currToken = getToken();
-
 	switch(currToken->type){
+	case SEMICOLON:
+		puts("; correct");
+		if((ret = print_exp()) != PARSE_OK)
+			return (ret);
+		break;
 	case EOL:
 		puts("EOL correct");
 		break;
 	default:
+		if((ret = assignment()) != PARSE_OK)
+			return (ret);
+
+		if(currToken->type != SEMICOLON){
+			warning_msg("expected ; after assignment() in Print");
+			return (SYNTAX_ERR);
+		}
+		puts("; correct");
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
 	}
 	return (PARSE_OK);
+
 }
 
 parse_errno command(){
@@ -572,6 +616,7 @@ parse_errno command(){
 		}
 		puts("= correct");
 
+		currToken = getToken();
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
@@ -583,6 +628,7 @@ parse_errno command(){
 		break;
 	case RETURN0:
 		puts("RETURN correct");
+		currToken = getToken();
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
@@ -656,7 +702,7 @@ parse_errno command(){
 
 parse_errno assignment(){
 	puts("assignment() entered");
-	currToken = getToken();
+//	currToken = getToken();
 
 	switch(currToken->type){
 	case IDENTIFIER:

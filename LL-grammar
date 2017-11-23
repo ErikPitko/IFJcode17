@@ -51,7 +51,7 @@ command		->	Input id EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
 				Dim id As <var_type>EOL
-				Return <assingnment> EOL End Function
+				Return <assingnment> EOL
 
 assingment	->	EXP
 				id ( <arg_list>

@@ -175,9 +175,6 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
 
 tFooListElem *function_find(tHashTable *local_table, char *fooId) {
 
-	if(local_table == NULL)
-		return;
-
 	int idx = hash_code(fooId);
 	for (local_table[idx].Act = local_table[idx].First;
 			local_table[idx].Act != NULL; local_table[idx].Act =

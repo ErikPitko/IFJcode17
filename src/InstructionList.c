@@ -107,7 +107,7 @@ void LSimpleInsert(tInstructionList *instrList,tInstruction *Instruction)
 	instrList->Active = elem;
 }
 
-void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,param *result,param *arg1,param *arg2)
+void LInsert(tInstructionList *instrList,EINSTRUCTION instruction,tFooListElem *result,tFooListElem *arg1,tFooListElem *arg2)
 {
 	tInstruction *instr;
 	if((instr =myMalloc(sizeof(tInstruction))) == NULL)
@@ -153,7 +153,17 @@ void PrintInstrList(tInstructionList *instrList)
 		int i = 0;
 		for(tListElement *elem = instrList->First; elem != NULL ; elem = elem->nextPtr,i++)
 		{
-			printf("+++++++++++%i-Instruction: %s %s %s %s\t++++++++++++\n",i, intInstructionToString(elem->ptrIntruction->Instruction),(char*)elem->ptrIntruction->arg1,(char*)elem->ptrIntruction->arg2,(char*)elem->ptrIntruction->result );
+			if(elem->ptrIntruction!= NULL)
+			{
+				printf("%s ",intInstructionToString(elem->ptrIntruction->Instruction));
+				if(elem->ptrIntruction->result != NULL)
+					printf(" %s ",elem->ptrIntruction->result->id);
+				if(elem->ptrIntruction->arg1 != NULL)
+					printf(" %s ",elem->ptrIntruction->arg1->id);
+				if(elem->ptrIntruction->arg2 != NULL)
+					printf(" %s ",elem->ptrIntruction->arg2->id);
+				printf("\n");
+			}
 		}
 	}
 }

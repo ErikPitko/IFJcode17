@@ -97,6 +97,7 @@ parse_errno prog_body(){
 		curr_function.id = "SCOPE";
 		curr_function.is_define = true;
 		curr_function.type = -1;
+		curr_function.is_main = 1;
 		list_insert(hTable, curr_function);
 
 		if((ret = check_EOL()) != PARSE_OK)
@@ -127,6 +128,7 @@ parse_errno prog_body(){
 
 		curr_function.id = currToken->info;
 		curr_function.is_define = false;
+		curr_function.is_main = 0;
 		list_insert(hTable, curr_function);
 
 
@@ -163,6 +165,7 @@ parse_errno prog_body(){
 
 		curr_function.id = currToken->info;
 		curr_function.is_define = false;
+		curr_function.is_main = 0;
 
 		if(list_insert(hTable, curr_function))
 			curr_function_declared = true;
@@ -537,7 +540,6 @@ parse_errno var_type(){
 
 parse_errno print_exp(){
 	puts("print_exp() entered");
-
 	currToken = getToken();
 	switch(currToken->type){
 	case SEMICOLON:
@@ -552,16 +554,21 @@ parse_errno print_exp(){
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
 
-		if(currToken->type != SEMICOLON){
-			warning_msg("expected ; after assignment() in Print");
+		switch(currToken->type){
+		case SEMICOLON:
+			puts("; correct");
+			if((ret = print_exp()) != PARSE_OK)
+				return (ret);
+			break;
+		case EOL:
+			puts("EOL correct");
+			break;
+		default:
+			warning_msg("expected ; or EOL after assignment() in Print");
 			return (SYNTAX_ERR);
 		}
-		puts("; correct");
-		if((ret = print_exp()) != PARSE_OK)
-			return (ret);
 	}
 	return (PARSE_OK);
-
 }
 
 parse_errno command(){
@@ -639,6 +646,8 @@ parse_errno command(){
 		break;
 	case DO:
 		puts("DO correct");
+		int main_int = curr_function.is_main;
+		curr_function.is_main = 0;
 		currToken = getToken();
 		if(currToken->type != WHILE){
 			warning_msg("expected WHILE after DO");
@@ -658,6 +667,7 @@ parse_errno command(){
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
+		curr_function.is_main = main_int;
 		break;
 	case PRINT:
 		puts("PRINT correct");

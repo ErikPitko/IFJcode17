@@ -40,7 +40,8 @@ var_type 	->	Integer
 				Double
 				String
 
-print_exp	->	<assingnment> ; <print_exp>
+print_exp	->	<assignment> ; <print_exp>
+				<assignment> EOL
 				; <print_exp>
 				EOL
 

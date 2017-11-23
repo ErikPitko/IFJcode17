@@ -339,25 +339,24 @@ int find_param_test(tHashTable *local_table, char *id_fnc, char *id_param) {
 
 // Funkcia ktora vracia pocet parametrov funkcie 
 
-int number_param(tHashTable *local_table, tFooListElem sym) {
-	int idx = hash_code(sym.id);
+int number_param(tHashTable *local_table, char *id) 
+{
+	int idx = hash_code(id);
 	int counter = 0;
 
 	local_table[idx].Act = local_table[idx].First;
 
 	while (local_table[idx].Act != NULL) //prejde vsetky prvky zoznamu
 	{
-		if (strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
-				{
-			local_table[idx].Act->param->Act =
-					local_table[idx].First->param->First;
+		if (strcmp(local_table[idx].Act->id, id) == 0) //porovna retazce
+		{
+			local_table[idx].Act->param->Act = local_table[idx].First->param->First;
 
 			while (local_table[idx].Act->param->Act != NULL) //prejde vsetky prvky zoznamu
 			{
 				counter++;
 
-				local_table[idx].Act->param->Act =
-						local_table[idx].Act->param->Act->next_param; //posunieme sa o prvok dalej
+				local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param; //posunieme sa o prvok dalej
 			}
 		}
 

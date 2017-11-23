@@ -74,7 +74,7 @@ int change_isdefine (tHashTable *local_table, tFooListElem sym);
 int return_index_parameter (tHashTable *local_table, tFooListElem sym, param psym);
 
 // Zisti pocet parametrov vo funkcii
-int test_nubmer_param (tHashTable *local_table, char *id);
+int nubmer_param (tHashTable *local_table, char *id);
 
 // Zrusi celu tabulku
 void ltab_destroy (tHashTable *local_table);

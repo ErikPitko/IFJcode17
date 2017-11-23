@@ -8,6 +8,7 @@ main_body	->	<command><main_body>
 				End Scope
 
 fnc_body	->	<command><fnc_body>
+				Return <assingnment> EOL <fnc_body>
 				End Function
 
 if_body		->	<command><if_body>
@@ -48,7 +49,6 @@ print_exp	->	<assignment> ; <print_exp>
 command		->	Input id EOL
 				If EXP Then EOL <if_body> EOL
 				id = <assingnment> EOL
-				Return <assingnment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
 				Dim id As <var_type>EOL

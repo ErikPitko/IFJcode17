@@ -252,6 +252,17 @@ parse_errno fnc_body(){
 //		ltab_destroy(lTable);
 		lTable = NULL;
 		break;
+	case RETURN0:
+		puts("RETURN correct");
+		currToken = getToken();
+		if((ret = assignment()) != PARSE_OK)
+			return (ret);
+
+		if(currToken->type != EOL){
+			warning_msg("expected EOL after assignment()");
+			return (SYNTAX_ERR);
+		}
+		break;
 	default:
 		if((ret = command()) != PARSE_OK)
 			return (ret);
@@ -632,17 +643,6 @@ parse_errno command(){
 			return (SYNTAX_ERR);
 		}
 		puts("EOL correct");
-		break;
-	case RETURN0:
-		puts("RETURN correct");
-		currToken = getToken();
-		if((ret = assignment()) != PARSE_OK)
-			return (ret);
-
-		if(currToken->type != EOL){
-			warning_msg("expected EOL after assignment()");
-			return (SYNTAX_ERR);
-		}
 		break;
 	case DO:
 		puts("DO correct");

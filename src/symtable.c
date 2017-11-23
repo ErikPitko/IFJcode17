@@ -257,33 +257,16 @@ int change_isdefine(tHashTable *local_table, tFooListElem sym) {
 
 void ltab_destroy(tHashTable *local_table) {
 	for (int i = 0; i < MAX_SIZE; i++) // Pre kazdy zoznam v tabulke
-			{
-		while (local_table[i].First != NULL) // Prejde vsetky prvky zoznamu
+	{
+		for(local_table[i].Act = local_table[i].First;local_table[i].First != NULL;local_table[i].First = local_table[i].First->next_item,local_table[i].Act = local_table[i].First)
 		{
-			while (local_table[i].First->param->First != NULL) {
-				if ((local_table[i].First->param->First)
-						== (local_table[i].Act->param->Act)) // Zrusi aj aktivny prvok
-						{
-					myFree(local_table[i].Act->param->Act);
-				}
-
-				param *pom2 = local_table[i].First->param->First;
-				local_table[i].First->param->First =
-						local_table[i].First->param->First->next_param;
-				myFree(pom2->id);
-				myFree(pom2);
+			for(local_table[i].Act->param->Act = local_table[i].Act->param->First;local_table[i].Act->param->First != NULL;local_table[i].Act->param->First = local_table[i].Act->param->First->next_param,local_table[i].Act->param->Act = local_table[i].Act->param->First)
+			{
+				myFree(local_table[i].Act->param->Act->id);
+				myFree(local_table[i].Act->param->Act);
 			}
-
-			if (local_table[i].First == local_table[i].Act) // Zrusi aj aktivny prvok
-					{
-				myFree(local_table[i].Act = NULL);
-			}
-
-			tFooListElem *pom = local_table[i].First;
-			local_table[i].First = local_table[i].First->next_item;
-			myFree(pom->id);
-			myFree(pom->param);
-			myFree(pom); // Uvolnime prvok zoznamu
+			myFree(local_table[i].Act->id);
+			myFree(local_table[i].Act);
 		}
 	}
 

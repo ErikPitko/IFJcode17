@@ -42,7 +42,6 @@ ePrecElem precTable[15][15] =
 /**************************************HEADER***************************************/
 int tableIndexSelect(tReductToken *tok);
 bool isOperatorExpr(token *tok);
-bool canIDiv(tFooListElem *firstOperand,tFooListElem *secondOperand,bool isDouble, bool *cast);
 bool areOperandsSame(tFooListElem *firstOperand,tFooListElem *secondOperand);
 bool areOperandsSameArithmethic(tFooListElem *firstOperand,tFooListElem *secondOperand);
 bool isTokenOperand(token *operand, bool isArithmethic);
@@ -53,7 +52,7 @@ char *rand_string(int length);
 void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString);
 bool end(int type);
 /**************************************HEADER***************************************/
-
+extern tFooListElem exprResult;
 char* strValueOfEnum(int enumValue)
 {
 	switch(enumValue)
@@ -185,17 +184,18 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	tFooListElem elem;
 	elem.id = temporaryName;
 	list_insert(localTable,elem);
+	printf("DEFVAR LF@%s\n",temporaryName);
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	priority.priority = L;
 	priority.firstToken->info = "<";
 	if(getSetToken == NULL)
 	{
-		printf("\n****Parser gives me: NULL****\n");
+		//printf("\n****Parser gives me: NULL****\n");
 		actToken.firstToken = getToken();
 	}
 	else
 	{
-		printf("\n****Parser gives me: %s****\n",strValueOfEnum(getSetToken->type));
+		//printf("\n****Parser gives me: %s****\n",strValueOfEnum(getSetToken->type));
 		actToken.firstToken = getSetToken;
 	}
 	do
@@ -238,21 +238,22 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				{
 					error_msg(SYNTAX_ERR,"Two operators in row");
 				}
-				printf("%i  \n",operatorcnt);
-				stackPrint("stack",&stack);
-				printf("&&&&&APPLY RULE&&&&&\n");
+				//printf("%i  \n",operatorcnt);
+				//stackPrint("stack",&stack);
+				//printf("&&&&&APPLY RULE&&&&&\n");
 				applyRule(&stack,&rStack,&reduct,&semanticError,returnVar,localTable,temporaryName);
-				printf("&&&&&AFTER RULE&&&&&\n");
+				//printf("&&&&&AFTER RULE&&&&&\n");
 				break;
 			}
 			case L:
 				//printf("LOOOW");
 				{
 				if(stackTop(&stack)->firstToken != NULL)
-					printf("%s  %s SYNTAX\n",strValueOfEnum(actToken.firstToken->type),strValueOfEnum(stackTop(&stack)->firstToken->type));
+					//printf("%s  %s SYNTAX\n",strValueOfEnum(actToken.firstToken->type),strValueOfEnum(stackTop(&stack)->firstToken->type));
 
-				if(isOperatorExpr(actToken.firstToken)&&isOperatorExpr(stackTop(&stack)->firstToken))
+				if(isOperatorExpr(actToken.firstToken) && isOperatorExpr(stackTop(&stack)->firstToken) && (actToken.firstToken->type != LEFT_PARENTHESIS || actToken.firstToken->type != RIGHT_PARENTHESIS))
 				{
+
 					error_msg(SYNTAX_ERR,"Two operators in row");
 				}
 				if(isTokenOperand(actToken.firstToken,false))
@@ -263,7 +264,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				}
 				else
 				{
-					if(actToken.firstToken->type != LEFT_PARENTHESIS || actToken.firstToken->type != RIGHT_PARENTHESIS)
+					if(actToken.firstToken->type != LEFT_PARENTHESIS && actToken.firstToken->type != RIGHT_PARENTHESIS)
 					{
 						if(wasOperation)
 						{
@@ -272,6 +273,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 						wasOperation = true;
 					}
 				}
+
 				if(!isTokenOperand(actToken.firstToken,false) && !wasOperand && actToken.firstToken->type != LEFT_PARENTHESIS)
 				{
 					error_msg(SYNTAX_ERR,"The first token of expression wasn't operand or function call");
@@ -291,6 +293,11 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				stackPush(&stack,actToken);
 				reduct = false;
 				actToken.firstToken = getToken();
+				//printf("%i ",actToken.firstToken->type);
+				if(wasOperation && !isTokenOperand(actToken.firstToken,false))
+				{
+					error_msg(SYNTAX_ERR,"Operator on the end of EXPR");
+				}
 				break;
 				}
 			case EQ:
@@ -299,56 +306,28 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				reduct = false;
 				break;
 			case ERROR:
-				printf("%i  \t%i \n",select,tableIndexSelect(&actToken));
+				//printf("%i  \t%i \n",select,tableIndexSelect(&actToken));
 				error_msg(SYNTAX_ERR,"Syntaktická chyba");
 				break;
 			case EXITPARSE:
-				stackPrint("stack",&stack);
+				//stackPrint("stack",&stack);
 				goto exit;
 			default:
-				printf("%i  %i\n",select,tableIndexSelect(&actToken));
+				//printf("%i  %i\n",select,tableIndexSelect(&actToken));
 				error_msg(SYNTAX_ERR,"Syntaktická chyba");
 		}
-
 	}
 	while(!(actToken.firstToken->type == EOL && stackTop(&stack)->firstToken->type == EOL));
 	exit:
-	printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
+	//printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
 	if(semanticError != 0)
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
+	exprResult = elem;
+	//printf("%s",exprResult.id);
 	PrintInstrList(&globalInstrList);
 	return actToken.firstToken;
-}
-
-bool canIDiv(tFooListElem *firstOperand,tFooListElem *secondOperand,bool isDouble, bool *cast)
-{
-	if(isSymbolOperand(firstOperand,true) && isSymbolOperand(secondOperand,true))
-	{
-
-		if(firstOperand->type == secondOperand->type)
-		{
-			if(isDouble)
-			{
-				if(firstOperand->type == VALUE_DOUBLE)
-					(*cast)= false;
-				else (*cast) = true;
-				return true;
-			}
-			else
-			{
-				if(firstOperand->type == VALUE_INTEGER)
-					(*cast)= false;
-				else (*cast) = true;
-				return true;
-			}
-		}
-		if(firstOperand->type != secondOperand->type)
-			(*cast) = true;
-		return true;
-	}
-	return false;
 }
 
 bool areOperandsSame(tFooListElem *firstOperand,tFooListElem *secondOperand)
@@ -368,7 +347,7 @@ bool areOperandsSameArithmethic(tFooListElem *firstOperand,tFooListElem *secondO
 bool isTokenOperand(token *operand, bool isArithmethic)
 {
 	//s identifierem to nebude fungovat musí se to ořešit protože identifier musí dávat více informací ohledně typu
-	if(operand->type == IDENTIFIER||operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || (operand->type == VALUE_STRING && !isArithmethic))
+	if(operand->type == IDENTIFIER||operand->type == VALUE_INTEGER||operand->type == VALUE_DOUBLE || operand->type ==DOUBLE ||operand->type == INTEGER||((operand->type == VALUE_STRING||operand->type ==STRING )&& !isArithmethic))
 		return true;
 	return false;
 }
@@ -409,7 +388,7 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 {
 	if(firstOper == NULL || secondOper == NULL|| returnVar == NULL)
 	{
-		printf("SOMETHING IS NULL!");
+		//printf("SOMETHING IS NULL!");
 		return;
 	}
 	switch(returnVar->type)
@@ -418,12 +397,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 		{
 			firstOper->type = INTEGER;
-			LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
+			printf("FLOAT2INT LF@%s LF@%s\n",firstOper->id,firstOper->id);
 		}
 		if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
 		{
 			secondOper->type = INTEGER;
-			LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
+			printf("FLOAT2INT LF@%s LF@%s\n",secondOper->id,secondOper->id);
 		}
 		if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
 		{
@@ -442,12 +421,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 		if(firstOper->type == INTEGER || firstOper->type == VALUE_INTEGER)
 		{
 			firstOper->type = DOUBLE;
-			LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
+			printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
 		}
 		if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
 		{
 			secondOper->type = DOUBLE;
-			LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
+			printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
 		}
 		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 		{
@@ -488,7 +467,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 	//E -> i
 	if(stackLenght(rStack)==1)
 	{
-		printf("****E -> i****\n");
+		//printf("****E -> i****\n");
 		tReductToken *tmp = stackTop(rStack);
 		tmp->isReduced = true;
 		stackPop(rStack);
@@ -507,7 +486,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			{
 				tReductToken tmp = *(stackTop(rStack));
 				stackPop(rStack);
-				printf("****E -> (E)****\n");
+				//printf("****E -> (E)****\n");
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
@@ -520,7 +499,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E+E
 			else if(stackTop(rStack)->firstToken->type == PLUS)
 			{
-				printf("****E -> E+E****\n");
+				//printf("****E -> E+E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -565,15 +544,23 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
+						if(temporary->type == STRING||temporary->type == VALUE_STRING)
+						{
+							printf("CONCAT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						}
+						else
+						{
+							printf("ADD LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+							//LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
+						}
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -583,7 +570,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E-E
 			else if(stackTop(rStack)->firstToken->type== MINUS)
 			{
-				printf("****E -> E-E****\n");
+				//printf("****E -> E-E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -628,15 +615,15 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_SUB,temporary,firstOper,secondOper);
+						printf("SUB LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -646,7 +633,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E*E
 			else if(stackTop(rStack)->firstToken->type== ASTERIX)
 			{
-				printf("****E -> E*E****\n");
+				//printf("****E -> E*E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -691,15 +678,15 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_MUL,temporary,firstOper,secondOper);
+						printf("MUL LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -709,7 +696,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E\E
 			else if(stackTop(rStack)->firstToken->type==  DIV_INT)
 			{
-				printf("****E -> E\\E****\n");
+				//printf("****E -> E\\E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -781,12 +768,12 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 								setSemanticError(semanticError,SEMANTIC_TYPE);
 							}
 						}
-						printf("CAST\n");
+						//printf("CAST\n");
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
+						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -796,7 +783,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E/E
 			else if(stackTop(rStack)->firstToken->type== DIV_DOUBLE)
 			{
-				printf("****E -> E/E****\n");
+				//printf("****E -> E/E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -841,15 +828,15 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
+						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -858,7 +845,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type== LESS)
 			{
-				printf("****E -> E<E****\n");
+				//printf("****E -> E<E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -904,12 +891,12 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->type = fID.firstToken->type;
 					}
 					convertTo(returnVar,firstOper,secondOper,semanticError,false);
-					printf("CAST\n");
+					//printf("CAST\n");
 					temporary->type = secondOper->type;
-					printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+					//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 					temporary->is_define = true;
 					result->firstToken->type = temporary->type;
-					LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
+					printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 				}
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
@@ -917,7 +904,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER)
 			{
-				printf("****E -> E>E****\n");
+				//printf("****E -> E>E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -963,14 +950,14 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->type = fID.firstToken->type;
 					}
 					convertTo(returnVar,firstOper,secondOper,semanticError,false);
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
+						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -979,7 +966,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type== EQUAL)
 			{
-				printf("****E -> E=E****\n");
+				//printf("****E -> E=E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -1024,15 +1011,15 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
+						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -1041,7 +1028,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER_EQUAL)
 			{
-				printf("****E -> E>=E****\n");
+				//printf("****E -> E>=E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -1086,16 +1073,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
-						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+						printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -1104,7 +1091,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type ==  LESS_EQUAL)
 			{
-				printf("****E -> E<=E****\n");
+				//printf("****E -> E<=E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -1154,11 +1141,11 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
-						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -1167,7 +1154,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type == INEQUALITY)
 			{
-				printf("****E -> E<>E****\n");
+				//printf("****E -> E<>E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -1217,11 +1204,11 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
 						temporary->type = secondOper->type;
-						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
-						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku

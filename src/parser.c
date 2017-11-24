@@ -78,6 +78,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
+	return;
 	va_list args;
 	fprintf(stdout, "%s", "PARSER: ");
 	vfprintf(stdout, form, args);
@@ -388,7 +389,7 @@ parse_errno par_list(){
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		if(!curr_function_declared && lTable)
+		if(lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 

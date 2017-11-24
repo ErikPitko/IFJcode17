@@ -13,6 +13,7 @@
 #include "garbage.h"
 #include "error.h"
 #include "symtable.h"
+#include "address_code.h"
 
 parse_errno parse();
 

@@ -28,11 +28,12 @@ ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
  scanner.h garbage.h error.h header.h symtable.h InstructionList.h
 garbage.o: garbage.c garbage.h error.h
 IFJcode17.o: IFJcode17.c error.h garbage.h ExpressionParser.h stack.h \
- scanner.h header.h symtable.h InstructionList.h parser.h
+ scanner.h header.h symtable.h InstructionList.h parser.h address_code.h
 InstructionList.o: InstructionList.c InstructionList.h header.h scanner.h \
  garbage.h error.h symtable.h
 parser.o: parser.c parser.h scanner.h garbage.h error.h \
- ExpressionParser.h stack.h header.h symtable.h InstructionList.h
+ ExpressionParser.h stack.h header.h symtable.h InstructionList.h \
+ address_code.h
 scanner.o: scanner.c scanner.h garbage.h error.h
 stack.o: stack.c stack.h scanner.h garbage.h error.h header.h symtable.h
 symtable.o: symtable.c symtable.h garbage.h error.h

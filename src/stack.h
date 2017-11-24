@@ -5,7 +5,6 @@
 #include "garbage.h"
 #include "header.h"
 #include <stdio.h>
-
 extern unsigned STACK_SIZE;
 
 /* ADT zásobník implementovaný ve statickém poli */
@@ -47,6 +46,7 @@ tReductToken *stackTopPop ( tStack* s);
 /**
  * @brief Vloží znak na vrchol zásobníku.
  */
+bool checkMoreOperators(tStack* s);
 void stackPush(tStack* s, tReductToken token);
 void stackPrint(char* stackName, tStack* s);
 void stackClear(tStack* s);

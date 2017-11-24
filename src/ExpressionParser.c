@@ -50,6 +50,7 @@ bool isSymbolOperand(tFooListElem *operand, bool isArithmethic);
 bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool isArithmethic);
 void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar,tHashTable *localTable,char * tempName);
 char *rand_string(int length);
+void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString);
 bool end(int type);
 /**************************************HEADER***************************************/
 
@@ -178,7 +179,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	tReductToken actToken;
 	tReductToken priority;
 	bool wasOperand = false;
-	bool operatorRead = false;
+	bool wasOperation = false;
 	int semanticError = 0;
 	char* temporaryName = rand_string(20);
 	tFooListElem elem;
@@ -215,6 +216,8 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		{
 			case H:
 				//<a+b
+			{
+				int operatorcnt = 0;
 				do
 				{
 					if(stackTop(&stack)->priority == L)		//b+a
@@ -226,32 +229,48 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 					{
 						break;
 					}
+					if(isOperatorExpr(stackTop(&stack)->firstToken))
+						operatorcnt++;
 					stackPush(&rStack,*(stackTop(&stack)));	//b...+...a
 					stackPop(&stack);	//b+a
 				}while(1);
-				stackPrint("stack",&rStack);
+				if(operatorcnt>1)
+				{
+					error_msg(SYNTAX_ERR,"Two operators in row");
+				}
+				printf("%i  \n",operatorcnt);
+				stackPrint("stack",&stack);
 				printf("&&&&&APPLY RULE&&&&&\n");
 				applyRule(&stack,&rStack,&reduct,&semanticError,returnVar,localTable,temporaryName);
 				printf("&&&&&AFTER RULE&&&&&\n");
 				break;
+			}
 			case L:
 				//printf("LOOOW");
 				{
-				if(operatorRead &&!isTokenOperand(actToken.firstToken,false) && actToken.firstToken->type != LEFT_PARENTHESIS)
+				if(stackTop(&stack)->firstToken != NULL)
+					printf("%s  %s SYNTAX\n",strValueOfEnum(actToken.firstToken->type),strValueOfEnum(stackTop(&stack)->firstToken->type));
+
+				if(isOperatorExpr(actToken.firstToken)&&isOperatorExpr(stackTop(&stack)->firstToken))
 				{
-					//printf("%s SYNTAX\n",strValueOfEnum(actToken.firstToken->type));
 					error_msg(SYNTAX_ERR,"Two operators in row");
-				}
-				if(isOperatorExpr(actToken.firstToken))
-				{
-				//	printf("%s OPERATOR READ\n",strValueOfEnum(actToken.firstToken->type));
-					operatorRead = true;
 				}
 				if(isTokenOperand(actToken.firstToken,false))
 				{
 					wasOperand = true;
-					operatorRead = false;
+					wasOperation = false;
 					//printf("WAS THERE %s \n",actToken.firstToken->info);
+				}
+				else
+				{
+					if(actToken.firstToken->type != LEFT_PARENTHESIS || actToken.firstToken->type != RIGHT_PARENTHESIS)
+					{
+						if(wasOperation)
+						{
+							error_msg(SYNTAX_ERR,"Two operators in row");
+						}
+						wasOperation = true;
+					}
 				}
 				if(!isTokenOperand(actToken.firstToken,false) && !wasOperand && actToken.firstToken->type != LEFT_PARENTHESIS)
 				{
@@ -378,6 +397,92 @@ bool isOperatorExpr(token *tok)
 	return false;
 }
 
+void setSemanticError(int *semanticError,int num)
+{
+	if(!*(semanticError))
+	{
+		*(semanticError) = num;
+	}
+}
+
+void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString)
+{
+	if(firstOper == NULL || secondOper == NULL|| returnVar == NULL)
+	{
+		printf("SOMETHING IS NULL!");
+		return;
+	}
+	switch(returnVar->type)
+	{
+	case INTEGER:
+		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+		{
+			firstOper->type = INTEGER;
+			LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
+		}
+		if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+		{
+			secondOper->type = INTEGER;
+			LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
+		}
+		if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
+		{
+			firstOper->type = INTEGER;
+		}
+		if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+		{
+			secondOper->type = INTEGER;
+		}
+		if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+		{
+			setSemanticError(semanticError,SEMANTIC_TYPE);
+		}
+		break;
+	case DOUBLE:
+		if(firstOper->type == INTEGER || firstOper->type == VALUE_INTEGER)
+		{
+			firstOper->type = DOUBLE;
+			LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
+		}
+		if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+		{
+			secondOper->type = DOUBLE;
+			LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
+		}
+		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+		{
+			firstOper->type = DOUBLE;
+		}
+		if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+		{
+			secondOper->type = DOUBLE;
+		}
+		if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+		{
+			setSemanticError(semanticError,SEMANTIC_TYPE);
+		}
+		break;
+	case STRING:
+		if(!couldBeString)
+		{
+			*(semanticError)= SEMANTIC_TYPE;
+		}
+		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
+		{
+			firstOper->type = STRING;
+		}
+		if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
+		{
+			secondOper->type = STRING;
+		}
+		if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER||firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE||secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER||secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+		{
+			setSemanticError(semanticError,SEMANTIC_TYPE);
+		}
+		break;
+	}
+}
+
 void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable, char * tempName)
 {
 	//E -> i
@@ -420,68 +525,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,true);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == STRING||firstOper->type == VALUE_STRING)&&(secondOper->type == STRING||secondOper->type == VALUE_STRING))
-				{
-					printf("1.STRING 2.STRING\n");
-					firstOper->type = STRING;
-					secondOper->type = STRING;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("PLUS SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -494,62 +588,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_SUB,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("SUB SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_SUB,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -562,62 +651,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_MUL,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("MUL SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_MUL,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -625,69 +709,86 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//E -> E\E
 			else if(stackTop(rStack)->firstToken->type==  DIV_INT)
 			{
-				printf("****E -> E\E****\n");
+				printf("****E -> E\\E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					if(secondOper != NULL && firstOper != NULL)
+										{
+						if(returnVar->type == INTEGER)
+						{
+							if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER)
+							{
+								firstOper->type = INTEGER;
+								LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
+							}
+							if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+							{
+								secondOper->type = INTEGER;
+								LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
+							}
+							if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+							{
+								firstOper->type = INTEGER;
+							}
+							if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+							{
+								secondOper->type = INTEGER;
+							}
+							if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+							{
+								setSemanticError(semanticError,SEMANTIC_TYPE);
+							}
+						}
+						printf("CAST\n");
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = INTEGER;
-					LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = INTEGER;
-					LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = INTEGER;
-					LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
-					secondOper->type = INTEGER;
-					LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("INT DIV SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -700,62 +801,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else
-				{
-					printf("DOUBLE DIV SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_DIV,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -767,62 +863,54 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					convertTo(returnVar,firstOper,secondOper,semanticError,false);
+					printf("CAST\n");
+					temporary->type = secondOper->type;
+					printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+					temporary->is_define = true;
+					result->firstToken->type = temporary->type;
+					LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("LESS SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -834,62 +922,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					convertTo(returnVar,firstOper,secondOper,semanticError,false);
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("GREATER SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -901,68 +984,57 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,true);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == STRING||firstOper->type == VALUE_STRING)&&(secondOper->type == STRING||secondOper->type == VALUE_STRING))
-				{
-					printf("1.STRING 2.STRING\n");
-					firstOper->type = STRING;
-					secondOper->type = STRING;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("EQUAL SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -974,63 +1046,58 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
+						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("GREATER EQUAL SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_LT,temporary,firstOper,secondOper);
-				LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -1042,63 +1109,58 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
+						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("LESS EQUAL SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_GT,temporary,firstOper,secondOper);
-				LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -1110,69 +1172,58 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tempName;
-				tFooListElem *temporary = function_find(localTable,tempName);
-				tFooListElem *firstOper;
-				tFooListElem *secondOper;
-
-				if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
-					firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
-				else
+				if(*(semanticError)==0)
 				{
-					firstOper = myMalloc(sizeof(tFooListElem));
-					firstOper->id = stackTop(rStack)->firstToken->info;
-					firstOper->type = stackTop(rStack)->firstToken->type;
+					tFooListElem *temporary = function_find(localTable,tempName);
+					tFooListElem *firstOper;
+					tFooListElem *secondOper;
+					if(stackTop(rStack) != NULL)
+					{
+						if(stackTop(rStack)->firstToken->type ==IDENTIFIER)
+							if(find_test(localTable,stackTop(rStack)->firstToken->info))
+							{
+								firstOper = function_find(localTable,stackTop(rStack)->firstToken->info);
+							}
+							else
+							{
+								setSemanticError(semanticError,SEMANTIC_REDEF);
+							}
+						else
+						{
+							firstOper = myMalloc(sizeof(tFooListElem));
+							firstOper->id = stackTop(rStack)->firstToken->info;
+							firstOper->type = stackTop(rStack)->firstToken->type;
+						}
+					}
+					if(fID.firstToken->type == IDENTIFIER)
+					{
+						if(find_test(localTable,fID.firstToken->info))
+						{
+							secondOper = function_find(localTable,fID.firstToken->info);
+						}
+						else
+						{
+							setSemanticError(semanticError,SEMANTIC_REDEF);
+						}
+					}
+					else
+					{
+						secondOper = myMalloc(sizeof(tFooListElem));
+						secondOper->id = fID.firstToken->info;
+						secondOper->type = fID.firstToken->type;
+					}
+					printf("CAST\n");
+					if(secondOper != NULL && firstOper != NULL)
+					{
+						convertTo(returnVar,firstOper,secondOper,semanticError,true);
+						temporary->type = secondOper->type;
+						printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
+						temporary->is_define = true;
+						result->firstToken->type = temporary->type;
+						LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
+						LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
+					}
 				}
-				if(fID.firstToken->type == IDENTIFIER)
-				{
-					secondOper = function_find(localTable,fID.firstToken->info);
-				}
-				else
-				{
-					secondOper = myMalloc(sizeof(tFooListElem));
-					secondOper->id = fID.firstToken->info;
-					secondOper->type = fID.firstToken->type;
-				}
-				if((firstOper->type == DOUBLE || firstOper->type == VALUE_DOUBLE)&& (secondOper->type == INTEGER|| secondOper->type == VALUE_INTEGER))
-				{
-					printf("1.DOUBLE 2.INTEGER\n");
-					secondOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,secondOper,secondOper,NULL);
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.INTEGER 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					LInsert(&globalInstrList,I_INT2FLOAT,firstOper,firstOper,NULL);
-				}
-				else if((firstOper->type == DOUBLE||firstOper->type == VALUE_DOUBLE) && (secondOper->type == DOUBLE||secondOper->type == VALUE_DOUBLE))
-				{
-					printf("1.DOUBLE 2.DOUBLE\n");
-					firstOper->type = DOUBLE;
-					secondOper->type = DOUBLE;
-				}
-				else if((firstOper->type == STRING||firstOper->type == VALUE_STRING)&&(secondOper->type == STRING||secondOper->type == VALUE_STRING))
-				{
-					printf("1.STRING 2.STRING\n");
-					firstOper->type = STRING;
-					secondOper->type = STRING;
-				}
-				else if((firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)&&(secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
-				{
-					firstOper->type = INTEGER;
-					secondOper->type = INTEGER;
-				}
-				else
-				{
-					printf("INEQUAL SEMANTIC_ERR");
-					*(semanticError)= SEMANTIC_TYPE;
-				}
-				printf("CAST\n");
-				temporary->type = secondOper->type;
-				printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-				temporary->is_define = true;
-				result->firstToken->type = temporary->type;
-				LInsert(&globalInstrList,I_EQ,temporary,firstOper,secondOper);
-				LInsert(&globalInstrList,I_NOT,temporary,temporary,NULL);
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;

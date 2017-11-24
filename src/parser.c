@@ -13,6 +13,7 @@ tFooListElem curr_function;
 tFooListElem *returnVal;
 int param_counter = 0;
 bool curr_function_declared = false;
+void debug(const char *form, ...);
 
 parse_errno ret;
 parse_errno prog_body();
@@ -39,7 +40,7 @@ parse_errno check_ID(){
 		warning_msg("expected IDENTIFIER");
 		return (SYNTAX_ERR);
 	}
-	puts("IDENTIFIER correct");
+	debug("IDENTIFIER correct");
 	return (PARSE_OK);
 }
 
@@ -49,7 +50,7 @@ parse_errno check_EOL(){
 		warning_msg("expected EOL");
 		return (SYNTAX_ERR);
 	}
-	puts("EOL correct");
+	debug("EOL correct");
 	return (PARSE_OK);
 }
 
@@ -59,7 +60,7 @@ parse_errno check_LEFTP(){
 		warning_msg("expected (");
 		return (SYNTAX_ERR);
 	}
-	puts("( correct");
+	debug("( correct");
 	return (PARSE_OK);
 }
 
@@ -69,28 +70,41 @@ parse_errno check_AS(){
 		warning_msg("expected As");
 		return (SYNTAX_ERR);
 	}
-	puts("As correct");
+	debug("As correct");
 	return (PARSE_OK);
 
 }
 
+/*--------------------------------------------*/
+
+void debug(const char *form, ...){
+	va_list args;
+	fprintf(stdout, "%s", "PARSER: ");
+	vfprintf(stdout, form, args);
+	fprintf(stdout, "\n");
+	va_end(args);
+}
+
 
 /*--------------------------------------------*/
+
+
 parse_errno prog_body(){
-	puts("prog_body() entered.");
+	debug("prog_body() entered.");
+
 	currToken = getToken();
 
 	switch(currToken->type){
 	case EOF0:
-		puts("EOF correct");
+		debug("EOF correct");
 		return (PARSE_OK);
 	case EOL:
-		puts("EOL correct");
+		debug("EOL correct");
 		if ((ret = prog_body()) != PARSE_OK)
 			return (ret);
 		break;
 	case SCOPE:
-		puts("SCOPE correct");
+		debug("SCOPE correct");
 
 		lTable = ltab_init();
 
@@ -115,13 +129,13 @@ parse_errno prog_body(){
 			return (ret);
 		break;
 	case DECLARE:
-		puts("DECLARE correct");
+		debug("DECLARE correct");
 		currToken = getToken();
 		if(currToken->type != FUNCTION){
 			warning_msg("expected FUNCTION after DECLARE | prog_body()");
 			return (SYNTAX_ERR);
 		}
-		puts("FUNCTION correct");
+		debug("FUNCTION correct");
 
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
@@ -156,7 +170,7 @@ parse_errno prog_body(){
 			return (ret);
 		break;
 	case FUNCTION:
-		puts("FUNCTION correct");
+		debug("FUNCTION correct");
 		lTable = ltab_init();
 		param_counter = 0;
 
@@ -208,24 +222,24 @@ parse_errno prog_body(){
 			return (ret);
 		break;
 	default:
-		puts("Expected FUNCTION, DECLARE, SCOPE or EOF");
+		debug("Expected FUNCTION, DECLARE, SCOPE or EOF");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno main_body(){
-	puts("main_body() entered");
+	debug("main_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case END:
-		puts("END correct");
+		debug("END correct");
 		currToken = getToken();
 		if(currToken->type != SCOPE){
 			warning_msg("Expected SCOPE after END");
 			return (SYNTAX_ERR);
 		}
-		puts("SCOPE correct");
+		debug("SCOPE correct");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -238,17 +252,17 @@ parse_errno main_body(){
 }
 
 parse_errno fnc_body(){
-	puts("fnc_body() entered");
+	debug("fnc_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case END:
-		puts("END correct");
+		debug("END correct");
 		currToken = getToken();
 		if(currToken->type != FUNCTION){
 			warning_msg("expected FUNCTION after END");
 			return (SYNTAX_ERR);
 		}
-		puts("FUNCTION correct");
+		debug("FUNCTION correct");
 //		ltab_destroy(lTable);
 		lTable = NULL;
 		break;
@@ -263,11 +277,11 @@ parse_errno fnc_body(){
 }
 
 parse_errno if_body(){
-	puts("if_body() entered");
+	debug("if_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case ELSE:
-		puts("ELSE correct");
+		debug("ELSE correct");
 
 		if((ret = check_EOL()) != PARSE_OK)
 					return (ret);
@@ -276,13 +290,13 @@ parse_errno if_body(){
 			return (ret);
 		break;
 	case END:
-		puts("END correct");
+		debug("END correct");
 		currToken = getToken();
 		if(currToken->type != IF){
 			warning_msg("expected IF after END");
 			return (SYNTAX_ERR);
 		}
-		puts("IF correct");
+		debug("IF correct");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -295,17 +309,17 @@ parse_errno if_body(){
 }
 
 parse_errno else_body(){
-	puts("else_body() entered");
+	debug("else_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case END:
-		puts("END correct");
+		debug("END correct");
 		currToken = getToken();
 		if(currToken->type != IF){
 			warning_msg("expected IF after END");
 			return (SYNTAX_ERR);
 		}
-		puts("IF correct");
+		debug("IF correct");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -318,11 +332,11 @@ parse_errno else_body(){
 }
 
 parse_errno while_body(){
-	puts("while_body() entered");
+	debug("while_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case LOOP:
-		puts("LOOP correct");
+		debug("LOOP correct");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -335,14 +349,14 @@ parse_errno while_body(){
 }
 
 parse_errno par_list(){
-	puts("par_list() entered");
+	debug("par_list() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case RIGHT_PARENTHESIS:
-		puts(") correct");
+		debug(") correct");
 		break;
 	case IDENTIFIER:
-		puts("ID correct");
+		debug("ID correct");
 
 		tFooListElem sym;
 		param p;
@@ -364,11 +378,11 @@ parse_errno par_list(){
 			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
 				return(SEMANTIC_REDEF);
 			else
-				puts("index OK");
+				debug("index OK");
 			if(index != param_counter)
 				return(SEMANTIC_TYPE);
 			param_counter++;
-			puts("called parameter correct");
+			debug("called parameter correct");
 		}
 
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
@@ -382,7 +396,7 @@ parse_errno par_list(){
 			return (ret);
 		break;
 	default:
-		puts("Expected ) or IDENTIFIER");
+		debug("Expected ) or IDENTIFIER");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
@@ -390,14 +404,14 @@ parse_errno par_list(){
 }
 
 parse_errno par_next(){
-	puts("par_next() entered");
+	debug("par_next() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case RIGHT_PARENTHESIS:
-		puts(") correct");
+		debug(") correct");
 		break;
 	case COMMA:
-		puts(", correct");
+		debug(", correct");
 
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
@@ -421,11 +435,11 @@ parse_errno par_next(){
 			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
 				return(SEMANTIC_REDEF);
 			else
-				puts("index OK");
+				debug("index OK");
 			if(index != param_counter)
 				return(SEMANTIC_TYPE);
 			param_counter++;
-			puts("called parameter correct");
+			debug("called parameter correct");
 		}
 
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
@@ -439,21 +453,21 @@ parse_errno par_next(){
 			return (ret);
 		break;
 	default:
-		puts("Expected ) or ,");
+		debug("Expected ) or ,");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno arg_list(){
-	puts("arg_list() entered");
+	debug("arg_list() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case RIGHT_PARENTHESIS:
-		puts(") correct");
+		debug(") correct");
 		break;
 	case IDENTIFIER:
-		puts("ID correct");
+		debug("ID correct");
 
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
@@ -461,94 +475,94 @@ parse_errno arg_list(){
 	case VALUE_INTEGER:
 	case VALUE_STRING:
 	case VALUE_DOUBLE:
-		puts("constant correct");
+		debug("constant correct");
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
 	default:
-		puts("Expected ), IDENTIFIER or value");
+		debug("Expected ), IDENTIFIER or value");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno arg_next(){
-	puts("arg_next() entered");
+	debug("arg_next() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case RIGHT_PARENTHESIS:
-		puts(") correct");
+		debug(") correct");
 		break;
 	case COMMA:
-		puts(", correct");
+		debug(", correct");
 
 		if((ret = arg_next2()) != PARSE_OK)
 			return (ret);
 		break;
 	default:
-		puts("Expected ) or ,");
+		debug("Expected ) or ,");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno arg_next2(){
-	puts("arg_next2() entered");
+	debug("arg_next2() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case IDENTIFIER:
-		puts("ID correct");
+		debug("ID correct");
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
 	case VALUE_INTEGER:
 	case VALUE_STRING:
 	case VALUE_DOUBLE:
-		puts("constant correct");
+		debug("constant correct");
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
 	default:
-		puts("Expected IDENTIFIER or value");
+		debug("Expected IDENTIFIER or value");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno var_type(){
-	puts("var_type() entered");
+	debug("var_type() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case INTEGER:
-		puts("integer type correct");
+		debug("integer type correct");
 		break;
 	case DOUBLE:
-		puts("double type correct");
+		debug("double type correct");
 		break;
 	case STRING:
-		puts("string type correct");
+		debug("string type correct");
 		break;
 	case BOOLEAN:
-		puts("boolean type correct");
+		debug("boolean type correct");
 		break;
 	default:
-		puts("Expected var type");
+		debug("Expected var type");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno print_exp(){
-	puts("print_exp() entered");
+	debug("print_exp() entered");
 	currToken = getToken();
 	switch(currToken->type){
 	case SEMICOLON:
-		puts("; correct");
+		debug("; correct");
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
 		break;
 	case EOL:
-		puts("EOL correct");
+		debug("EOL correct");
 		break;
 	default:
 		if((ret = assignment()) != PARSE_OK)
@@ -556,12 +570,12 @@ parse_errno print_exp(){
 
 		switch(currToken->type){
 		case SEMICOLON:
-			puts("; correct");
+			debug("; correct");
 			if((ret = print_exp()) != PARSE_OK)
 				return (ret);
 			break;
 		case EOL:
-			puts("EOL correct");
+			debug("EOL correct");
 			break;
 		default:
 			warning_msg("expected ; or EOL after assignment() in Print");
@@ -572,22 +586,22 @@ parse_errno print_exp(){
 }
 
 parse_errno command(){
-	puts("command() entered");
+	debug("command() entered");
 	switch(currToken->type){
 	case INPUT:
-		puts("INPUT correct");
+		debug("INPUT correct");
 		if((ret = check_ID()) != PARSE_OK)
 			return (ret);
 
 		if(curr_function.id && !(find_test(lTable, currToken->info)))
 			return(SEMANTIC_REDEF);
-		puts("ID defined");
+		debug("ID defined");
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 		break;
 	case IF:
-		puts("IF correct");
+		debug("IF correct");
 
 		currToken = parseExpression(NULL, NULL, lTable);
 
@@ -595,7 +609,7 @@ parse_errno command(){
 			warning_msg("expected THEN after EXP");
 			return (SYNTAX_ERR);
 		}
-		puts("THEN correct");
+		debug("THEN correct");
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -607,11 +621,11 @@ parse_errno command(){
 			return (ret);
 		break;
 	case IDENTIFIER:
-		puts("ID correct");
+		debug("ID correct");
 
 		if(curr_function.id && !(find_test(lTable, currToken->info)))
 			return(SEMANTIC_REDEF);
-		puts("ID defined");
+		debug("ID defined");
 
 		returnVal = function_find(lTable, currToken->info);
 
@@ -621,7 +635,7 @@ parse_errno command(){
 			warning_msg("expected = after ID");
 			return (SYNTAX_ERR);
 		}
-		puts("= correct");
+		debug("= correct");
 
 		currToken = getToken();
 		if((ret = assignment()) != PARSE_OK)
@@ -631,10 +645,10 @@ parse_errno command(){
 			warning_msg("expected EOL after assignment()");
 			return (SYNTAX_ERR);
 		}
-		puts("EOL correct");
+		debug("EOL correct");
 		break;
 	case DO:
-		puts("DO correct");
+		debug("DO correct");
 		int main_int = curr_function.is_main;
 		curr_function.is_main = 0;
 		currToken = getToken();
@@ -642,7 +656,7 @@ parse_errno command(){
 			warning_msg("expected WHILE after DO");
 			return (SYNTAX_ERR);
 		}
-		puts("WHILE correct");
+		debug("WHILE correct");
 
 		currToken = parseExpression(NULL, NULL, lTable);
 
@@ -659,13 +673,13 @@ parse_errno command(){
 		curr_function.is_main = main_int;
 		break;
 	case PRINT:
-		puts("PRINT correct");
+		debug("PRINT correct");
 
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
 		break;
 	case DIM:
-			puts("DIM correct");
+			debug("DIM correct");
 
 			if((ret = check_ID()) != PARSE_OK)
 				return (ret);
@@ -689,15 +703,27 @@ parse_errno command(){
 			if(list_insert(lTable, p))
 				return(SEMANTIC_REDEF);
 
-			if((ret = check_EOL()) != PARSE_OK)
-				return (ret);
+			currToken = getToken();
+
+			switch(currToken->type){
+			case EOL:
+				debug("EOL correct");
+				break;
+			case EQUAL:
+				debug("EQUAL correct");
+
+				currToken = parseExpression(NULL, &p, lTable);
+
+				if(currToken->type != EOL)
+					return (SYNTAX_ERR);
+			}
 			break;
 	case RETURN0:
 		if(!strcmp(curr_function.id, "SCOPE")){
 			warning_msg("Unexpected RETURN in SCOPE");
 			return (SYNTAX_ERR);
 		}
-		puts("RETURN correct");
+		debug("RETURN correct");
 		currToken = getToken();
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
@@ -708,26 +734,26 @@ parse_errno command(){
 		}
 		break;
 	default:
-		puts("Unexpected command");
+		debug("Unexpected command");
 		return (SYNTAX_ERR);
 	}
 	return (PARSE_OK);
 }
 
 parse_errno assignment(){
-	puts("assignment() entered");
+	debug("assignment() entered");
 //	currToken = getToken();
 
 	switch(currToken->type){
 	case IDENTIFIER:
-		puts("ID correct");
+		debug("ID correct");
 
 
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
 				return (SEMANTIC_REDEF);
 			}
-			puts("NOT FUNCTION -> ExpressionParser");
+			debug("NOT FUNCTION -> ExpressionParser");
 			currToken = parseExpression(currToken, returnVal, lTable);
 			break;
 		}
@@ -751,14 +777,15 @@ parse_errno assignment(){
 }
 
 parse_errno parse(){
+	init3ADD();
 	hTable = ltab_init();
 	parse_errno rett;
 	rett = prog_body();
-	puts("FILE PARSING COMPLETE:");
+	debug("FILE PARSING COMPLETE:");
 	if(rett == PARSE_OK)
-		puts("\tSUCCESS");
+		debug("\tSUCCESS");
 	else{
-		puts("\tFAILED");
+		debug("\tFAILED");
 		char str[12];
 		sprintf(str, "%d", currToken->type);
 		printf("failure at token: %s : %s\n", currToken->info, str);

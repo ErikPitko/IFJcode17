@@ -11,7 +11,7 @@ fnc_body	->	<command><fnc_body>
 				End Function
 
 if_body		->	<command><if_body>
-				Else <else_body>
+				Else EOL <else_body>
 				End If
 
 else_body	->	<command><else_body>
@@ -50,7 +50,8 @@ command		->	Input id EOL
 				id = <assingnment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
-				Dim id As <var_type>EOL
+				Dim id As <var_type> EOL
+				Dim id As <var_type> = EXP EOL
 				Return <assingnment> EOL
 
 assingment	->	EXP

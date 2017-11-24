@@ -67,31 +67,31 @@ int  where = 0;
   if(type == INTEGER){
     if(where){
       printf("DEFVAR GF@_%s\n",id);
-      printf("MOVE GF@_%s int@0\n");
+      printf("MOVE GF@_%s int@0\n",id);
     }
     else{
       printf("DEFVAR LF@_%s\n",id);
-      printf("MOVE LF@_%s int@0\n");
+      printf("MOVE LF@_%s int@0\n",id);
     }
   }else
   if(type == DOUBLE){
     if(where){
       printf("DEFVAR GF@_%s\n",id);
-      printf("MOVE GF@_%s float@0.0\n");
+      printf("MOVE GF@_%s float@0.0\n",id);
     }
     else{
       printf("DEFVAR LF@_%s\n",id);
-      printf("MOVE LF@_%s float@0.0\n");
+      printf("MOVE LF@_%s float@0.0\n",id);
     }
   }else
   if(type == STRING){
     if(where){
       printf("DEFVAR GF@_%s\n",id);
-      printf("MOVE GF@_%s string@!""\n");
+      printf("MOVE GF@_%s string@!""\n",id);
     }
     else{
       printf("DEFVAR LF@_%s\n",id);
-      printf("MOVE LF@_%s int@0\n");
+      printf("MOVE LF@_%s int@0\n",id);
     }
   }//else error
 }

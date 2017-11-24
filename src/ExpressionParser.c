@@ -519,6 +519,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticplus;
 							}
 						else
 						{
@@ -536,6 +537,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticplus;
 						}
 					}
 					else
@@ -563,6 +565,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						}
 					}
 				}
+				semanticplus:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -590,6 +593,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticsub;
 							}
 						else
 						{
@@ -607,6 +611,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticsub;
 						}
 					}
 					else
@@ -626,6 +631,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("SUB LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticsub:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -653,6 +659,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticasterix;
 							}
 						else
 						{
@@ -670,6 +677,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticasterix;
 						}
 					}
 					else
@@ -689,6 +697,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("MUL LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticasterix:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -716,6 +725,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticdivint;
 							}
 						else
 						{
@@ -733,6 +743,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticdivint;
 						}
 					}
 					else
@@ -776,6 +787,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticdivint:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -803,6 +815,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticdivdouble;
 							}
 						else
 						{
@@ -820,6 +833,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticdivdouble;
 						}
 					}
 					else
@@ -839,6 +853,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticdivdouble:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -865,6 +880,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticless;
 							}
 						else
 						{
@@ -882,6 +898,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticless;
 						}
 					}
 					else
@@ -898,13 +915,14 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					result->firstToken->type = temporary->type;
 					printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 				}
+				semanticless:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER)
 			{
-				//printf("****E -> E>E****\n");
+				printf("****E -> E>E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
@@ -924,6 +942,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticgreater;
 							}
 						else
 						{
@@ -941,6 +960,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticgreater;
 						}
 					}
 					else
@@ -960,6 +980,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticgreater:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -986,6 +1007,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticequal;
 							}
 						else
 						{
@@ -1003,6 +1025,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticequal;
 						}
 					}
 					else
@@ -1022,6 +1045,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
+				semanticequal:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -1048,6 +1072,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticgreaterequal;
 							}
 						else
 						{
@@ -1065,6 +1090,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticgreaterequal;
 						}
 					}
 					else
@@ -1085,6 +1111,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
 				}
+				semanticgreaterequal:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;
@@ -1174,6 +1201,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							else
 							{
 								setSemanticError(semanticError,SEMANTIC_REDEF);
+								goto semanticinequality;
 							}
 						else
 						{
@@ -1191,6 +1219,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						else
 						{
 							setSemanticError(semanticError,SEMANTIC_REDEF);
+							goto semanticinequality;
 						}
 					}
 					else
@@ -1199,7 +1228,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					printf("CAST\n");
+					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
@@ -1211,6 +1240,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
 				}
+				semanticinequality:
 				stackPop(rStack);	//popnutí stacku
 				stackPush(st,(*result));
 				(*reduct) = true;

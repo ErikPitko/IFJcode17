@@ -88,6 +88,22 @@ void stackClear(tStack* s)
 		myFree(s->arr);
 	}
 }
+bool checkMoreOperators(tStack* s)
+{
+	int counter = 0;
+	for(int i =0;i<s->top+1;i++)
+	{
+		if(s->arr[i].firstToken->type>=36 && s->arr[i].firstToken->type<=46)
+		{
+			printf("aaa\n");
+			counter++;
+		}
+	}
+	if(counter>1)
+		return true;
+	return false;
+}
+
 /*
 int main(){
 	garbageInit(400);

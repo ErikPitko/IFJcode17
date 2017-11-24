@@ -15,6 +15,7 @@
 #include "InstructionList.h"
 #include "symtable.h"
 #define EXPR 999
+tFooListElem exprResult;
 token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *localTable);
 char* strValueOfEnum(int enumValue);
 #endif /* EXPRESSIONPARSER_H_ */

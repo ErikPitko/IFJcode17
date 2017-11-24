@@ -22,7 +22,8 @@ clean:
 
 ##############################################################
 
-address_code.o: address_code.c address_code.h scanner.h garbage.h error.h
+address_code.o: address_code.c address_code.h symtable.h garbage.h \
+ error.h scanner.h
 error.o: error.c error.h garbage.h
 ExpressionParser.o: ExpressionParser.c ExpressionParser.h stack.h \
  scanner.h garbage.h error.h header.h symtable.h InstructionList.h

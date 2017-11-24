@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "symtable.h"
 #include "scanner.h"
 #include "garbage.h"
 
@@ -15,6 +16,7 @@
 * vrati ukazatel na string vhodny pre vypis v 3ADD //PRINT
 *
 */
+void I_move_to_global(tFooListElem value);
 char * reformString(char *tmp);
 
 /*
@@ -27,10 +29,10 @@ void init3ADD();
 
 void I_dim_id_as_var_type(char* id, int type );
 void I_input_id(char *id, int type);
-void I_do_while(int number);
+void I_do_while(int number, tFooListElem value);
 void I_do_while_label(int number);
 void I_loop(int number);
-void I_if_then(int number);
+void I_if_then(int number, tFooListElem value);
 void I_else(int number);
 void I_endif(int number);
 void I_id_expression(char *id);

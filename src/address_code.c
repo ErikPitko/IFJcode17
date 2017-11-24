@@ -1,5 +1,22 @@
 #include "address_code.h"
 
+
+void I_move_to_global(tFooListElem value){
+	switch(value.type){
+	case STRING:
+		printf("MOVE GF@_pom_string LF@%s\n", value.id);
+		break;
+	case DOUBLE:
+		printf("MOVE GF@_pom_double LF@%s\n", value.id);
+		break;
+	case INTEGER:
+		printf("MOVE GF@_pom_integer LF@%s\n", value.id);
+		break;
+	default:
+		error_msg(99, "unexpected type: %s : %d", value.id, value.type);
+	}
+}
+
 /*
 *
 * vrati ukazatel na string vhodny pre vypis v 3ADD //PRINT
@@ -46,10 +63,11 @@ char * reformString(char *tmp){
 *
 */
 void init3ADD(){
-  printf(".IFJcode17\n");
-printf("DEFVAR GF@_pom_integer\n");
-printf("DEFVAR GF@_pom_double\n");
-printf("DEFVAR GF@_pom_string\n");
+	printf(".IFJcode17\n");
+	printf("DEFVAR GF@_pom_integer\n");
+	printf("DEFVAR GF@_pom_double\n");
+	printf("DEFVAR GF@_pom_string\n");
+	printf("JUMP labelSCOPE\n");
 
 }
 
@@ -132,18 +150,24 @@ void I_input_id(char *id, int type){//READ var type
 *
 */
 void I_do_while_label(int number){
-  printf("label%d0",number);
-
-//  expression();//zistit od adama nazov premennej pro vysledek EXP
+  printf("label%d",number);
 }
 
-void I_do_while(int number)
+void I_do_while(int number, tFooListElem value)
 {
-  printf("DEFVAR LF@_pom%d\n", number);
-  printf("MOVE LF@_pom%d EXP\n",number);
+	printf("DEFVAR LF@_pom%d\n", number);
+	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
 
-  printf("JUMPIFEQ label%d LF@_pom%d 0\n", number, number);
-
+	switch(value.type){
+	case INTEGER:
+		printf("JUMPIFEQ label%d_end LF@_pom%d 0\n", number, number);
+		break;
+	case DOUBLE:
+		printf("JUMPIFEQ label%d_end LF@_pom%d 0.0\n", number, number);
+		break;
+	default:
+		error_msg(99, "wrong type in if statement: %s : %d", value.id, value.type);
+	}
 }
 
 /*
@@ -153,15 +177,23 @@ void I_do_while(int number)
 *
 */
 void I_loop(int number){
-  printf("JUMP label%d0\n",number);
-  printf("label%d\n",number);
+  printf("JUMP label%d\n",number);
+  printf("label%d_end\n",number);
 }
 
-void I_if_then(int number){
-  printf("DEFVAR LF@_pom%d\n", number);
-  printf("MOVE LF@_pom%d EXP\n", number);
-
-  printf("JUMPIFEQ label%d LF@_pom%d 0\n", number, number);
+void I_if_then(int number, tFooListElem value){
+	printf("DEFVAR LF@_pom%d\n", number);
+	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
+	switch(value.type){
+	case INTEGER:
+		printf("JUMPIFEQ label%d LF@_pom%d 0\n", number, number);
+		break;
+	case DOUBLE:
+		printf("JUMPIFEQ label%d LF@_pom%d 0.0\n", number, number);
+		break;
+	default:
+		error_msg(99, "wrong type in if statement: %s : %d", value.id, value.type);
+	}
 }
 
 void I_else(int number){

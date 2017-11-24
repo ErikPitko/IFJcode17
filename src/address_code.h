@@ -44,4 +44,14 @@ void I_define_func(char *id_func);
 void I_define_return();
 void I_print();
 
+/*
+*
+* pridari do promenne @id hodnotu z posledneho vypoctu // GL
+* @param id - nazov premennej do ktorej priradime
+* @param type_of_a - typ z @id
+* @param number - counter
+*
+*/
+void I_priradenie(char *id, int type_of_a, int number);
+
 #endif /* ADDRESS_CODE_H_ */

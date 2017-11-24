@@ -2,6 +2,10 @@
 
 
 void I_move_to_global(tFooListElem value){
+	printf("MOVE GL@_string0 string@\n");
+	printf("FLOAT2INT GL@_int0 float@0.0\n");
+	printf("INT2FLOAT GL@_float0 int@0\n");
+	
 	switch(value.type){
 	case STRING:
 		printf("MOVE GF@_pom_string LF@%s\n", value.id);
@@ -67,6 +71,16 @@ void init3ADD(){
 	printf("DEFVAR GF@_pom_integer\n");
 	printf("DEFVAR GF@_pom_double\n");
 	printf("DEFVAR GF@_pom_string\n");
+	
+	printf("DEFVAR GL@_string0\n");       //prazdny string nemenit
+	printf("TYPE GL@_string0 GL@_string0\n");
+
+	printf("DEFVAR GL@_int0\n");     // integerova hodnota 0 nemenit
+	printf("FLOAT2INT GL@_int0 float@0.0\n");
+
+	printf("DEFVAR GL@_float0\n");   // realna nula 0.0
+	printf("INT2FLOAT GL@_float0 int@0\n");
+	
 	printf("JUMP labelSCOPE\n");
 
 }
@@ -297,4 +311,62 @@ void I_define_return(){
 */
 void I_print(){ // type z expression
   printf("PRINT EXP\n");
+}
+
+/*
+*
+* pridari do promenne @id hodnotu z posledneho vypoctu // GL
+* @param id - nazov premennej do ktorej priradime
+* @param type_of_a - typ z @id
+* @param number - counter
+*
+*/
+void I_priradenie(char *id, int type_of_a, int number){
+
+  if(type_of_a == STRING){
+      printf("MOVE LF@_%s GF@_pom_string\n",id);  //string pretypovavat nebudu
+  }else
+
+
+  if(type_of_a == INTEGER){
+
+    printf("JUMPIFEQ label_int%d GF@_pom_double GL@_float0\n", number);  //zisti ci potrebujeme pretypovavat
+    printf("JUMPIFEQ label_int0%d GF@_pom_integer GL@_int0\n",number);  // skoci si pre priradenie 0
+
+    printf("FLOAT2INT LF@_%s GF@_pom_double\n",id); // pretypuje a priradenie
+    printf("JUMP label_end%d\n",number);    //ukoncenie
+
+    printf("LABEL label_int%d\n",number)  // aby sme mohli preskocit pretypovanie
+    printf("MOVE LF@_%s GF@_pom_integer\n",id);  // priradenie
+    printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
+
+    //museli sme pretypovat
+    printf("LABEL label_int0%d\n",number); // ak je 0
+    printf("MOVE LF@_%s GL@_int0\n",id);
+
+    printf("LABEL label_end%d\n",number);
+  }else
+
+  if(type_of_a == DOUBLE){
+
+
+        printf("JUMPIFEQ label_double%d GF@_pom_integer GL@_int0\n", number);  //zisti ci potrebujeme pretypovavat
+        printf("JUMPIFEQ label_double0%d GF@_pom_double GL@_float0\n",number);  // skoci si pre priradenie 0.0
+
+        printf("INT2FLOAT LF@_%s GF@_pom_integer\n",id); // pretypuje a priradi
+        printf("JUMP label_end%d\n",number);  // ukoncenie
+
+        printf("LABEL label_double%d\n",number)  // aby sme mohli preskocit pretypovanie
+        printf("MOVE LF@_%s GF@_pom_double\n",id);  // priradenie
+        printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
+
+        //museli sme pretypovat
+        printf("LABEL label_double0%d\n",number); // ak je 0
+        printf("MOVE LF@_%s GL@_double0\n",id);
+
+        printf("LABEL label_end%d\n",number);
+
+
+  }//else error?
+
 }

@@ -11,7 +11,18 @@ tHashTable *hTable;
 tHashTable *lTable;
 tFooListElem curr_function;
 tFooListElem *returnVal;
-int param_counter = 0;
+
+extern tFooListElem exprResult;
+
+/*********counters************/
+int param_counter;
+
+int cycle_counter;
+int plunge_counter;
+
+
+/*****************************/
+
 bool curr_function_declared = false;
 void debug(const char *form, ...);
 
@@ -78,7 +89,6 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-	return;
 	va_list args;
 	fprintf(stdout, "%s", "PARSER: ");
 	vfprintf(stdout, form, args);
@@ -115,6 +125,9 @@ parse_errno prog_body(){
 		curr_function.is_main = 1;
 		list_insert(hTable, curr_function);
 
+		debug("********SCOPE********");
+		I_define_func(curr_function.id);
+
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
@@ -125,6 +138,8 @@ parse_errno prog_body(){
 			return (ret);
 
 //		ltab_destroy(lTable);
+		lTable = NULL;
+		debug("*********************");
 
 		if ((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -145,7 +160,6 @@ parse_errno prog_body(){
 		curr_function.is_define = false;
 		curr_function.is_main = 0;
 		list_insert(hTable, curr_function);
-
 
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
@@ -185,6 +199,9 @@ parse_errno prog_body(){
 		if(list_insert(hTable, curr_function))
 			curr_function_declared = true;
 
+		debug("******FUNCTION*******");
+		I_define_func(curr_function.id);
+
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
 
@@ -212,12 +229,13 @@ parse_errno prog_body(){
 		if(number_param(hTable, curr_function.id) != param_counter)
 			return (SEMANTIC_TYPE);
 
-//				ltab_destroy(lTable);
+//		ltab_destroy(lTable);
+		lTable = NULL;
 		curr_function.id = NULL;
 		curr_function_declared = false;
 		param_counter = 0;
 
-
+		debug("*********************");
 
 		if((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -264,8 +282,7 @@ parse_errno fnc_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("FUNCTION correct");
-//		ltab_destroy(lTable);
-		lTable = NULL;
+		I_define_return();
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -283,6 +300,7 @@ parse_errno if_body(){
 	switch(currToken->type){
 	case ELSE:
 		debug("ELSE correct");
+		I_else(cycle_counter);
 
 		if((ret = check_EOL()) != PARSE_OK)
 					return (ret);
@@ -298,6 +316,10 @@ parse_errno if_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
+		I_endif(--plunge_counter);
+		if(plunge_counter <= 0)
+			plunge_counter = cycle_counter;
+		debug("*********************");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -321,6 +343,8 @@ parse_errno else_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
+		I_endif(plunge_counter++);
+		debug("*********************");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -338,6 +362,10 @@ parse_errno while_body(){
 	switch(currToken->type){
 	case LOOP:
 		debug("LOOP correct");
+		I_loop(--plunge_counter);
+		if(plunge_counter <= 0)
+			plunge_counter = cycle_counter;
+		debug("*********************");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
@@ -393,6 +421,7 @@ parse_errno par_list(){
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
+
 		if((ret = par_next()) != PARSE_OK)
 			return (ret);
 		break;
@@ -446,7 +475,7 @@ parse_errno par_next(){
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		if(!curr_function_declared && lTable)
+		if(lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
 
@@ -606,6 +635,10 @@ parse_errno command(){
 
 		currToken = parseExpression(NULL, NULL, lTable);
 
+		debug("*** IF GENERATION ***");
+		I_if_then(cycle_counter++, exprResult);
+		plunge_counter++;
+
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
 			return (SYNTAX_ERR);
@@ -620,6 +653,8 @@ parse_errno command(){
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
+
+		debug("*********************");
 		break;
 	case IDENTIFIER:
 		debug("ID correct");
@@ -659,7 +694,14 @@ parse_errno command(){
 		}
 		debug("WHILE correct");
 
+		debug("********WHILE********");
+
+		I_do_while_label(cycle_counter);
+
 		currToken = parseExpression(NULL, NULL, lTable);
+
+		I_do_while(cycle_counter++, exprResult);
+		plunge_counter++;
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");

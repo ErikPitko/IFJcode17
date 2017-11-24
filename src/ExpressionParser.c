@@ -324,8 +324,8 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
-	exprResult = elem;
-	//printf("%s",exprResult.id);
+	exprResult.id = elem.id;
+	printf("%s\n",strValueOfEnum(exprResult.type));
 	PrintInstrList(&globalInstrList);
 	return actToken.firstToken;
 }
@@ -554,6 +554,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						if(temporary->type == STRING||temporary->type == VALUE_STRING)
 						{
 							printf("CONCAT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
@@ -628,6 +629,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("SUB LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
@@ -694,6 +696,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("MUL LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
@@ -784,6 +787,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
@@ -850,6 +854,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
@@ -913,6 +918,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 					temporary->is_define = true;
 					result->firstToken->type = temporary->type;
+					exprResult.type = temporary->type;
 					printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 				}
 				semanticless:
@@ -977,6 +983,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 					}
 				}
@@ -1107,6 +1114,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
@@ -1171,6 +1179,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}
@@ -1236,6 +1245,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
+						exprResult.type = temporary->type;
 						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
 						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
 					}

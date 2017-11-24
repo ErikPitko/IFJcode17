@@ -17,9 +17,9 @@ extern tFooListElem exprResult;
 /*********counters************/
 int param_counter;
 
+int if_counter;
 int cycle_counter;
-int plunge_counter;
-
+int cycle_counter2;
 
 /*****************************/
 
@@ -300,7 +300,8 @@ parse_errno if_body(){
 	switch(currToken->type){
 	case ELSE:
 		debug("ELSE correct");
-		I_else(cycle_counter);
+		if_counter -= 2;
+		I_endif(if_counter);
 
 		if((ret = check_EOL()) != PARSE_OK)
 					return (ret);
@@ -316,9 +317,7 @@ parse_errno if_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-		I_endif(--plunge_counter);
-		if(plunge_counter <= 0)
-			plunge_counter = cycle_counter;
+		I_endif(if_counter + 1);
 		debug("*********************");
 		break;
 	default:
@@ -343,7 +342,7 @@ parse_errno else_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-		I_endif(plunge_counter++);
+		I_endif(if_counter + 1);
 		debug("*********************");
 		break;
 	default:
@@ -362,9 +361,10 @@ parse_errno while_body(){
 	switch(currToken->type){
 	case LOOP:
 		debug("LOOP correct");
-		I_loop(--plunge_counter);
-		if(plunge_counter <= 0)
-			plunge_counter = cycle_counter;
+		I_loop(--cycle_counter2);
+		if(cycle_counter2 <= 0)
+			cycle_counter2 = cycle_counter;
+		cycle_counter++;
 		debug("*********************");
 		break;
 	default:
@@ -636,8 +636,8 @@ parse_errno command(){
 		currToken = parseExpression(NULL, NULL, lTable);
 
 		debug("*** IF GENERATION ***");
-		I_if_then(cycle_counter++, exprResult);
-		plunge_counter++;
+		I_if_then(if_counter, exprResult);
+		if_counter += 2;
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -701,7 +701,7 @@ parse_errno command(){
 		currToken = parseExpression(NULL, NULL, lTable);
 
 		I_do_while(cycle_counter++, exprResult);
-		plunge_counter++;
+		cycle_counter2++;
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");

@@ -150,23 +150,26 @@ void I_input_id(char *id, int type){//READ var type
 *
 */
 void I_do_while_label(int number){
-  printf("label%d",number);
+  printf("w_label%d\n",number);
 }
 
 void I_do_while(int number, tFooListElem value)
 {
-	printf("DEFVAR LF@_pom%d\n", number);
-	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
+	printf("DEFVAR LF@_wpom%d\n", number);
+	printf("MOVE LF@_wpom%d LF@%s\n", number, value.id);
 
 	switch(value.type){
 	case INTEGER:
-		printf("JUMPIFEQ label%d_end LF@_pom%d 0\n", number, number);
+	case VALUE_INTEGER:
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0\n", number, number);
 		break;
 	case DOUBLE:
-		printf("JUMPIFEQ label%d_end LF@_pom%d 0.0\n", number, number);
+	case VALUE_DOUBLE:
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0.0\n", number, number);
 		break;
 	default:
-		error_msg(99, "wrong type in if statement: %s : %d", value.id, value.type);
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0\n", number, number);
+		warning_msg("wrong type in if statement: %s : %d", value.id, value.type);
 	}
 }
 
@@ -177,8 +180,8 @@ void I_do_while(int number, tFooListElem value)
 *
 */
 void I_loop(int number){
-  printf("JUMP label%d\n",number);
-  printf("label%d_end\n",number);
+  printf("JUMP w_label%d\n",number);
+  printf("w_label%d_end\n",number);
 }
 
 void I_if_then(int number, tFooListElem value){
@@ -186,24 +189,25 @@ void I_if_then(int number, tFooListElem value){
 	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
 	switch(value.type){
 	case INTEGER:
-		printf("JUMPIFEQ label%d LF@_pom%d 0\n", number, number);
+		printf("JUMPIFEQ label_endif%d LF@_pom%d 0\n", number, number);
 		break;
 	case DOUBLE:
-		printf("JUMPIFEQ label%d LF@_pom%d 0.0\n", number, number);
+		printf("JUMPIFEQ label_endif%d LF@_pom%d 0.0\n", number, number);
 		break;
 	default:
-		error_msg(99, "wrong type in if statement: %s : %d", value.id, value.type);
+		printf("JUMPIFEQ label_endif%d LF@_pom%d 0\n", number, number);
+		warning_msg("wrong type in if statement: %s : %d", value.id, value.type);
 	}
 }
 
-void I_else(int number){
-  printf("JUMPIFEQ label_end%d LF@_pom%d 1\n", number, number);
-
-  printf("LABEL label%d\n", number);
-}
+//void I_else(int number){
+//  printf("JUMPIFEQ label_end%d LF@_pom%d 1\n", number, number);
+//
+//  printf("LABEL label%d\n", number);
+//}
 
 void I_endif(int number){
-  printf("LABEL label_end%d\n", number);
+  printf("LABEL label_endif%d\n", number);
 }
 /*
 *

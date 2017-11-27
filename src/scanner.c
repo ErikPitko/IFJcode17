@@ -100,7 +100,7 @@ token* getToken0() {
             c = getchar0();
           }//pre vypis len jedneho EOL
           ungetcharpom = c;
-          if((lastToken->type == EOL )||(lastToken->type == NOPE))
+          if((lastToken->type == EOL ))
             tmpToken->type = NOPE;
 					else tmpToken->type = EOL;
 					tmpToken->info = NULL;

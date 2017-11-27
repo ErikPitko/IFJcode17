@@ -325,8 +325,10 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		error_msg(semanticError,"Semantic error in expression");
 	}
 	exprResult.id = elem.id;
+	if(returnVar != NULL)
+		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
 	printf("%s\n",strValueOfEnum(exprResult.type));
-	PrintInstrList(&globalInstrList);
+	//PrintInstrList(&globalInstrList);
 	return actToken.firstToken;
 }
 

@@ -193,7 +193,7 @@ token* getToken0() {
   				tmpToken->info = NULL;
           ungetcharpom = '\n';
 				  return tmpToken;*/
-					if((lastToken->type == EOL )||(lastToken->type == NOPE))
+					if((lastToken->type == EOL ))
             tmpToken->type = NOPE;
           else tmpToken->type = EOL;
           tmpToken->info = NULL;

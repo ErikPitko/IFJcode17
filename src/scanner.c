@@ -291,12 +291,12 @@ token* getToken0() {
 
 					}else { // nebola .
 						  if(c == 'e'){
-              c = getchar0(c);
+              c = getchar0();
               if((c >= '0') && (c <='9'))
                 ERR;
 
               while((c >= '0') && (c <='9')){
-                c = getchar0(c);
+                c = getchar0();
               }
 
                 ungetcharpom = c;

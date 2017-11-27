@@ -279,6 +279,10 @@ token* getToken0() {
 						while (((c = getchar0()) >= '0') && (c <='9')){ // 123.132e+123
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}// konec cyklu
+						if((tmp_s[i-1] == 'e') || (tmp_s[i-1] ==  '+') || (tmp_s[i-1] == '-')){ /// 112
+							ungetcharpom = c;
+							ERR; // 123.123e+-c /
+						}
             ungetcharpom = c;
             tmp_s[i] = '\0';
             tmpToken->info = tmp_s;
@@ -286,11 +290,31 @@ token* getToken0() {
             return tmpToken;
 
 					}else { // nebola .
-						tmp_s[i] = '\0';
-						ungetcharpom = c;
-						tmpToken->info = tmp_s;
-						tmpToken->type = VALUE_INTEGER;
-						return tmpToken;
+						  if(c == 'e'){
+              c = getchar0(c);
+              if((c >= '0') && (c <='9'))
+                ERR;
+
+              while((c >= '0') && (c <='9')){
+                c = getchar0(c);
+              }
+
+                ungetcharpom = c;
+                tmp_s[i] = '\0';
+                tmpToken->info = tmp_s;
+                tmpToken->type = VALUE_DOUBLE;
+                return tmpToken;
+
+
+            }else{
+
+    						tmp_s[i] = '\0';
+    						ungetcharpom = c;
+    						tmpToken->info = tmp_s;
+    						tmpToken->type = VALUE_INTEGER;
+    						return tmpToken;
+  
+            }
 					}
 /*
 						tmp_s[i] = '\0';

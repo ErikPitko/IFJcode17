@@ -327,7 +327,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	exprResult.id = elem.id;
 	if(returnVar != NULL)
 		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
-	printf("%s\n",strValueOfEnum(exprResult.type));
+	//printf("%s\n",strValueOfEnum(exprResult.type));
 	//PrintInstrList(&globalInstrList);
 	return actToken.firstToken;
 }
@@ -414,7 +414,7 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 		{
 			secondOper->type = INTEGER;
 		}
-		if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING||secondOper->type == STRING||secondOper ->type == VALUE_STRING)
 		{
 			setSemanticError(semanticError,SEMANTIC_TYPE);
 		}
@@ -438,7 +438,7 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 		{
 			secondOper->type = DOUBLE;
 		}
-		if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING||secondOper->type == STRING||secondOper ->type == VALUE_STRING)
 		{
 			setSemanticError(semanticError,SEMANTIC_TYPE);
 		}

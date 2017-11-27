@@ -100,7 +100,7 @@ token* getToken0() {
             c = getchar0();
           }//pre vypis len jedneho EOL
           ungetcharpom = c;
-          if(lastToken->type == EOL)
+          if((lastToken->type == EOL )||(lastToken->type == NOPE))
             tmpToken->type = NOPE;
 					else tmpToken->type = EOL;
 					tmpToken->info = NULL;
@@ -188,10 +188,15 @@ token* getToken0() {
 					c = getchar0();
 				}
         //ungetcharpom = c;
-        if(c == '\n'){
+        if(c == '\n'){/*
           tmpToken->type = NOPE;
   				tmpToken->info = NULL;
           ungetcharpom = '\n';
+				  return tmpToken;*/
+					if((lastToken->type == EOL )||(lastToken->type == NOPE))
+            tmpToken->type = NOPE;
+          else tmpToken->type = EOL;
+          tmpToken->info = NULL;
 				  return tmpToken;
         }else
           ERR; //komentar ukonceny EOF

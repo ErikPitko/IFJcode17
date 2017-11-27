@@ -245,7 +245,7 @@ token* getToken0() {
 						tmpToken->info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
-					}
+					}else ERR;
 
 					if (c == '.'){ // double?
 						{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
@@ -257,11 +257,13 @@ token* getToken0() {
 							ERR; // 123.x // x neni cislo
 						}
 						if (c != 'e'/*isspace(c) || isOperator(c)*/){
-							ungetcharpom = c;
-							tmp_s[i] = '\0';
-							tmpToken->info = tmp_s;
-							tmpToken->type = VALUE_DOUBLE;
-							return tmpToken; // 123.123
+							if (isspace(c) || isOperator(c)){
+								ungetcharpom = c;
+								tmp_s[i] = '\0';
+								tmpToken->info = tmp_s;
+								tmpToken->type = VALUE_DOUBLE;
+								return tmpToken; // 123.123
+							}else ERR;
 						}else {
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
@@ -283,12 +285,13 @@ token* getToken0() {
 							ungetcharpom = c;
 							ERR; // 123.123e+-c /
 						}
-            ungetcharpom = c;
-            tmp_s[i] = '\0';
-            tmpToken->info = tmp_s;
-            tmpToken->type = VALUE_DOUBLE;
-            return tmpToken;
-
+						if (isspace(c) || isOperator(c)){
+							ungetcharpom = c;
+							tmp_s[i] = '\0';
+							tmpToken->info = tmp_s;
+							tmpToken->type = VALUE_DOUBLE;
+							return tmpToken;
+						} else ERR;
 					}else { // nebola .
 						  if(c == 'e'){
               c = getchar0();
@@ -298,22 +301,22 @@ token* getToken0() {
               while((c >= '0') && (c <='9')){
                 c = getchar0();
               }
-
+							if (isspace(c) || isOperator(c)){
                 ungetcharpom = c;
                 tmp_s[i] = '\0';
                 tmpToken->info = tmp_s;
                 tmpToken->type = VALUE_DOUBLE;
-                return tmpToken;
-
+							  return tmpToken;
+							} else ERR;
 
             }else{
-
+							if (isspace(c) || isOperator(c)){
     						tmp_s[i] = '\0';
     						ungetcharpom = c;
     						tmpToken->info = tmp_s;
     						tmpToken->type = VALUE_INTEGER;
     						return tmpToken;
-  
+							} else ERR;
             }
 					}
 /*

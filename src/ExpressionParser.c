@@ -1,3 +1,11 @@
+//BUGLIST:
+/*
+ * dim a as string =!"aa"
+ * dim b as string =!"cc"
+ * print a+b
+ * */
+
+
 /*
  * ExpressionParser.c
  *
@@ -145,7 +153,7 @@ char *rand_string(int length) {
     char *string = "abcdefghijklmnopqrstuvwxyz";
     size_t stringLen = 26;
     char *randomString;
-    randomString = malloc(sizeof(char) * (length +1));
+    randomString = (char*)myMalloc(sizeof(char) * (length +1));
     if (!randomString) {
         return (char*)0;
     }
@@ -179,6 +187,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	tReductToken priority;
 	bool wasOperand = false;
 	bool wasOperation = false;
+	int operandCounter = 0;
 	int semanticError = 0;
 	char* temporaryName = rand_string(20);
 	tFooListElem elem;
@@ -198,6 +207,9 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		//printf("\n****Parser gives me: %s****\n",strValueOfEnum(getSetToken->type));
 		actToken.firstToken = getSetToken;
 	}
+
+	if(actToken.firstToken->type == EOL || (actToken.firstToken->type <=35 && actToken.firstToken->type >=0)||(actToken.firstToken->type <=55 && actToken.firstToken->type >=54))
+		error_msg(SYNTAX_ERR,"No expression");
 	do
 	{
 		int select;
@@ -258,6 +270,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				}
 				if(isTokenOperand(actToken.firstToken,false))
 				{
+					operandCounter++;
 					wasOperand = true;
 					wasOperation = false;
 					//printf("WAS THERE %s \n",actToken.firstToken->info);
@@ -294,8 +307,9 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				reduct = false;
 				actToken.firstToken = getToken();
 				//printf("%i ",actToken.firstToken->type);
-				if(wasOperation && !isTokenOperand(actToken.firstToken,false))
+				if(wasOperation && !isTokenOperand(actToken.firstToken,false)&& actToken.firstToken->type != LEFT_PARENTHESIS && actToken.firstToken->type != RIGHT_PARENTHESIS)
 				{
+					//exit(0);
 					error_msg(SYNTAX_ERR,"Operator on the end of EXPR");
 				}
 				break;
@@ -320,15 +334,21 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	while(!(actToken.firstToken->type == EOL && stackTop(&stack)->firstToken->type == EOL));
 	exit:
 	//printf("****RETURNS: %s ****\n\n",strValueOfEnum(actToken.firstToken->type));
+	if(operandCounter == 0)
+	{
+		semanticError = SYNTAX_ERR;
+	}
 	if(semanticError != 0)
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
 	exprResult.id = elem.id;
 	if(returnVar != NULL)
+	{
 		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
-	//printf("%s\n",strValueOfEnum(exprResult.type));
-	//PrintInstrList(&globalInstrList);
+	}
+	//stackClear(&stack);
+	//stackClear(&rStack);
 	return actToken.firstToken;
 }
 
@@ -388,79 +408,153 @@ void setSemanticError(int *semanticError,int num)
 
 void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString)
 {
-	if(firstOper == NULL || secondOper == NULL|| returnVar == NULL)
+	if(returnVar == NULL)
 	{
-		//printf("SOMETHING IS NULL!");
+		if(firstOper != NULL && secondOper != NULL)
+		{
+			if((firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE||firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER) &&(secondOper->type == STRING|| secondOper->type == VALUE_STRING))
+			{
+				setSemanticError(semanticError,SEMANTIC_TYPE);
+			}
+			else if((secondOper->type == DOUBLE|| secondOper->type == VALUE_DOUBLE||secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER) &&(firstOper->type == STRING|| firstOper->type == VALUE_STRING))
+			{
+				setSemanticError(semanticError,SEMANTIC_TYPE);
+			}
+		}
+
+		if(firstOper != NULL && secondOper != NULL)
+		{
+			if((firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE) && (secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
+			{
+				secondOper->type = DOUBLE;
+				printf("FLOAT2INT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+			}
+			if((secondOper->type == DOUBLE|| secondOper->type == VALUE_DOUBLE) && (firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER))
+			{
+				firstOper->type = DOUBLE;
+				printf("FLOAT2INT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+			}
+		}
+		if(firstOper!= NULL)
+		{
+			if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
+			{
+				firstOper->type = INTEGER;
+			}
+			if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+			{
+				firstOper->type = DOUBLE;
+			}
+		}
+		if(secondOper!= NULL)
+		{
+			if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+			{
+				secondOper->type = INTEGER;
+			}
+			if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+			{
+				secondOper->type = DOUBLE;
+			}
+		}
 		return;
 	}
 	switch(returnVar->type)
 	{
-	case INTEGER:
-		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
-		{
-			firstOper->type = INTEGER;
-			printf("FLOAT2INT LF@%s LF@%s\n",firstOper->id,firstOper->id);
-		}
-		if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
-		{
-			secondOper->type = INTEGER;
-			printf("FLOAT2INT LF@%s LF@%s\n",secondOper->id,secondOper->id);
-		}
-		if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
-		{
-			firstOper->type = INTEGER;
-		}
-		if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
-		{
-			secondOper->type = INTEGER;
-		}
-		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING||secondOper->type == STRING||secondOper ->type == VALUE_STRING)
-		{
-			setSemanticError(semanticError,SEMANTIC_TYPE);
-		}
-		break;
-	case DOUBLE:
-		if(firstOper->type == INTEGER || firstOper->type == VALUE_INTEGER)
-		{
-			firstOper->type = DOUBLE;
-			printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
-		}
-		if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
-		{
-			secondOper->type = DOUBLE;
-			printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
-		}
-		if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
-		{
-			firstOper->type = DOUBLE;
-		}
-		if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
-		{
-			secondOper->type = DOUBLE;
-		}
-		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING||secondOper->type == STRING||secondOper ->type == VALUE_STRING)
-		{
-			setSemanticError(semanticError,SEMANTIC_TYPE);
-		}
-		break;
-	case STRING:
-		if(!couldBeString)
-		{
-			*(semanticError)= SEMANTIC_TYPE;
-		}
-		if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
-		{
-			firstOper->type = STRING;
-		}
-		if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
-		{
-			secondOper->type = STRING;
-		}
-		if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER||firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE||secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER||secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
-		{
-			setSemanticError(semanticError,SEMANTIC_TYPE);
-		}
-		break;
+		case INTEGER:
+			if(firstOper != NULL)
+				if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			if(firstOper != NULL)
+				if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+				{
+					firstOper->type = INTEGER;
+					printf("FLOAT2INT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+				{
+					secondOper->type = INTEGER;
+					printf("FLOAT2INT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+				}
+			if(firstOper != NULL)
+				if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
+				{
+					firstOper->type = INTEGER;
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+				{
+					secondOper->type = INTEGER;
+				}
+			break;
+		case DOUBLE:
+			if(firstOper != NULL)
+				if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			if(firstOper != NULL)
+				if(firstOper->type == INTEGER || firstOper->type == VALUE_INTEGER)
+				{
+					firstOper->type = DOUBLE;
+					printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+				{
+					secondOper->type = DOUBLE;
+					printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+				}
+			if(firstOper != NULL)
+				if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+				{
+					firstOper->type = DOUBLE;
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+				{
+					secondOper->type = DOUBLE;
+				}
+			break;
+		case STRING:
+			if(!couldBeString)
+			{
+				*(semanticError)= SEMANTIC_TYPE;
+			}
+			if(firstOper != NULL)
+				if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
+				{
+					firstOper->type = STRING;
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
+				{
+					secondOper->type = STRING;
+				}
+			if(firstOper != NULL)
+				if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER||firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			if(secondOper != NULL)
+				if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER||secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+				{
+					setSemanticError(semanticError,SEMANTIC_TYPE);
+				}
+			break;
 	}
 }
 
@@ -471,6 +565,31 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 	{
 		//printf("****E -> i****\n");
 		tReductToken *tmp = stackTop(rStack);
+		tFooListElem *firstOper;
+		if(tmp != NULL)
+		{
+			if(tmp->firstToken->type ==IDENTIFIER)
+				if(find_test(localTable,tmp->firstToken->info))
+				{
+					firstOper = function_find(localTable,tmp->firstToken->info);
+				}
+				else
+				{
+					setSemanticError(semanticError,SEMANTIC_REDEF);
+					goto semanticplus;
+				}
+			else
+			{
+				firstOper = myMalloc(sizeof(tFooListElem));
+				firstOper->id = tmp->firstToken->info;
+				firstOper->type = tmp->firstToken->type;
+			}
+		}
+		convertTo(returnVar,firstOper,NULL,semanticError,true);
+		tFooListElem *temporary = function_find(localTable,tempName);
+		temporary->type = firstOper->type;
+		exprResult.type = temporary->type;
+		tmp->firstToken->type = temporary->type;
 		tmp->isReduced = true;
 		stackPop(rStack);
 		stackPush(st,*(tmp));
@@ -484,7 +603,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			//stackPop(rStack);	//MUSÍ BÝT JINAK NEBUDE FUNGOVAT BACHA NA HORNÍ ŘÁDEK POKUD BUDEME PRACOVAT JAKO TOP POP MUSÍME VYMAZAT
 			if(!isOperatorExpr(fID.firstToken))
 			{
-			if(fID.firstToken->type == LEFT_PARENTHESIS||fID.firstToken->type == RIGHT_PARENTHESIS)
+			if(fID.firstToken->type == LEFT_PARENTHESIS || fID.firstToken->type == RIGHT_PARENTHESIS)
 			{
 				tReductToken tmp = *(stackTop(rStack));
 				stackPop(rStack);
@@ -623,10 +742,10 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
+					convertTo(returnVar,firstOper,secondOper,semanticError,false);
 					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
-						convertTo(returnVar,firstOper,secondOper,semanticError,false);
 						temporary->type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
@@ -758,32 +877,33 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->type = fID.firstToken->type;
 					}
 					if(secondOper != NULL && firstOper != NULL)
-										{
-						if(returnVar->type == INTEGER)
-						{
-							if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER)
+					{
+						if(returnVar != NULL)
+							if(returnVar->type == INTEGER)
 							{
-								firstOper->type = INTEGER;
-								LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
+								if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER)
+								{
+									firstOper->type = INTEGER;
+									LInsert(&globalInstrList,I_FLOAT2INT,firstOper,firstOper,NULL);
+								}
+								if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
+								{
+									secondOper->type = INTEGER;
+									LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
+								}
+								if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+								{
+									firstOper->type = INTEGER;
+								}
+								if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+								{
+									secondOper->type = INTEGER;
+								}
+								if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
+								{
+									setSemanticError(semanticError,SEMANTIC_TYPE);
+								}
 							}
-							if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
-							{
-								secondOper->type = INTEGER;
-								LInsert(&globalInstrList,I_FLOAT2INT,secondOper,secondOper,NULL);
-							}
-							if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
-							{
-								firstOper->type = INTEGER;
-							}
-							if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
-							{
-								secondOper->type = INTEGER;
-							}
-							if((firstOper->type == STRING|| firstOper->type == VALUE_STRING)||(secondOper->type == STRING||secondOper ->type == VALUE_STRING))
-							{
-								setSemanticError(semanticError,SEMANTIC_TYPE);
-							}
-						}
 						//printf("CAST\n");
 						temporary->type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));

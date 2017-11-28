@@ -74,6 +74,7 @@ tFooListElem *function_find (tHashTable *local_table, char *fooId);
 int change_isdefine (tHashTable *local_table, tFooListElem sym);
 // Funkcia, ktora vracia index hladaneho parametru
 int return_index_parameter (tHashTable *local_table, tFooListElem sym, param psym);
+param *return_parameter_from_index(tHashTable *local_table, tFooListElem sym, int index);
 
 // Zisti pocet parametrov vo funkcii
 int number_param (tHashTable *local_table, char *id);

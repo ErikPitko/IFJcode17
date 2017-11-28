@@ -61,7 +61,7 @@ int *cstackTopPop ( tcStack* s) {
 	return (temp);
 }
 void cstackPush ( tcStack* s, int token ) {
-	if(stackFull(s))
+	if(cstackFull(s))
 		cstackIncrement(s);
 	s->arr[++(s->top)] = token;
 }
@@ -73,7 +73,7 @@ void cstackPrint(char* stackName, tcStack* s){
 		return;
 	}
 	for(int i =cstackLenght(s)-1;i>=0;i--)
-		printf("\t%i-index = %s \n", i, s->arr[i]);
+		printf("\t%i-index = %d \n", i, s->arr[i]);
 }
 void cstackClear(tcStack* s){
 	if(s!= NULL)

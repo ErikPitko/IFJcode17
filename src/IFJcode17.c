@@ -44,13 +44,6 @@ int main(int argc, char *argv[])
 	if (ret == PARSE_OK){
 		garbageFree();
 		return (EXIT_SUCCESS);
-	}
-	else if(ret == SYNTAX_ERR)
-		error_msg(2, "Syntax error");
-	else if(ret == SEMANTIC_REDEF)
-		error_msg(3, "Semantic ERR");
-	else{
-		garbageFree();
-		return(EXIT_SUCCESS);
-	}
+	}else
+		error_msg(ret, "error: %d", ret);
 }

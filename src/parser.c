@@ -10,16 +10,19 @@ token *lastToken;
 tHashTable *hTable;
 tHashTable *lTable;
 tFooListElem curr_function;
+tFooListElem called_function;
 tFooListElem *returnVal;
 
 extern tFooListElem exprResult;
 
 /*********counters************/
+
 int param_counter;
 
 int cycle_counter;
+int if_counter;
 tcStack cstack;
-
+tcStack ifstack;
 
 
 /*****************************/
@@ -90,6 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
+	return;
 	va_list args;
 	fprintf(stdout, "%s", "PARSER: ");
 	vfprintf(stdout, form, args);
@@ -223,8 +227,12 @@ parse_errno prog_body(){
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
+
+		if(number_param(hTable, curr_function.id) == -1)
+			return (SEMANTIC_TYPE);
 		if(number_param(hTable, curr_function.id) != param_counter)
 			return (SEMANTIC_TYPE);
+
 
 //		ltab_destroy(lTable);
 		lTable = NULL;
@@ -295,39 +303,22 @@ parse_errno fnc_body(){
 parse_errno if_body(){
 	debug("if_body() entered");
 	currToken = getToken();
+	int tmp1, tmp2;
 	switch(currToken->type){
-	case IF:
-		debug("IF correct");
-		debug("******* IF GENERATION *******");
-
-		currToken = parseExpression(NULL, NULL, lTable);
-
-//		I_if_then(if_counter, exprResult);
-
-		if(currToken->type != THEN){
-			warning_msg("expected THEN after EXP");
-			return (SYNTAX_ERR);
-		}
-		debug("THEN correct");
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-		if((ret = if_body()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
-			return (ret);
-
-
-		if((ret = if_body()) != PARSE_OK)
-			return (ret);
-
-		debug("*****************************");
-		break;
 	case ELSE:
 		debug("ELSE correct");
-//		I_endif(if_counter);
+
+		tmp1 = *cstackTopPop(&ifstack);
+		tmp2 = *cstackTopPop(&ifstack);
+
+		I_jump_endif(*cstackTop(&ifstack));
+
+		cstackPush(&ifstack, tmp2);
+		cstackPush(&ifstack, tmp1);
+
+		cstackPop(&ifstack);
+
+		I_if(*cstackTopPop(&ifstack));
 
 		currToken = getToken();
 
@@ -342,9 +333,23 @@ parse_errno if_body(){
 		debug("ELSEIF correct");
 		debug("*** ELSEIF GENERATION ***");
 
+
+		tmp1 = *cstackTopPop(&ifstack);
+		tmp2 = *cstackTopPop(&ifstack);
+
+		I_jump_endif(*cstackTop(&ifstack));
+
+		cstackPush(&ifstack, tmp2);
+		cstackPush(&ifstack, tmp1);
+
+		I_if(*cstackTopPop(&ifstack));
+
 		currToken = parseExpression(NULL, NULL, lTable);
 
-//				I_if_then(if_counter, exprResult);
+		I_if_then(*cstackTop(&ifstack), exprResult);
+
+		cstackPush(&ifstack, if_counter++);
+
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -369,9 +374,12 @@ parse_errno if_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-//		I_endif(if_counter + 1);
 
-//		local_counter[255]--;
+		cstackPop(&ifstack);
+		cstackPop(&ifstack);
+
+		I_endif(*cstackTopPop(&ifstack));
+
 		debug("*********************");
 		break;
 	default:
@@ -386,20 +394,19 @@ parse_errno if_body(){
 
 parse_errno else_body(int local_counter[]){
 	debug("else_body() entered");
-	if(local_counter[255] >= 254){
-		//TODO CRASH
-	}
 	switch(currToken->type){
 	case END:
 		debug("END correct");
-		(local_counter[local_counter[255]])++;
 		currToken = getToken();
 		if(currToken->type != IF){
 			warning_msg("expected IF after END");
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-//		I_endif(if_counter + 1);
+
+
+		I_endif(*cstackTopPop(&ifstack));
+
 		debug("*********************");
 		break;
 	default:
@@ -420,6 +427,7 @@ parse_errno while_body(){
 	switch(currToken->type){
 	case LOOP:
 		debug("LOOP correct");
+		I_loop(*cstackTopPop(&cstack));
 		debug("*********************");
 		break;
 	default:
@@ -554,6 +562,15 @@ parse_errno arg_list(){
 	case IDENTIFIER:
 		debug("ID correct");
 
+		param p;
+		p.id = currToken->info;
+
+		if(return_index_parameter(hTable, called_function, p) != param_counter)
+			return (SEMANTIC_TYPE);
+
+		I_arg_i_id(currToken->info, param_find(hTable, called_function.id, p.id)->id);
+
+		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
@@ -561,6 +578,21 @@ parse_errno arg_list(){
 	case VALUE_STRING:
 	case VALUE_DOUBLE:
 		debug("constant correct");
+		param *tmp = return_parameter_from_index(hTable, called_function, param_counter);
+		if(tmp == NULL)
+			return (SEMANTIC_TYPE);
+
+		if(tmp->type != currToken->type){
+			if(tmp->type == VALUE_INTEGER && currToken->type != VALUE_INTEGER)
+				return (SEMANTIC_TYPE);
+			if(tmp->type == VALUE_DOUBLE && currToken->type != VALUE_DOUBLE)
+				return (SEMANTIC_TYPE);
+			if(tmp->type == VALUE_STRING && currToken->type != VALUE_STRING)
+				return (SEMANTIC_TYPE);
+		}
+
+		I_arg_i_const(currToken->info, currToken->type, tmp->id);
+		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
@@ -597,6 +629,16 @@ parse_errno arg_next2(){
 	switch(currToken->type){
 	case IDENTIFIER:
 		debug("ID correct");
+
+		param p;
+		p.id = currToken->info;
+
+		if(return_index_parameter(hTable, called_function, p) != param_counter)
+			return (SEMANTIC_TYPE);
+
+		I_arg_i_id(currToken->info, param_find(hTable, curr_function.id, p.id)->id);
+
+		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
@@ -604,6 +646,23 @@ parse_errno arg_next2(){
 	case VALUE_STRING:
 	case VALUE_DOUBLE:
 		debug("constant correct");
+
+		param *tmp = return_parameter_from_index(hTable, called_function, param_counter);
+		if(tmp == NULL)
+			return (SEMANTIC_TYPE);
+
+		if(tmp->type != currToken->type){
+			if(tmp->type == VALUE_INTEGER && currToken->type != VALUE_INTEGER)
+				return (SEMANTIC_TYPE);
+			if(tmp->type == VALUE_DOUBLE && currToken->type != VALUE_DOUBLE)
+				return (SEMANTIC_TYPE);
+			if(tmp->type == VALUE_STRING && currToken->type != VALUE_STRING)
+				return (SEMANTIC_TYPE);
+		}
+
+		I_arg_i_const(currToken->info, currToken->type, tmp->id);
+		param_counter++;
+
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;
@@ -648,10 +707,16 @@ parse_errno print_exp(){
 		break;
 	case EOL:
 		debug("EOL correct");
+		tFooListElem val;
+		val.id = "\n";
+		val.type = STRING;
+		I_print(val);
 		break;
 	default:
 		if((ret = assignment()) != PARSE_OK)
 			return (ret);
+
+		I_print(exprResult);
 
 		switch(currToken->type){
 		case SEMICOLON:
@@ -661,6 +726,7 @@ parse_errno print_exp(){
 			break;
 		case EOL:
 			debug("EOL correct");
+
 			break;
 		default:
 			warning_msg("expected ; or EOL after assignment() in Print");
@@ -682,6 +748,8 @@ parse_errno command(){
 			return(SEMANTIC_REDEF);
 		debug("ID defined");
 
+		I_input_id(*function_find(lTable, currToken->info));
+
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 		break;
@@ -691,7 +759,10 @@ parse_errno command(){
 		currToken = parseExpression(NULL, NULL, lTable);
 
 		debug("*** IF GENERATION ***");
-//		I_if_then(if_counter, exprResult);
+		for(int i = 0; i < 3; i++)
+			cstackPush(&ifstack, if_counter++);
+
+		I_if_then(*cstackTop(&ifstack), exprResult);
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -751,7 +822,7 @@ parse_errno command(){
 		debug("********WHILE********");
 
 		cstackPush(&cstack, cycle_counter);
-		I_do_while_label(cycle_counter++);
+		I_do_while_label(cycle_counter);
 
 		currToken = parseExpression(NULL, NULL, lTable);
 
@@ -800,6 +871,8 @@ parse_errno command(){
 			if(list_insert(lTable, p))
 				return(SEMANTIC_REDEF);
 
+			I_dim_id_as_var_type(p);
+
 			currToken = getToken();
 
 			switch(currToken->type){
@@ -809,7 +882,11 @@ parse_errno command(){
 			case EQUAL:
 				debug("EQUAL correct");
 
-				currToken = parseExpression(NULL, &p, lTable);
+				returnVal = &p;
+
+				currToken = getToken();
+				if((ret = assignment()) != PARSE_OK)
+					return (ret);
 
 				if(currToken->type != EOL)
 					return (SYNTAX_ERR);
@@ -822,8 +899,18 @@ parse_errno command(){
 		}
 		debug("RETURN correct");
 		currToken = getToken();
-		if((ret = assignment()) != PARSE_OK)
-			return (ret);
+
+		if(!find_test(hTable, currToken->info)){
+			if(!find_test(lTable, currToken->info)){
+				return (SEMANTIC_REDEF);
+			}
+			debug("NOT FUNCTION -> ExpressionParser");
+			currToken = parseExpression(currToken, &curr_function, lTable);
+		}else{
+			return (SYNTAX_ERR);
+		}
+
+		I_move_to_global(exprResult);
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -842,12 +929,12 @@ parse_errno command(){
 
 parse_errno assignment(){
 	debug("assignment() entered");
-//	currToken = getToken();
 
 	switch(currToken->type){
 	case IDENTIFIER:
 		debug("ID correct");
 
+		called_function.id = currToken->info;
 
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
@@ -858,19 +945,32 @@ parse_errno assignment(){
 			break;
 		}
 
+		I_createFrame();
+
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
 
 		if((ret = arg_list()) != PARSE_OK)
 			return (ret);
 
+		if (param_counter != number_param(hTable, called_function.id))
+			return (SEMANTIC_TYPE);
+
+		I_callFunc(called_function.id);
+
+		I_priradenie(*returnVal);
+
+		param_counter = 0;
+		called_function.id = NULL;
 		currToken = getToken();
+		returnVal = NULL;
 		break;
 	default:
 	{
 		lastToken = myMalloc(sizeof(token));
 		memcpy(lastToken, currToken, sizeof(token));
 		currToken = parseExpression(lastToken, returnVal, lTable);
+		returnVal = NULL;
 	}
 	}
 	return (PARSE_OK);
@@ -880,6 +980,7 @@ parse_errno parse(){
 	init3ADD();
 	hTable = ltab_init();
 	cstackInit(&cstack);
+	cstackInit(&ifstack);
 	parse_errno rett;
 	rett = prog_body();
 	debug("FILE PARSING COMPLETE:");

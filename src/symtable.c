@@ -230,6 +230,40 @@ int return_index_parameter(tHashTable *local_table, tFooListElem sym, param psym
 	return -1;
 }
 
+param *return_parameter_from_index(tHashTable *local_table, tFooListElem sym, int index) {
+
+	int idx = hash_code(sym.id);
+	int counter = 0;
+
+	local_table[idx].Act = local_table[idx].First;
+
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
+		{
+			local_table[idx].Act->param->Act =
+					local_table[idx].First->param->First;
+
+			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
+			{
+				if (counter == index) // Porovna retazce
+				{
+					return (local_table[idx].Act->param->Act);
+				}
+
+				counter++;
+
+				local_table[idx].Act->param->Act =
+						local_table[idx].Act->param->Act->next_param; // Posunieme sa o prvok dalej v zozname parametrov
+			}
+		}
+
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+
+	return NULL;
+}
+
 /*
  * Funkcia: change_isdefine()
  * Popis: Funkcia prejde zoznam a najde prvoku zo spravym "sym.id" nastavi is_define na true
@@ -369,7 +403,7 @@ int find_param_test(tHashTable *local_table, char *id_fnc, char *id_param) {
 int number_param(tHashTable *local_table, char *id) {
 
 	int idx = hash_code(id);
-	int counter = 0;
+	int counter = -1;
 
 	local_table[idx].Act = local_table[idx].First;
 
@@ -390,5 +424,8 @@ int number_param(tHashTable *local_table, char *id) {
 		local_table[idx].Act = local_table[idx].Act->next_item; //posunieme sa o prvok dalej
 	}
 
-	return counter;
+	if(counter == -1)
+		return counter;
+	else
+		return counter+1;
 }

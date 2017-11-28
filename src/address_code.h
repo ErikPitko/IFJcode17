@@ -27,19 +27,20 @@ char * reformString(char *tmp);
 */
 void init3ADD();
 
-void I_dim_id_as_var_type(char* id, int type );
-void I_input_id(char *id, int type);
+void I_dim_id_as_var_type(tFooListElem value);
+void I_input_id(tFooListElem value);
 void I_do_while(int number, tFooListElem value);
 void I_do_while_label(int number);
 void I_loop(int number);
 void I_if_then(int number, tFooListElem value);
-void I_else(int number);
+void I_jump_endif(int number);
+void I_if(int number);
 void I_endif(int number);
 void I_id_expression(char *id);
-void I_id_func1();
+void I_createFrame();
 void I_arg_i_id(char *id, char *idD);
 void I_arg_i_const(char *_const, int type, char *idD);
-void I_id_func2(char *id_func);
+void I_callFunc(char *id_func);
 void I_define_func(char *id_func);
 void I_define_return();
 void I_print();
@@ -52,6 +53,6 @@ void I_print();
 * @param number - counter
 *
 */
-void I_priradenie(char *id, int type_of_a, int number);
+void I_priradenie(tFooListElem value);
 
 #endif /* ADDRESS_CODE_H_ */

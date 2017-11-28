@@ -343,7 +343,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		error_msg(semanticError,"Semantic error in expression");
 	}
 	exprResult.id = elem.id;
-	if(returnVar != NULL)
+	if(returnVar != NULL && !find_test(localTable, returnVar->id))
 	{
 		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
 	}

@@ -48,17 +48,13 @@ print_exp	->	<assignment> ; <print_exp>
 
 command		->	Input id EOL
 				If EXP Then EOL <if_body> EOL
-				
-				If EXP Then EOL <command> Else <command> End If
-				If EXP Then EOL <command> End If
-				
-				id = <assingnment> EOL
+				id = <assignment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
 				Dim id As <var_type> EOL
-				Dim id As <var_type> = EXP EOL
-				Return <assingnment> EOL
+				Dim id As <var_type> = <assignment> EOL
+				Return EXP EOL
 				EOL
 
-assingment	->	EXP
+assignment	->	EXP
 				id ( <arg_list>

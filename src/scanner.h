@@ -11,7 +11,7 @@
 
 
 typedef struct structToken{
-	unsigned type;
+	int type;
 	char *info; //Numbers will be in here too.
 }token;
 

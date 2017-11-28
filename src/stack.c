@@ -1,4 +1,3 @@
-
 /*
 **    stackInit .... inicializace zásobníku
 **    stackEmpty ... test na prázdnost zásobníku
@@ -10,7 +9,7 @@
 
 #include "stack.h"
 
-unsigned STACK_SIZE = 200;
+unsigned STACK_SIZE = 1000;
 
 void stackInit ( tStack* s ) {
 	if(s == NULL)
@@ -22,7 +21,7 @@ void stackInit ( tStack* s ) {
 }
 
 void stackIncrement ( tStack* s ){
-	tReductToken *new = (tReductToken*)myRealloc(s->arr, s->size + STACK_SIZE);
+	tReductToken *new = (tReductToken*)myRealloc(s->arr, (s->size + STACK_SIZE)*sizeof(tReductToken));
 	if(new == NULL)
 		return;
 	s->arr = new;
@@ -103,22 +102,3 @@ bool checkMoreOperators(tStack* s)
 		return true;
 	return false;
 }
-
-/*
-int main(){
-	garbageInit(400);
-	struct structToken *temp;
-	struct structToken token;
-	token.info = "a";
-	token.type = 1;
-	tStack st;
-	stackInit(&st);
-	stackPush(&st, token);
-	temp = stackTop(&st);
-	fprintf(stdout, "%c \t -- top", (temp) ? temp->info[0]:'0');
-	stackPop(&st);
-	garbageFree();
-	return EXIT_SUCCESS;
-}
-*/
-

@@ -12,7 +12,7 @@
 //extern struct structToken;
 
 int ungetcharpom = 0;
-static token* lastToken;
+extern token* lastToken;
 //token *getToken();
 //testove ucely 1. TOKEN_ID OBSAH
 /*
@@ -55,8 +55,8 @@ token *tokenInit(){
 token *getToken(){
   token * tmpToken;
 	
-  lastToken = myMalloc(sizeof(struct structToken));
-  lastToken->type = NOPE;
+//  lastToken = myMalloc(sizeof(struct structToken));
+//  lastToken->type = NOPE;
   tmpToken = getToken0();
   lastToken = tmpToken;
 	

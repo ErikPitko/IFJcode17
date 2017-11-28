@@ -14,6 +14,7 @@
 #include "error.h"
 #include "symtable.h"
 #include "address_code.h"
+#include "cstack.h"
 
 parse_errno parse();
 

@@ -17,9 +17,10 @@ extern tFooListElem exprResult;
 /*********counters************/
 int param_counter;
 
-int if_counter;
 int cycle_counter;
-int cycle_counter2;
+tcStack cstack;
+
+
 
 /*****************************/
 
@@ -96,7 +97,6 @@ void debug(const char *form, ...){
 	va_end(args);
 }
 
-
 /*--------------------------------------------*/
 
 
@@ -132,9 +132,6 @@ parse_errno prog_body(){
 			return (ret);
 
 		if((ret =main_body()) != PARSE_OK)
-			return (ret);
-
-		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
 //		ltab_destroy(lTable);
@@ -285,6 +282,7 @@ parse_errno fnc_body(){
 		I_define_return();
 		break;
 	default:
+
 		if((ret = command()) != PARSE_OK)
 			return (ret);
 
@@ -298,17 +296,71 @@ parse_errno if_body(){
 	debug("if_body() entered");
 	currToken = getToken();
 	switch(currToken->type){
-	case ELSE:
-		debug("ELSE correct");
-		if_counter -= 2;
-		I_endif(if_counter);
+	case IF:
+		debug("IF correct");
+		debug("******* IF GENERATION *******");
+
+		currToken = parseExpression(NULL, NULL, lTable);
+
+//		I_if_then(if_counter, exprResult);
+
+		if(currToken->type != THEN){
+			warning_msg("expected THEN after EXP");
+			return (SYNTAX_ERR);
+		}
+		debug("THEN correct");
 
 		if((ret = check_EOL()) != PARSE_OK)
-					return (ret);
+			return (ret);
+
+		if((ret = if_body()) != PARSE_OK)
+			return (ret);
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
+
+
+		if((ret = if_body()) != PARSE_OK)
+			return (ret);
+
+		debug("*****************************");
+		break;
+	case ELSE:
+		debug("ELSE correct");
+//		I_endif(if_counter);
+
+		currToken = getToken();
+
+		if(currToken->type == EOL)
+			currToken = getToken();
 
 		if((ret = else_body()) != PARSE_OK)
 			return (ret);
+
 		break;
+	case ELSEIF:
+		debug("ELSEIF correct");
+		debug("*** ELSEIF GENERATION ***");
+
+		currToken = parseExpression(NULL, NULL, lTable);
+
+//				I_if_then(if_counter, exprResult);
+
+		if(currToken->type != THEN){
+			warning_msg("expected THEN after EXP");
+			return (SYNTAX_ERR);
+		}
+		debug("THEN correct");
+
+		if((ret = check_EOL()) != PARSE_OK)
+			return (ret);
+
+		if((ret = if_body()) != PARSE_OK)
+			return (ret);
+
+		debug("*********************");
+		break;
+
 	case END:
 		debug("END correct");
 		currToken = getToken();
@@ -317,7 +369,9 @@ parse_errno if_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-		I_endif(if_counter + 1);
+//		I_endif(if_counter + 1);
+
+//		local_counter[255]--;
 		debug("*********************");
 		break;
 	default:
@@ -330,26 +384,31 @@ parse_errno if_body(){
 	return (PARSE_OK);
 }
 
-parse_errno else_body(){
+parse_errno else_body(int local_counter[]){
 	debug("else_body() entered");
-	currToken = getToken();
+	if(local_counter[255] >= 254){
+		//TODO CRASH
+	}
 	switch(currToken->type){
 	case END:
 		debug("END correct");
+		(local_counter[local_counter[255]])++;
 		currToken = getToken();
 		if(currToken->type != IF){
 			warning_msg("expected IF after END");
 			return (SYNTAX_ERR);
 		}
 		debug("IF correct");
-		I_endif(if_counter + 1);
+//		I_endif(if_counter + 1);
 		debug("*********************");
 		break;
 	default:
 		if((ret = command()) != PARSE_OK)
 			return (ret);
 
-		if((ret = else_body()) != PARSE_OK)
+		currToken = getToken();
+
+		if((ret = else_body(local_counter)) != PARSE_OK)
 			return (ret);
 	}
 	return (PARSE_OK);
@@ -361,10 +420,6 @@ parse_errno while_body(){
 	switch(currToken->type){
 	case LOOP:
 		debug("LOOP correct");
-		I_loop(--cycle_counter2);
-		if(cycle_counter2 <= 0)
-			cycle_counter2 = cycle_counter;
-		cycle_counter++;
 		debug("*********************");
 		break;
 	default:
@@ -636,8 +691,7 @@ parse_errno command(){
 		currToken = parseExpression(NULL, NULL, lTable);
 
 		debug("*** IF GENERATION ***");
-		I_if_then(if_counter, exprResult);
-		if_counter += 2;
+//		I_if_then(if_counter, exprResult);
 
 		if(currToken->type != THEN){
 			warning_msg("expected THEN after EXP");
@@ -696,12 +750,12 @@ parse_errno command(){
 
 		debug("********WHILE********");
 
-		I_do_while_label(cycle_counter);
+		cstackPush(&cstack, cycle_counter);
+		I_do_while_label(cycle_counter++);
 
 		currToken = parseExpression(NULL, NULL, lTable);
 
 		I_do_while(cycle_counter++, exprResult);
-		cycle_counter2++;
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -776,6 +830,9 @@ parse_errno command(){
 			return (SYNTAX_ERR);
 		}
 		break;
+	case EOL:
+		debug("EOL correct");
+		break;
 	default:
 		debug("Unexpected command");
 		return (SYNTAX_ERR);
@@ -822,6 +879,7 @@ parse_errno assignment(){
 parse_errno parse(){
 	init3ADD();
 	hTable = ltab_init();
+	cstackInit(&cstack);
 	parse_errno rett;
 	rett = prog_body();
 	debug("FILE PARSING COMPLETE:");
@@ -833,6 +891,7 @@ parse_errno parse(){
 		sprintf(str, "%d", currToken->type);
 		printf("failure at token: %s : %s\n", currToken->info, str);
 	}
+	cstackClear(&cstack);
 	ltab_destroy(hTable);
 	return (rett);
 }

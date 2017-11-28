@@ -1,6 +1,6 @@
 prog_body	->	EOF
 				EOL <prog_body>
-				Scope EOL <main_body> EOL <prog_body>
+				Scope EOL <main_body> <prog_body>
 				Declare Function fncName ( <par_list> As <var_type> EOL <prog_body>
 				Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
 
@@ -11,7 +11,8 @@ fnc_body	->	<command><fnc_body>
 				End Function
 
 if_body		->	<command><if_body>
-				Else EOL <else_body>
+				ElseIf EXP Then EOL <if_body>
+				Else <else_body>
 				End If
 
 else_body	->	<command><else_body>
@@ -47,12 +48,17 @@ print_exp	->	<assignment> ; <print_exp>
 
 command		->	Input id EOL
 				If EXP Then EOL <if_body> EOL
+				
+				If EXP Then EOL <command> Else <command> End If
+				If EXP Then EOL <command> End If
+				
 				id = <assingnment> EOL
 				Do While EXP EOL <while_body> EOL
 				Print <print_exp>
 				Dim id As <var_type> EOL
 				Dim id As <var_type> = EXP EOL
 				Return <assingnment> EOL
+				EOL
 
 assingment	->	EXP
 				id ( <arg_list>

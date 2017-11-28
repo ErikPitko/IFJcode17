@@ -16,6 +16,9 @@
 #include "error.h"
 #include "ExpressionParser.h"
 #include "parser.h"
+
+token *lastToken;
+
 int main(int argc, char *argv[])
 {
 	parse_errno ret;
@@ -23,6 +26,10 @@ int main(int argc, char *argv[])
 	(void) argv;
 	garbageInit(2000);
 	LInit(&globalInstrList);
+
+	lastToken = myMalloc(sizeof(struct structToken));
+	lastToken->type = NOPE;
+
 	ret = parse();
   /*if (argc == 2){
 	FILE *file;

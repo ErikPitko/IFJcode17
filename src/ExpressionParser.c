@@ -1050,7 +1050,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 			else if(stackTop(rStack)->firstToken->type== GREATER)
 			{
-				printf("****E -> E>E****\n");
+//				printf("****E -> E>E****\n");
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));

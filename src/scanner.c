@@ -243,7 +243,7 @@ token* getToken0() {
 					while (((c = getchar0()) >= '0') && (c<='9')) {
 							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;} // 222
 					}
-					if(isspace(c) || isOperator(c)){
+					if(isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
 						//if (c == '\n')
 							tmp_s[i] = '\0';
 						tmpToken->type = VALUE_INTEGER;
@@ -262,7 +262,7 @@ token* getToken0() {
 							ERR; // 123.x // x neni cislo
 						}
 						if (c != 'e'/*isspace(c) || isOperator(c)*/){
-							if (isspace(c) || isOperator(c)){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
 								ungetcharpom = c;
 								tmp_s[i] = '\0';
 								tmpToken->info = tmp_s;
@@ -290,7 +290,7 @@ token* getToken0() {
 							ungetcharpom = c;
 							ERR; // 123.123e+-c /
 						}
-						if (isspace(c) || isOperator(c)){
+						if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
 							ungetcharpom = c;
 							tmp_s[i] = '\0';
 							tmpToken->info = tmp_s;
@@ -306,7 +306,7 @@ token* getToken0() {
               while((c >= '0') && (c <='9')){
                 c = getchar0();
               }
-							if (isspace(c) || isOperator(c)){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
                 ungetcharpom = c;
                 tmp_s[i] = '\0';
                 tmpToken->info = tmp_s;
@@ -315,7 +315,7 @@ token* getToken0() {
 							} else ERR;
 
             }else{
-							if (isspace(c) || isOperator(c)){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
     						tmp_s[i] = '\0';
     						ungetcharpom = c;
     						tmpToken->info = tmp_s;

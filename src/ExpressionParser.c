@@ -55,8 +55,7 @@ bool areOperandsSameArithmethic(tFooListElem *firstOperand,tFooListElem *secondO
 bool isTokenOperand(token *operand, bool isArithmethic);
 bool isSymbolOperand(tFooListElem *operand, bool isArithmethic);
 bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool isArithmethic);
-void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar,tHashTable *localTable,char * tempName);
-char *rand_string(int length);
+void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable,int *counter);
 void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString);
 bool end(int type);
 /**************************************HEADER***************************************/
@@ -148,26 +147,6 @@ int tableIndexSelect(tReductToken *tok)
 			return i;
 	return 13;
 }
-
-char *rand_string(int length) {
-    char *string = "abcdefghijklmnopqrstuvwxyz";
-    size_t stringLen = 26;
-    char *randomString;
-    randomString = (char*)myMalloc(sizeof(char) * (length +1));
-    if (!randomString) {
-        return (char*)0;
-    }
-
-    unsigned int key = 0;
-
-    for (int n = 0;n < length;n++) {
-        key = rand() % stringLen;
-        randomString[n] = string[key];
-    }
-    randomString[length] = '\0';
-    return randomString;
-}
-
 //returnVar je a = b+8 (jaký datový typ je a)
 //localTable lokální tabulka symbolů
 //datové typy:
@@ -184,18 +163,14 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	stackPush(&stack,t);
 	bool reduct = false;
 	tReductToken actToken;
+	int counter = 0;
 	tReductToken priority;
 	bool wasOperand = false;
 	bool wasOperation = false;
 	int operandCounter = 0;
 	int semanticError = 0;
-	char* temporaryName = rand_string(20);
 	tFooListElem elem;
-	elem.id = temporaryName;
 	list_insert(localTable,elem);
-//	printf("CREATEFRAME\n");
-	printf("DEFVAR LF@%s\n",temporaryName);
-//	printf("PUSHFRAME\n");
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	priority.priority = L;
 	priority.firstToken->info = "<";
@@ -255,7 +230,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				//printf("%i  \n",operatorcnt);
 				//stackPrint("stack",&stack);
 				//printf("&&&&&APPLY RULE&&&&&\n");
-				applyRule(&stack,&rStack,&reduct,&semanticError,returnVar,localTable,temporaryName);
+				applyRule(&stack,&rStack,&reduct,&semanticError,returnVar,localTable,&counter);
 				//printf("&&&&&AFTER RULE&&&&&\n");
 				break;
 			}
@@ -344,14 +319,46 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
-	exprResult.id = elem.id;
 	if(returnVar != NULL && find_test(localTable, returnVar->id))
 	{
-		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
+		printf("MOVE LF@%s GF@%s\n",returnVar->id, exprResult.id);
 	}
 	//stackClear(&stack);
 	//stackClear(&rStack);
 	return actToken.firstToken;
+}
+
+char* selectTmp(int zeroOrOne,int type,int counter)
+{
+	int modulo = (counter)%2 +zeroOrOne;
+	if(modulo == 0)
+	{
+		if(type == STRING || type == VALUE_STRING)
+			return "exppom1string";
+		else if(type == DOUBLE || type == VALUE_DOUBLE)
+			return "exppom1double";
+		else if(type == INTEGER|| type == VALUE_INTEGER)
+			return "exppom1integer";
+	}
+	else if(modulo == 1)
+	{
+		if(type == STRING || type == VALUE_STRING)
+			return "exppom2string";
+		else if(type == DOUBLE || type == VALUE_DOUBLE)
+			return "exppom2double";
+		else if(type == INTEGER|| type == VALUE_INTEGER)
+			return "exppom2integer";
+	}
+	else if (modulo == 2)
+	{
+		if(type == STRING || type == VALUE_STRING)
+			return "exppom3string";
+		else if(type == DOUBLE || type == VALUE_DOUBLE)
+			return "exppom3double";
+		else if(type == INTEGER|| type == VALUE_INTEGER)
+			return "exppom3integer";
+	}
+	return "";
 }
 
 bool areOperandsSame(tFooListElem *firstOperand,tFooListElem *secondOperand)
@@ -560,10 +567,10 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 	}
 }
 
-void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFooListElem *secondOper)
+void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFooListElem *secondOper, int counter)
 {
 	//printf("ADD LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
-	printf("%s LF@%s ",instr,temporary->id);
+	printf("%s GF@%s ",instr,temporary->id);
 	if(firstOper!= NULL)
 	{
 		if(firstOper->type == VALUE_STRING)
@@ -573,7 +580,9 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 		if(firstOper->type == VALUE_DOUBLE)
 			printf("double@%s",firstOper->id);
 		if(firstOper->type == STRING || firstOper->type == INTEGER ||firstOper->type == DOUBLE)
-			printf("LF@%s ",firstOper->id);
+			if(counter == 1)
+				printf("LF@%s ",firstOper->id);
+			else printf("GF@%s ",firstOper->id);
 	}
 	if(secondOper!= NULL)
 	{
@@ -589,7 +598,7 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 	printf("\n");
 }
 
-void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable, char * tempName)
+void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable,int *counter)
 {
 	//E -> i
 	if(stackLenght(rStack)==1)
@@ -617,12 +626,13 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			}
 		}
 		convertTo(returnVar,firstOper,NULL,semanticError,true);
-		tFooListElem *temporary = function_find(localTable,tempName);
-		temporary->type = firstOper->type;
-		exprResult.type = temporary->type;
-		tmp->firstToken->type = temporary->type;
+		tFooListElem temporary;
+		temporary.type = firstOper->type;
+		temporary.id = selectTmp(0,temporary.type,(*counter));
+		exprResult.type = temporary.type;
+		tmp->firstToken->type = temporary.type;
 		tmp->isReduced = true;
-		printValue("MOVE", temporary, firstOper, NULL);
+		printf("MOVE GF@%s LF@%s\n", temporary.id, firstOper->id);
 		stackPop(rStack);
 		stackPush(st,*(tmp));
 		(*reduct) = true;
@@ -642,7 +652,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				//printf("****E -> (E)****\n");
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info =  selectTmp(0, tmp.firstToken->type,(*counter));
 				result->firstToken->type = tmp.firstToken->type;
 				result->isReduced = true;
 				stackPop(rStack);
@@ -656,10 +666,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -703,18 +712,22 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
-						temporary->type = secondOper->type;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						if(temporary->type == STRING||temporary->type == VALUE_STRING)
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						if(temporary.type == STRING||temporary.type == VALUE_STRING)
 						{
-							printValue("CONCAT",temporary,secondOper,firstOper);
+							printValue("CONCAT",&temporary,secondOper,firstOper,(*counter));
 						}
 						else
 						{
-							printValue("ADD",temporary,secondOper,firstOper);
+							printValue("ADD",&temporary,secondOper,firstOper,(*counter));
 							//LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
 						}
 					}
@@ -731,10 +744,10 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
+
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -774,16 +787,19 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					convertTo(returnVar,firstOper,secondOper,semanticError,false);
-					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
-						temporary->type = secondOper->type;
+						convertTo(returnVar,firstOper,secondOper,semanticError,false);
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("SUB",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("SUB",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticsub:
@@ -798,10 +814,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -845,12 +860,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = secondOper->type;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("MUL",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("MUL",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticasterix:
@@ -865,10 +884,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -937,12 +955,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 								}
 							}
 						//printf("CAST\n");
-						temporary->type = secondOper->type;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("DIV",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("DIV",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticdivint:
@@ -957,10 +979,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1004,12 +1025,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = secondOper->type;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = secondOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("DIV",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("DIV",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticdivdouble:
@@ -1023,10 +1048,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1067,13 +1091,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->type = fID.firstToken->type;
 					}
 					convertTo(returnVar,firstOper,secondOper,semanticError,false);
-					//printf("CAST\n");
-					temporary->type = BOOLEAN;
+					tFooListElem temporary;
+					temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+					temporary.type = secondOper->type;
 					//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-					temporary->is_define = true;
-					result->firstToken->type = temporary->type;
-					exprResult.type = temporary->type;
-					printValue("LT",temporary,secondOper,firstOper);
+					temporary.is_define = true;
+					result->firstToken->type = temporary.type;
+					result->firstToken->info = temporary.id;
+					exprResult.type = temporary.type;
+					exprResult.id = temporary.id;
+					printValue("LT",&temporary,secondOper,firstOper,(*counter));
 				}
 				semanticless:
 				stackPop(rStack);	//popnutí stacku
@@ -1086,10 +1113,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1133,12 +1159,17 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
-						temporary->type = BOOLEAN;
+
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("GT",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("GT",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticgreater:
@@ -1152,10 +1183,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1199,11 +1229,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
-						temporary->type = BOOLEAN;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						printValue("EQ",temporary,secondOper,firstOper);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("EQ",&temporary,secondOper,firstOper,(*counter));
 					}
 				}
 				semanticequal:
@@ -1217,10 +1252,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1264,13 +1298,17 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = BOOLEAN;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("LT",temporary,secondOper,firstOper);
-						printValue("NOT",temporary,temporary,NULL);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("LT",&temporary,secondOper,firstOper,(*counter));
+						printValue("NOT",&temporary,&temporary,NULL,(*counter));
 					}
 				}
 				semanticgreaterequal:
@@ -1284,10 +1322,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1329,13 +1366,17 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = BOOLEAN;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("GT",temporary,secondOper,firstOper);
-						printValue("NOT",temporary,temporary,NULL);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("GT",&temporary,secondOper,firstOper,(*counter));
+						printValue("NOT",&temporary,&temporary,NULL,(*counter));
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -1348,10 +1389,9 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				stackPop(rStack);	//popnutí PLUS
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
-				result->firstToken->info = tempName;
+				result->firstToken->info = "EXPR";
 				if(*(semanticError)==0)
 				{
-					tFooListElem *temporary = function_find(localTable,tempName);
 					tFooListElem *firstOper;
 					tFooListElem *secondOper;
 					if(stackTop(rStack) != NULL)
@@ -1395,13 +1435,17 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
-						temporary->type = BOOLEAN;
+						tFooListElem temporary;
+						temporary.id = selectTmp(0, secondOper->type,(*counter)++);
+						temporary.type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
-						temporary->is_define = true;
-						result->firstToken->type = temporary->type;
-						exprResult.type = temporary->type;
-						printValue("EQ",temporary,secondOper,firstOper);
-						printValue("NOT",temporary,temporary,NULL);
+						temporary.is_define = true;
+						result->firstToken->type = temporary.type;
+						result->firstToken->info = temporary.id;
+						exprResult.type = temporary.type;
+						exprResult.id = temporary.id;
+						printValue("EQ",&temporary,secondOper,firstOper,(*counter));
+						printValue("NOT",&temporary,&temporary,NULL,(*counter));
 					}
 				}
 				semanticinequality:

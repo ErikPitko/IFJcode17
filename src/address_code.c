@@ -72,10 +72,35 @@ void init3ADD(){
 	printf("DEFVAR GF@_pom_integer\n");
 	printf("DEFVAR GF@_pom_double\n");
 	printf("DEFVAR GF@_pom_string\n");
-	
+
 	printf("MOVE GF@_pom_integer int@0\n");
 	printf("MOVE GF@_pom_double float@0\n");
 	printf("MOVE GF@_pom_string string@\n");
+
+	printf("DEFVAR GF@exppom1string\n");
+	printf("DEFVAR GF@exppom1double\n");
+	printf("DEFVAR GF@exppom1integer\n");
+
+	printf("MOVE GF@exppom1integer int@0\n");
+	printf("MOVE GF@exppom1double float@0\n");
+	printf("MOVE GF@exppom1string string@\n");
+
+	printf("DEFVAR GF@exppom2string\n");
+	printf("DEFVAR GF@exppom2double\n");
+	printf("DEFVAR GF@exppom2integer\n");
+
+	printf("MOVE GF@exppom2integer int@0\n");
+	printf("MOVE GF@exppom2double float@0\n");
+	printf("MOVE GF@exppom2string string@\n");
+
+	printf("DEFVAR GF@exppom3string\n");
+	printf("DEFVAR GF@exppom3double\n");
+	printf("DEFVAR GF@exppom3integer\n");
+	
+	printf("MOVE GF@exppom3integer int@0\n");
+	printf("MOVE GF@exppom3double float@0\n");
+	printf("MOVE GF@exppom3string string@\n");
+
 
 	printf("DEFVAR GF@_string0\n");       //prazdny string nemenit
 	printf("TYPE GF@_string0 GF@_string0\n");

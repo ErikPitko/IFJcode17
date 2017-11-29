@@ -193,9 +193,9 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	tFooListElem elem;
 	elem.id = temporaryName;
 	list_insert(localTable,elem);
-	printf("CREATEFRAME\n");
+//	printf("CREATEFRAME\n");
 	printf("DEFVAR LF@%s\n",temporaryName);
-	printf("PUSHFRAME\n");
+//	printf("PUSHFRAME\n");
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	priority.priority = L;
 	priority.firstToken->info = "<";
@@ -345,7 +345,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 		error_msg(semanticError,"Semantic error in expression");
 	}
 	exprResult.id = elem.id;
-	if(returnVar != NULL && !find_test(localTable, returnVar->id))
+	if(returnVar != NULL && find_test(localTable, returnVar->id))
 	{
 		printf("MOVE LF@%s LF@%s\n",returnVar->id, exprResult.id);
 	}
@@ -594,7 +594,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 	//E -> i
 	if(stackLenght(rStack)==1)
 	{
-		//printf("****E -> i****\n");
+//		printf("****E -> i****\n");
 		tReductToken *tmp = stackTop(rStack);
 		tFooListElem *firstOper;
 		if(tmp != NULL)
@@ -622,6 +622,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 		exprResult.type = temporary->type;
 		tmp->firstToken->type = temporary->type;
 		tmp->isReduced = true;
+		printValue("MOVE", temporary, firstOper, NULL);
 		stackPop(rStack);
 		stackPush(st,*(tmp));
 		(*reduct) = true;
@@ -1067,7 +1068,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					}
 					convertTo(returnVar,firstOper,secondOper,semanticError,false);
 					//printf("CAST\n");
-					temporary->type = secondOper->type;
+					temporary->type = BOOLEAN;
 					//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 					temporary->is_define = true;
 					result->firstToken->type = temporary->type;
@@ -1132,7 +1133,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					//printf("CAST\n");
 					if(secondOper != NULL && firstOper != NULL)
 					{
-						temporary->type = secondOper->type;
+						temporary->type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
@@ -1198,7 +1199,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
-						temporary->type = secondOper->type;
+						temporary->type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
@@ -1263,7 +1264,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = secondOper->type;
+						temporary->type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
@@ -1328,7 +1329,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false);
-						temporary->type = secondOper->type;
+						temporary->type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
@@ -1394,7 +1395,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					if(secondOper != NULL && firstOper != NULL)
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true);
-						temporary->type = secondOper->type;
+						temporary->type = BOOLEAN;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;

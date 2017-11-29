@@ -6,7 +6,11 @@ all: IFJcode17
 OBJS=error.o ExpressionParser.o garbage.o scanner.o stack.o parser.o symtable.o InstructionList.o address_code.o cstack.o
 
 run: all
-	./IFJcode17 ${ARGS} > out.txt	
+	./IFJcode17 ${ARGS}
+
+int: all
+	./IFJcode17 ${ARGS} > out.txt && ./ic17int out.txt
+
 IFJcode17: IFJcode17.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 

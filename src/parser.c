@@ -300,32 +300,39 @@ parse_errno fnc_body(){
 	return (PARSE_OK);
 }
 
-parse_errno if_body(){
+parse_errno if_body(unsigned loc_counter){
 	debug("if_body() entered");
 	currToken = getToken();
+	int label_num = *cstackTop(&ifstack);
 	int tmp1, tmp2;
 	switch(currToken->type){
 	case ELSE:
 		debug("ELSE correct");
+//		cstackPrint("KKT", &ifstack);
 
-		tmp1 = *cstackTopPop(&ifstack);
-		tmp2 = *cstackTopPop(&ifstack);
+//		if(loc_counter != 0){
+			tmp1 = *cstackTopPop(&ifstack);
+			tmp2 = *cstackTopPop(&ifstack);
 
-		I_jump_endif(*cstackTop(&ifstack));
+			I_jump_endif(*cstackTop(&ifstack));
 
-		cstackPush(&ifstack, tmp2);
-		cstackPush(&ifstack, tmp1);
-
+			cstackPush(&ifstack, tmp2);
+			cstackPush(&ifstack, tmp1);
+//		}
 		cstackPop(&ifstack);
 
+
+//		cstackPrint("KKT", &ifstack);
 		I_if(*cstackTopPop(&ifstack));
+		if(loc_counter == 0)
+			I_endif(label_num);
 
 		currToken = getToken();
 
 		if(currToken->type == EOL)
 			currToken = getToken();
 
-		if((ret = else_body()) != PARSE_OK)
+		if((ret = else_body(label_num, loc_counter)) != PARSE_OK)
 			return (ret);
 
 		break;
@@ -333,6 +340,7 @@ parse_errno if_body(){
 		debug("ELSEIF correct");
 		debug("*** ELSEIF GENERATION ***");
 
+//		cstackPrint("KKT", &ifstack);
 
 		tmp1 = *cstackTopPop(&ifstack);
 		tmp2 = *cstackTopPop(&ifstack);
@@ -342,6 +350,8 @@ parse_errno if_body(){
 		cstackPush(&ifstack, tmp2);
 		cstackPush(&ifstack, tmp1);
 
+
+//		cstackPrint("KKT1", &ifstack);
 		I_if(*cstackTopPop(&ifstack));
 
 		currToken = parseExpression(NULL, NULL, lTable);
@@ -360,7 +370,8 @@ parse_errno if_body(){
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
-		if((ret = if_body()) != PARSE_OK)
+		loc_counter++;
+		if((ret = if_body(0)) != PARSE_OK)
 			return (ret);
 
 		debug("*********************");
@@ -375,10 +386,16 @@ parse_errno if_body(){
 		}
 		debug("IF correct");
 
-		cstackPop(&ifstack);
-		cstackPop(&ifstack);
+//		if(loc_counter == 0){
+			cstackPop(&ifstack);
+			cstackPop(&ifstack);
+			I_endif(*cstackTopPop(&ifstack));
+//		}else{
+//			I_endif(*cstackTopPop(&ifstack));
+//			cstackPop(&ifstack);
+//			cstackPop(&ifstack);
+//		}
 
-		I_endif(*cstackTopPop(&ifstack));
 
 		debug("*********************");
 		break;
@@ -386,13 +403,13 @@ parse_errno if_body(){
 		if((ret = command()) != PARSE_OK)
 			return (ret);
 
-		if((ret = if_body()) != PARSE_OK)
+		if((ret = if_body(loc_counter)) != PARSE_OK)
 			return (ret);
 	}
 	return (PARSE_OK);
 }
 
-parse_errno else_body(int local_counter[]){
+parse_errno else_body(int label_num, unsigned local_counter){
 	debug("else_body() entered");
 	switch(currToken->type){
 	case END:
@@ -404,7 +421,6 @@ parse_errno else_body(int local_counter[]){
 		}
 		debug("IF correct");
 
-
 		I_endif(*cstackTopPop(&ifstack));
 
 		debug("*********************");
@@ -415,7 +431,7 @@ parse_errno else_body(int local_counter[]){
 
 		currToken = getToken();
 
-		if((ret = else_body(local_counter)) != PARSE_OK)
+		if((ret = else_body(label_num, local_counter)) != PARSE_OK)
 			return (ret);
 	}
 	return (PARSE_OK);
@@ -727,7 +743,10 @@ parse_errno print_exp(){
 			break;
 		case EOL:
 			debug("EOL correct");
-
+			tFooListElem val;
+			val.id = "\n";
+			val.type = STRING;
+			I_print(val);
 			break;
 		default:
 			warning_msg("expected ; or EOL after assignment() in Print");
@@ -774,7 +793,7 @@ parse_errno command(){
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
-		if((ret = if_body()) != PARSE_OK)
+		if((ret = if_body(0)) != PARSE_OK)
 			return (ret);
 
 		if((ret = check_EOL()) != PARSE_OK)

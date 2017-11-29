@@ -73,6 +73,10 @@ void init3ADD(){
 	printf("DEFVAR GF@_pom_double\n");
 	printf("DEFVAR GF@_pom_string\n");
 	
+	printf("MOVE GF@_pom_integer int@0\n");
+	printf("MOVE GF@_pom_double float@0\n");
+	printf("MOVE GF@_pom_string string@\n");
+
 	printf("DEFVAR GF@_string0\n");       //prazdny string nemenit
 	printf("TYPE GF@_string0 GF@_string0\n");
 
@@ -103,8 +107,8 @@ int  where = 0;
       printf("MOVE GF@_%s int@0\n",value.id);
     }
     else{
-      printf("DEFVAR LF@_%s\n",value.id);
-      printf("MOVE LF@_%s int@0\n",value.id);
+      printf("DEFVAR LF@%s\n",value.id);
+      printf("MOVE LF@%s int@0\n",value.id);
     }
   }else
   if(value.type == DOUBLE){
@@ -113,8 +117,8 @@ int  where = 0;
       printf("MOVE GF@_%s float@0.0\n",value.id);
     }
     else{
-      printf("DEFVAR LF@_%s\n",value.id);
-      printf("MOVE LF@_%s float@0.0\n",value.id);
+      printf("DEFVAR LF@%s\n",value.id);
+      printf("MOVE LF@%s float@0.0\n",value.id);
     }
   }else
   if(value.type == STRING){
@@ -123,8 +127,8 @@ int  where = 0;
       printf("MOVE GF@_%s string@!""\n",value.id);
     }
     else{
-      printf("DEFVAR LF@_%s\n",value.id);
-      printf("MOVE LF@_%s int@0\n",value.id);
+      printf("DEFVAR LF@%s\n",value.id);
+      printf("MOVE LF@%s int@0\n",value.id);
     }
   }//else error
 }
@@ -176,15 +180,17 @@ void I_do_while(int number, tFooListElem value)
 	switch(value.type){
 	case INTEGER:
 	case VALUE_INTEGER:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0\n", number, number);
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d int@0\n", number, number);
 		break;
 	case DOUBLE:
 	case VALUE_DOUBLE:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0.0\n", number, number);
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d double@0.0\n", number, number);
+		break;
+	case BOOLEAN:
+		printf("JUMPIFEQ label_if%d LF@_pom%d bool@false\n", number, number);
 		break;
 	default:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d 0\n", number, number);
-		warning_msg("wrong type in if statement: %s : %d", value.id, value.type);
+		error_msg(SEMANTIC_TYPE, "wrong type in while statement: %s : %d", value.id, value.type);
 	}
 }
 
@@ -199,19 +205,24 @@ void I_loop(int number){
   printf("LABEL w_label%d_end\n",number);
 }
 
+//TODO porovnavanie stringov
 void I_if_then(int number, tFooListElem value){
 	printf("DEFVAR LF@_pom%d\n", number);
 	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
 	switch(value.type){
 	case INTEGER:
-		printf("JUMPIFEQ label_if%d LF@_pom%d 0\n", number, number);
+	case VALUE_INTEGER:
+		printf("JUMPIFEQ label_if%d LF@_pom%d int@0\n", number, number);
 		break;
 	case DOUBLE:
-		printf("JUMPIFEQ label_if%d LF@_pom%d 0.0\n", number, number);
+	case VALUE_DOUBLE:
+		printf("JUMPIFEQ label_if%d LF@_pom%d double@0.0\n", number, number);
+		break;
+	case BOOLEAN:
+		printf("JUMPIFEQ label_if%d LF@_pom%d bool@false\n", number, number);
 		break;
 	default:
-		printf("JUMPIFEQ label_if%d LF@_pom%d 0\n", number, number);
-		warning_msg("wrong type in if statement: %s : %d", value.id, value.type);
+		error_msg(SEMANTIC_TYPE, "wrong type in if statement: %s : %d", value.id, value.type);
 	}
 }
 
@@ -222,7 +233,7 @@ void I_if_then(int number, tFooListElem value){
 //}
 
 void I_jump_endif(int number){
-  printf("JUMP label_endif%d\n", number);
+  printf("JUMP label_if%d\n", number);
 }
 
 void I_if(int number){
@@ -230,7 +241,7 @@ void I_if(int number){
 }
 
 void I_endif(int number){
-  printf("LABEL label_endif%d\n", number);
+  printf("LABEL label_if%d\n", number);
 }
 /*
 *
@@ -240,7 +251,7 @@ void I_endif(int number){
 void I_id_expression(char *id){
   //expression();//zistit od adama nazov premennej pro vysledek EXP
 
-  printf("MOVE LF@_%s EXP\n",id);
+  printf("MOVE LF@%s EXP\n",id);
 
 
 }
@@ -263,7 +274,7 @@ void I_createFrame(){
 */
 void I_arg_i_id(char *id, char *idD){
 
-    printf("MOVE TF@_%s LF@_%s\n", idD, id);
+    printf("MOVE TF@%s LF@%s\n", idD, id);
 
 }
 
@@ -274,15 +285,16 @@ void I_arg_i_id(char *id, char *idD){
 */
 void I_arg_i_const(char *_const, int type, char *idD){
 
+	printf("DEFVAR TF@%s\n", idD);
 
   if(type == VALUE_INTEGER)
-    printf("MOVE TF@_%s int@%s\n", idD, _const);
+    printf("MOVE TF@%s int@%s\n", idD, _const);
   else if(type == VALUE_DOUBLE)
-    printf("MOVE TF@_%s double@%s\n", idD, _const);
+    printf("MOVE TF@%s double@%s\n", idD, _const);
   else if(type == VALUE_STRING)
   {
     _const = reformString(_const);
-    printf("MOVE TF@_%s int@%s\n", idD, _const);
+    printf("MOVE TF@%s int@%s\n", idD, _const);
   }
 }
 /*
@@ -339,7 +351,7 @@ void I_priradenie(tFooListElem value){
 	static int number = 0;
 
   if(value.type == STRING){
-      printf("MOVE LF@_%s GF@_pom_string\n",value.id);  //string pretypovavat nebudu
+      printf("MOVE LF@%s GF@_pom_string\n",value.id);  //string pretypovavat nebudu
   }else
 
 
@@ -352,12 +364,12 @@ void I_priradenie(tFooListElem value){
     printf("JUMP label_end%d\n",number);    //ukoncenie
 
     printf("LABEL label_int%d\n",number);  // aby sme mohli preskocit pretypovanie
-    printf("MOVE LF@_%s GF@_pom_integer\n",value.id);  // priradenie
+    printf("MOVE LF@%s GF@_pom_integer\n",value.id);  // priradenie
     printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
 
     //museli sme pretypovat
     printf("LABEL label_int0%d\n",number); // ak je 0
-    printf("MOVE LF@_%s GF@_int0\n",value.id);
+    printf("MOVE LF@%s GF@_int0\n",value.id);
 
     printf("LABEL label_end%d\n",number);
   }else
@@ -372,12 +384,12 @@ void I_priradenie(tFooListElem value){
         printf("JUMP label_end%d\n",number);  // ukoncenie
 
         printf("LABEL label_double%d\n",number);  // aby sme mohli preskocit pretypovanie
-        printf("MOVE LF@_%s GF@_pom_double\n",value.id);  // priradenie
+        printf("MOVE LF@%s GF@_pom_double\n",value.id);  // priradenie
         printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
 
         //museli sme pretypovat
         printf("LABEL label_double0%d\n",number); // ak je 0
-        printf("MOVE LF@_%s GF@_double0\n",value.id);
+        printf("MOVE LF@%s GF@_double0\n",value.id);
 
         printf("LABEL label_end%d\n",number);
 

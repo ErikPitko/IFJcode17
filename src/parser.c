@@ -467,6 +467,7 @@ parse_errno par_list(){
 
 		if(curr_function_declared){
 			int index;
+			//TODO funkcia bez parametrov
 			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
 				return(SEMANTIC_REDEF);
 			else

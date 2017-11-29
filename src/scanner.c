@@ -250,7 +250,7 @@ token* getToken0() {
 						tmpToken->info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
-					}else ERR;
+					}
 
 					if (c == '.'){ // double?
 						{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
@@ -297,15 +297,25 @@ token* getToken0() {
 							tmpToken->type = VALUE_DOUBLE;
 							return tmpToken;
 						} else ERR;
-					}else { // nebola .
-						  if(c == 'e'){
+					}else { // nebola .    
+						if((c == 'e') || (c == 'E')){
+              c = upper2lower(c);
+              
+							tmp_s[i++] = c;
               c = getchar0();
-              if((c >= '0') && (c <='9'))
-                ERR;
+              if((c == '+') || (c == '-'))
+                tmp_s[i++] = c;
+              else ungetcharpom = c;
+              c = getchar0();
 
               while((c >= '0') && (c <='9')){
+                tmp_s[i++] = c;
                 c = getchar0();
               }
+
+              if((tmp_s[i-1] == 'e') || (tmp_s[i-1] == '+') || (tmp_s[i-1] == '-'))
+                ERR;
+								
 							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
                 ungetcharpom = c;
                 tmp_s[i] = '\0';

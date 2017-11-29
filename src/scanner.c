@@ -299,13 +299,22 @@ token* getToken0() {
 						} else ERR;
 					}else { // nebola .
 						  if(c == 'e'){
+              
+							tmp_s[i++] = c;
               c = getchar0();
-              if((c >= '0') && (c <='9'))
-                ERR;
+              if((c == '+') || (c == '-'))
+                tmp_s[i++] = c;
+              else ungetcharpom = c;
+              c = getchar0();
 
               while((c >= '0') && (c <='9')){
+                tmp_s[i++] = c;
                 c = getchar0();
               }
+
+              if((tmp_s[i-1] == 'e') || (tmp_s[i-1] == '+') || (tmp_s[i-1] == '-'))
+                ERR;
+								
 							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
                 ungetcharpom = c;
                 tmp_s[i] = '\0';

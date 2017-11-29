@@ -297,8 +297,9 @@ token* getToken0() {
 							tmpToken->type = VALUE_DOUBLE;
 							return tmpToken;
 						} else ERR;
-					}else { // nebola .
-						  if(c == 'e'){
+					}else { // nebola .    
+						if((c == 'e') || (c == 'E')){
+              c = upper2lower(c);
               
 							tmp_s[i++] = c;
               c = getchar0();

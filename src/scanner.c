@@ -250,7 +250,7 @@ token* getToken0() {
 						tmpToken->info = tmp_s;
 						ungetcharpom = c;
 						return tmpToken;
-					}else ERR;
+					}
 
 					if (c == '.'){ // double?
 						{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}

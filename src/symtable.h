@@ -38,7 +38,7 @@ typedef struct tSymFoo
 	int type; // Datovy typ
 	bool is_define; // Kontrola ci je funkcia definovana
 	int is_main; // Kontrola ci je funkcia main	
-
+    int is_global;
 	tParamListElem *param;
 
 	struct tSymFoo *next_item; // Ukazatel na dalsi prvok	

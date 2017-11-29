@@ -361,7 +361,7 @@ void I_print(tFooListElem value){ // type z expression
 		value.id = reformString(value.id);
 		printf("WRITE string@%s\n", value.id);
 	}else
-	printf("WRITE LF@%s\n", value.id);
+	printf("WRITE GF@%s\n", value.id);
 }
 
 /*

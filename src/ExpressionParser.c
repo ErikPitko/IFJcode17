@@ -439,22 +439,22 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 		{
 			if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
 			{
-				firstOper->type = INTEGER;
+
 			}
 			if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 			{
-				firstOper->type = DOUBLE;
+
 			}
 		}
 		if(secondOper!= NULL)
 		{
 			if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
 			{
-				secondOper->type = INTEGER;
+
 			}
 			if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
 			{
-				secondOper->type = DOUBLE;
+
 			}
 		}
 		return;
@@ -487,12 +487,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			if(firstOper != NULL)
 				if(firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER)
 				{
-					firstOper->type = INTEGER;
+
 				}
 			if(secondOper != NULL)
 				if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
 				{
-					secondOper->type = INTEGER;
+
 				}
 			break;
 		case DOUBLE:
@@ -521,12 +521,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			if(firstOper != NULL)
 				if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 				{
-					firstOper->type = DOUBLE;
+
 				}
 			if(secondOper != NULL)
 				if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
 				{
-					secondOper->type = DOUBLE;
+
 				}
 			break;
 		case STRING:
@@ -537,12 +537,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			if(firstOper != NULL)
 				if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
 				{
-					firstOper->type = STRING;
+
 				}
 			if(secondOper != NULL)
 				if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
 				{
-					secondOper->type = STRING;
+
 				}
 			if(firstOper != NULL)
 				if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER||firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
@@ -556,6 +556,35 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				}
 			break;
 	}
+}
+
+void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFooListElem *secondOper)
+{
+	//printf("ADD LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+	printf("%s LF@%s ",instr,temporary->id);
+	if(firstOper!= NULL)
+	{
+		if(firstOper->type == VALUE_STRING)
+			printf("string@%s",firstOper->id);
+		if(firstOper->type == VALUE_INTEGER)
+			printf("int@%s",firstOper->id);
+		if(firstOper->type == VALUE_DOUBLE)
+			printf("double@%s",firstOper->id);
+		if(firstOper->type == STRING || firstOper->type == INTEGER ||firstOper->type == DOUBLE)
+			printf("LF@%s ",firstOper->id);
+	}
+	if(secondOper!= NULL)
+	{
+		if(secondOper->type == VALUE_STRING)
+			printf("string@%s",secondOper->id);
+		if(secondOper->type == VALUE_INTEGER)
+			printf("int@%s",secondOper->id);
+		if(secondOper->type == VALUE_DOUBLE)
+			printf("double@%s",secondOper->id);
+		if(secondOper->type == STRING || secondOper->type == INTEGER ||secondOper->type == DOUBLE)
+			printf("LF@%s ",secondOper->id);
+	}
+	printf("\n");
 }
 
 void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable, char * tempName)
@@ -678,11 +707,11 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						exprResult.type = temporary->type;
 						if(temporary->type == STRING||temporary->type == VALUE_STRING)
 						{
-							printf("CONCAT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+							printValue("CONCAT",temporary,secondOper,firstOper);
 						}
 						else
 						{
-							printf("ADD LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+							printValue("ADD",temporary,secondOper,firstOper);
 							//LInsert(&globalInstrList,I_ADD,temporary,firstOper,secondOper);
 						}
 					}
@@ -751,7 +780,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("SUB LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("SUB",temporary,secondOper,firstOper);
 					}
 				}
 				semanticsub:
@@ -818,7 +847,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("MUL LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("MUL",temporary,secondOper,firstOper);
 					}
 				}
 				semanticasterix:
@@ -910,7 +939,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("DIV",temporary,secondOper,firstOper);
 					}
 				}
 				semanticdivint:
@@ -977,7 +1006,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("DIV LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("DIV",temporary,secondOper,firstOper);
 					}
 				}
 				semanticdivdouble:
@@ -1041,7 +1070,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					temporary->is_define = true;
 					result->firstToken->type = temporary->type;
 					exprResult.type = temporary->type;
-					printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+					printValue("LT",temporary,secondOper,firstOper);
 				}
 				semanticless:
 				stackPop(rStack);	//popnutí stacku
@@ -1106,7 +1135,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("GT",temporary,secondOper,firstOper);
 					}
 				}
 				semanticgreater:
@@ -1171,7 +1200,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
-						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
+						printValue("EQ",temporary,secondOper,firstOper);
 					}
 				}
 				semanticequal:
@@ -1237,8 +1266,8 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("LT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
-						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
+						printValue("LT",temporary,secondOper,firstOper);
+						printValue("NOT",temporary,temporary,NULL);
 					}
 				}
 				semanticgreaterequal:
@@ -1302,8 +1331,8 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("GT LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
-						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
+						printValue("GT",temporary,secondOper,firstOper);
+						printValue("NOT",temporary,temporary,NULL);
 					}
 				}
 				stackPop(rStack);	//popnutí stacku
@@ -1368,8 +1397,8 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						temporary->is_define = true;
 						result->firstToken->type = temporary->type;
 						exprResult.type = temporary->type;
-						printf("EQ LF@%s LF@%s LF@%s\n",temporary->id,secondOper->id,firstOper->id);
-						printf("NOT LF@%s LF@%s\n",temporary->id,temporary->id);
+						printValue("EQ",temporary,secondOper,firstOper);
+						printValue("NOT",temporary,temporary,NULL);
 					}
 				}
 				semanticinequality:

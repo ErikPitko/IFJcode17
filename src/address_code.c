@@ -164,7 +164,7 @@ void I_input_id(tFooListElem value){//READ var type
 *
 */
 void I_do_while_label(int number){
-  printf("w_label%d\n",number);
+  printf("LABEL w_label%d\n",number);
 }
 
 void I_do_while(int number, tFooListElem value)
@@ -195,7 +195,7 @@ void I_do_while(int number, tFooListElem value)
 */
 void I_loop(int number){
   printf("JUMP w_label%d\n",number);
-  printf("w_label%d_end\n",number);
+  printf("LABEL w_label%d_end\n",number);
 }
 
 void I_if_then(int number, tFooListElem value){
@@ -275,13 +275,13 @@ void I_arg_i_const(char *_const, int type, char *idD){
 
 
   if(type == VALUE_INTEGER)
-    printf("MOVE TF@_%s integer@%s\n", idD, _const);
+    printf("MOVE TF@_%s int@%s\n", idD, _const);
   else if(type == VALUE_DOUBLE)
     printf("MOVE TF@_%s double@%s\n", idD, _const);
   else if(type == VALUE_STRING)
   {
     _const = reformString(_const);
-    printf("MOVE TF@_%s integer@%s\n", idD, _const);
+    printf("MOVE TF@_%s int@%s\n", idD, _const);
   }
 }
 /*
@@ -301,7 +301,7 @@ void I_callFunc(char *id_func){
 * @param id - znak do premennej do ktorej to budeme zapisovat EXP/func
 */
 void I_define_func(char *id_func){
-  printf("label%s\n", id_func);
+  printf("LABEL label%s\n", id_func);
 }
 
 /*

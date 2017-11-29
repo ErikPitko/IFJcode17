@@ -320,9 +320,11 @@ void I_define_return(){
 *
 */
 void I_print(tFooListElem value){ // type z expression
-	if (value.type == STRING)
+	if (value.type == STRING){
 		value.id = reformString(value.id);
-	printf("WRITE %s\n", value.id);
+		printf("WRITE string@%s\n", value.id);
+	}else
+	printf("WRITE LF@%s\n", value.id);
 }
 
 /*

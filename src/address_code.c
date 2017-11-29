@@ -68,6 +68,7 @@ char * reformString(char *tmp){
 */
 void init3ADD(){
 	printf(".IFJcode17\n");
+	printf("CREATEFRAME\n");
 	printf("DEFVAR GF@_pom_integer\n");
 	printf("DEFVAR GF@_pom_double\n");
 	printf("DEFVAR GF@_pom_string\n");
@@ -80,7 +81,7 @@ void init3ADD(){
 
 	printf("DEFVAR GF@_float0\n");   // realna nula 0.0
 	printf("INT2FLOAT GF@_float0 int@0\n");
-	
+	printf("PUSHFRAME\n");
 	printf("JUMP labelSCOPE\n");
 
 }

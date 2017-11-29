@@ -193,7 +193,9 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	tFooListElem elem;
 	elem.id = temporaryName;
 	list_insert(localTable,elem);
+	printf("CREATEFRAME\n");
 	printf("DEFVAR LF@%s\n",temporaryName);
+	printf("PUSHFRAME\n");
 	priority.firstToken = (token*)myMalloc(sizeof(token));
 	priority.priority = L;
 	priority.firstToken->info = "<";

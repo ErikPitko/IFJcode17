@@ -187,7 +187,7 @@ void I_do_while(int number, tFooListElem value)
 		printf("JUMPIFEQ w_label%d_end LF@_wpom%d double@0.0\n", number, number);
 		break;
 	case BOOLEAN:
-		printf("JUMPIFEQ label_if%d LF@_pom%d bool@false\n", number, number);
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d bool@false\n", number, number);
 		break;
 	default:
 		error_msg(SEMANTIC_TYPE, "wrong type in while statement: %s : %d", value.id, value.type);

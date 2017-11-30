@@ -416,7 +416,7 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 					if(isGlobal(secondOper->id))
 						printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
 					else
-					printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
+						printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
 					secondOper->id = selectTmp(0,DOUBLE,counter);
 				}
 				secondOper->type = DOUBLE;
@@ -677,34 +677,36 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 	printf("%s GF@%s ",instr,temporary->id);
 	if(firstOper!= NULL)
 	{
-		if(firstOper->type == VALUE_STRING)
-			printf("string@%s ",firstOper->id);
-		if(firstOper->type == VALUE_INTEGER)
-			printf("int@%s ",firstOper->id);
-		if(firstOper->type == VALUE_DOUBLE)
-			printf("float@%s ",firstOper->id);
-		if(firstOper->type == STRING || firstOper->type == INTEGER ||firstOper->type == DOUBLE)
+		if(isGlobal(firstOper->id))
 		{
-			if(isGlobal(firstOper->id))
-			{
-				printf("GF@%s ",firstOper->id);
-			}else printf("LF@%s ",firstOper->id);
+			printf("GF@%s ",firstOper->id);
+		}
+		else if(firstOper->type == VALUE_STRING)
+			printf("string@%s ",firstOper->id);
+		else if(firstOper->type == VALUE_INTEGER)
+			printf("int@%s ",firstOper->id);
+		else if(firstOper->type == VALUE_DOUBLE)
+			printf("float@%s ",firstOper->id);
+		else if(firstOper->type == STRING || firstOper->type == INTEGER ||firstOper->type == DOUBLE)
+		{
+			printf("LF@%s ",firstOper->id);
 		}
 	}
 	if(secondOper!= NULL)
 	{
-		if(secondOper->type == VALUE_STRING)
-			printf("string@%s ",secondOper->id);
-		if(secondOper->type == VALUE_INTEGER)
-			printf("int@%s ",secondOper->id);
-		if(secondOper->type == VALUE_DOUBLE)
-			printf("float@%s ",secondOper->id);
-		if(secondOper->type == STRING || secondOper->type == INTEGER ||secondOper->type == DOUBLE)
+		if(isGlobal(secondOper->id))
 		{
-			if(isGlobal(secondOper->id))
-			{
-				printf("GF@%s ",secondOper->id);
-			}else printf("LF@%s ",secondOper->id);
+			printf("GF@%s ",secondOper->id);
+		}
+		else if(secondOper->type == VALUE_STRING)
+			printf("string@%s ",secondOper->id);
+		else if(secondOper->type == VALUE_INTEGER)
+			printf("int@%s ",secondOper->id);
+		else if(secondOper->type == VALUE_DOUBLE)
+			printf("float@%s ",secondOper->id);
+		else if(secondOper->type == STRING || secondOper->type == INTEGER ||secondOper->type == DOUBLE)
+		{
+			printf("LF@%s ",secondOper->id);
 		}
 	}
 	printf("\n");

@@ -8,13 +8,13 @@ void I_move_to_global(tFooListElem value){
 	
 	switch(value.type){
 	case STRING:
-		printf("MOVE GF@_pom_string LF@%s\n", value.id);
+		printf("MOVE GF@_pom_string GF@%s\n", value.id);
 		break;
 	case DOUBLE:
-		printf("MOVE GF@_pom_double LF@%s\n", value.id);
+		printf("MOVE GF@_pom_double GF@%s\n", value.id);
 		break;
 	case INTEGER:
-		printf("MOVE GF@_pom_integer LF@%s\n", value.id);
+		printf("MOVE GF@_pom_integer GF@%s\n", value.id);
 		break;
 	default:
 		error_msg(99, "unexpected type: %s : %d", value.id, value.type);

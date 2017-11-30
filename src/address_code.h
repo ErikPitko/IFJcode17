@@ -10,6 +10,8 @@
 #include "symtable.h"
 #include "scanner.h"
 #include "garbage.h"
+#include "header.h"
+#include "ExpressionParser.h"
 
 /*
 *

@@ -5,6 +5,7 @@
 #include "garbage.h"
 #include "header.h"
 #include <stdio.h>
+#include "ExpressionParser.h"
 extern unsigned STACK_SIZE;
 
 /* ADT zásobník implementovaný ve statickém poli */

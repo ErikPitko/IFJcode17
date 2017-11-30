@@ -153,7 +153,7 @@ int  where = 0;
     }
     else{
       printf("DEFVAR LF@%s\n",value.id);
-      printf("MOVE LF@%s int@0\n",value.id);
+      printf("MOVE LF@%s string@0\n",value.id);
     }
   }//else error
 }
@@ -357,11 +357,15 @@ void I_define_return(){
 *
 */
 void I_print(tFooListElem value){ // type z expression
-	if (value.type == STRING){
+	if (isGlobal(value.id))
+	{
+		printf("WRITE GF@%s\n", value.id);
+	}
+	else
+	{
 		value.id = reformString(value.id);
 		printf("WRITE string@%s\n", value.id);
-	}else
-	printf("WRITE GF@%s\n", value.id);
+	}
 }
 
 /*

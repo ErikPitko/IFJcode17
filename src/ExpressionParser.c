@@ -58,7 +58,6 @@ bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool is
 void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable, int * counter,int *a);
 void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString,int counter);
 char* selectTmp(int zeroOrOne,int type,int counter);
-bool isGlobal(char* str);
 bool end(int type);
 /**************************************HEADER***************************************/
 extern tFooListElem exprResult;
@@ -148,6 +147,23 @@ int tableIndexSelect(tReductToken *tok)
 		if(arr[i] == tok->firstToken->type)
 			return i;
 	return 13;
+}
+
+bool isGlobal(char* str)
+{
+	if(strcmp(str,"exppom1double") == 0 || strcmp(str,"exppom1integer")== 0 || strcmp(str,"exppom1string")==0)
+	{
+		return true;
+	}
+	else if(strcmp(str,"exppom2double") == 0 || strcmp(str,"exppom2integer")== 0 || strcmp(str,"exppom2string")==0)
+	{
+		return true;
+	}
+	else if(strcmp(str,"exppom3double") == 0 || strcmp(str,"exppom3integer")== 0 || strcmp(str,"exppom3string")==0)
+	{
+		return true;
+	}
+	return false;
 }
 
 //returnVar je a = b+8 (jaký datový typ je a)
@@ -448,9 +464,13 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			{
 
 			}
-			if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
+			else if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 			{
 
+			}
+			else if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
+			{
+				firstOper->id = reformString(firstOper->id);
 			}
 		}
 		if(secondOper!= NULL)
@@ -459,9 +479,13 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			{
 
 			}
-			if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
+			else if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
 			{
 
+			}
+			else if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
+			{
+				secondOper->id = reformString(secondOper->id);
 			}
 		}
 		return;
@@ -600,12 +624,12 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			if(firstOper != NULL)
 				if(firstOper->type == STRING|| firstOper->type == VALUE_STRING)
 				{
-
+					firstOper->id = reformString(firstOper->id);
 				}
 			if(secondOper != NULL)
 				if(secondOper->type == STRING||secondOper ->type == VALUE_STRING)
 				{
-
+					secondOper->id = reformString(secondOper->id);
 				}
 			if(firstOper != NULL)
 				if(firstOper->type == INTEGER|| firstOper->type == VALUE_INTEGER||firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
@@ -619,23 +643,6 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				}
 			break;
 	}
-}
-
-bool isGlobal(char* str)
-{
-	if(strcmp(str,"exppom1double") == 0 || strcmp(str,"exppom1integer")== 0 || strcmp(str,"exppom1string")==0)
-	{
-		return true;
-	}
-	else if(strcmp(str,"exppom2double") == 0 || strcmp(str,"exppom2integer")== 0 || strcmp(str,"exppom2string")==0)
-	{
-		return true;
-	}
-	else if(strcmp(str,"exppom3double") == 0 || strcmp(str,"exppom3integer")== 0 || strcmp(str,"exppom3string")==0)
-	{
-		return true;
-	}
-	return false;
 }
 
 char* selectTmp(int zeroOrOne,int type,int counter)

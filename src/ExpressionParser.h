@@ -14,8 +14,10 @@
 #include "error.h"
 #include "InstructionList.h"
 #include "symtable.h"
+#include "address_code.h"
 #define EXPR 999
 tFooListElem exprResult;
 token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *localTable);
 char* strValueOfEnum(int enumValue);
+bool isGlobal(char* str);
 #endif /* EXPRESSIONPARSER_H_ */

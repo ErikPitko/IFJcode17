@@ -58,6 +58,7 @@ bool areOperands(tFooListElem *firstOperand,tFooListElem *secondOperand, bool is
 void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooListElem *returnVar, tHashTable *localTable, int * counter,int *a);
 void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *secondOper,int *semanticError,bool couldBeString,int counter);
 char* selectTmp(int zeroOrOne,int type,int counter);
+bool isGlobal(char* str);
 bool end(int type);
 /**************************************HEADER***************************************/
 extern tFooListElem exprResult;
@@ -404,9 +405,17 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			if((firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE) && (secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
 			{
 				if(secondOper->type == INTEGER)
-					printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+				{
+					if(isGlobal(secondOper->id))
+						printf("INT2FLOAT GF@%s GF@%s\n",secondOper->id,secondOper->id);
+					else
+						printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+				}
 				else
 				{
+					if(isGlobal(secondOper->id))
+						printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
+					else
 					printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
 					secondOper->id = selectTmp(0,DOUBLE,counter);
 				}
@@ -416,10 +425,18 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 			{
 
 				if(firstOper->type == INTEGER)
-					printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+				{
+					if(isGlobal(firstOper->id))
+						printf("INT2FLOAT GF@%s GF@%s\n",firstOper->id,firstOper->id);
+					else
+						printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+				}
 				else
 				{
-					printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
+					if(isGlobal(firstOper->id))
+						printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
+					else
+						printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
 					firstOper->id =selectTmp(0,DOUBLE,counter);
 				}
 				firstOper->type = DOUBLE;
@@ -466,10 +483,18 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				if(firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE)
 				{
 					if(firstOper->type == DOUBLE)
-						printf("FLOAT2R2EINT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+					{
+						if(isGlobal(firstOper->id))
+							printf("FLOAT2R2EINT GF@%s GF@%s\n",firstOper->id,firstOper->id);
+						else
+							printf("FLOAT2R2EINT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+					}
 					else
 					{
-						printf("FLOAT2R2EINT GF@%s float@%s\n",selectTmp(0,INTEGER,counter),firstOper->id);
+						if(isGlobal(firstOper->id))
+							printf("FLOAT2R2EINT GF@%s GF@%s\n",selectTmp(0,INTEGER,counter),firstOper->id);
+						else
+							printf("FLOAT2R2EINT GF@%s float@%s\n",selectTmp(0,INTEGER,counter),firstOper->id);
 						firstOper->id = selectTmp(0,INTEGER,counter);
 					}
 					firstOper->type = INTEGER;
@@ -478,10 +503,18 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				if(secondOper->type == DOUBLE||secondOper ->type == VALUE_DOUBLE)
 				{
 					if(secondOper->type == DOUBLE)
-						printf("FLOAT2R2EINT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+					{
+						if(isGlobal(secondOper->id))
+							printf("FLOAT2R2EINT GF@%s GF@%s\n",secondOper->id,secondOper->id);
+						else
+							printf("FLOAT2R2EINT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+					}
 					else
 					{
-						printf("FLOAT2R2EINT GF@%s float@%s\n",selectTmp(0,INTEGER,counter),secondOper->id);
+						if(isGlobal(secondOper->id))
+							printf("FLOAT2R2EINT GF@%s GF@%s\n",selectTmp(0,INTEGER,counter),secondOper->id);
+						else
+							printf("FLOAT2R2EINT GF@%s float@%s\n",selectTmp(0,INTEGER,counter),secondOper->id);
 						secondOper->id =selectTmp(0,INTEGER,counter);
 					}
 					secondOper->type = INTEGER;
@@ -512,10 +545,18 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				if(firstOper->type == INTEGER || firstOper->type == VALUE_INTEGER)
 				{
 					if(firstOper->type == INTEGER)
-						printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+					{
+						if(isGlobal(firstOper->id))
+							printf("INT2FLOAT GF@%s GF@%s\n",firstOper->id,firstOper->id);
+						else
+							printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+					}
 					else
 					{
-						printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
+						if(isGlobal(firstOper->id))
+							printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
+						else
+							printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
 						firstOper->id =selectTmp(0,DOUBLE,counter);
 					}
 					firstOper->type = DOUBLE;
@@ -524,10 +565,18 @@ void convertTo(tFooListElem *returnVar,tFooListElem *firstOper,tFooListElem *sec
 				if(secondOper->type == INTEGER||secondOper ->type == VALUE_INTEGER)
 				{
 					if(secondOper->type == INTEGER)
-						printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+					{
+						if(isGlobal(secondOper->id))
+							printf("INT2FLOAT GF@%s GF@%s\n",secondOper->id,secondOper->id);
+						else
+							printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+					}
 					else
 					{
-						printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
+						if(isGlobal(secondOper->id))
+							printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
+						else
+							printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
 						secondOper->id = selectTmp(0,DOUBLE,counter);
 					}
 					secondOper->type = DOUBLE;
@@ -1187,6 +1236,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					result->firstToken->type = temporary.type;
 					result->firstToken->info = temporary.id;
 					exprResult.type = temporary.type;
+					exprResult.id = temporary.id;
 					printValue("LT",&temporary,secondOper,firstOper);
 				}
 				semanticless:
@@ -1316,7 +1366,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true,(*counter));
 						tFooListElem temporary;
-						temporary.type = BOOLEAN;
+						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary.is_define = true;
 						temporary.id = selectTmp(0,temporary.type,(*counter)++);
@@ -1385,7 +1435,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false,(*counter));
 						tFooListElem temporary;
-						temporary.type = BOOLEAN;
+						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary.is_define = true;
 						temporary.id = selectTmp(0,temporary.type,(*counter)++);
@@ -1453,7 +1503,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,false,(*counter));
 						tFooListElem temporary;
-						temporary.type = BOOLEAN;
+						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary.is_define = true;
 						temporary.id = selectTmp(0,temporary.type,(*counter)++);
@@ -1461,6 +1511,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						result->firstToken->info = temporary.id;
 						exprResult.type = temporary.type;
 						exprResult.id = temporary.id;
+						//printf("%s ",temporary.id);
 						printValue("GT",&temporary,secondOper,firstOper);
 						printValue("NOT",&temporary,&temporary,NULL);
 					}
@@ -1522,7 +1573,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					{
 						convertTo(returnVar,firstOper,secondOper,semanticError,true,(*counter));
 						tFooListElem temporary;
-						temporary.type = BOOLEAN;
+						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
 						temporary.is_define = true;
 						temporary.id = selectTmp(0,temporary.type,(*counter)++);

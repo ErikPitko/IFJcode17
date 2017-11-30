@@ -212,7 +212,7 @@ void I_do_while(int number, tFooListElem value)
 		printf("JUMPIFEQ w_label%d_end LF@_wpom%d float@0.0\n", number, number);
 		break;*/
 	//case BOOLEAN:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d bool@true\n", number, number);
+		printf("JUMPIFEQ w_label%d_end LF@_wpom%d bool@false\n", number, number);
 		//break;
 	//default:
 		//error_msg(SEMANTIC_TYPE, "wrong type in while statement: %s : %d", value.id, value.type);
@@ -233,22 +233,22 @@ void I_loop(int number){
 //TODO porovnavanie stringov
 void I_if_then(int number, tFooListElem value){
 	printf("DEFVAR LF@_pom%d\n", number);
-	printf("MOVE LF@_pom%d LF@%s\n", number, value.id);
-	switch(value.type){
+	printf("MOVE LF@_pom%d GF@%s\n", number, value.id);
+	/*switch(value.type){
 	case INTEGER:
 	case VALUE_INTEGER:
 		printf("JUMPIFEQ label_if%d LF@_pom%d int@0\n", number, number);
 		break;
 	case DOUBLE:
 	case VALUE_DOUBLE:
-		printf("JUMPIFEQ label_if%d LF@_pom%d double@0.0\n", number, number);
+		printf("JUMPIFEQ label_if%d LF@_pom%d float@0.0\n", number, number);
 		break;
-	case BOOLEAN:
+	case BOOLEAN:*/
 		printf("JUMPIFEQ label_if%d LF@_pom%d bool@false\n", number, number);
-		break;
+/*		break;
 	default:
 		error_msg(SEMANTIC_TYPE, "wrong type in if statement: %s : %d", value.id, value.type);
-	}
+	}*/
 }
 
 //void I_else(int number){

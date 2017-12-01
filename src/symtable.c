@@ -49,43 +49,56 @@ tHashTable *ltab_init() {
 
 int list_insert(tHashTable *local_table, tFooListElem sym) {
 
-	if (find_test(local_table, sym.id) != -1) {
-		int idx = hash_code(sym.id);
+	int i = hash_code(sym.id);
 
-		tFooListElem *pom = myMalloc(sizeof(struct tSymFoo));
+	local_table[i].Act = local_table[i].First;
 
-		if (pom == NULL)
-			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
-
-		pom->id = myMalloc(strlen(sym.id) * sizeof(char));
-
-		if (pom->id == NULL) {
-			myFree(pom);
-			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
+	while (local_table[i].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if(strcmp(local_table[i].Act->id, sym.id) == 0){
+			if (local_table[i].Act->type == sym.type) // Porovna retazce
+				return (1);
+			return (-1);
 		}
 
-		pom->param = myMalloc(sizeof(tParamListElem));
+		local_table[i].Act = local_table[i].Act->next_item; // Posunieme sa o prvok dalej
+	}
 
-		if (pom->param == NULL) {
-			myFree(pom);
-			myFree(pom->id);
-			error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
-		}
+	int idx = hash_code(sym.id);
 
-		pom->param->First = NULL;
-		pom->param->Act = NULL;
+	tFooListElem *pom = myMalloc(sizeof(struct tSymFoo));
 
-		strcpy(pom->id, sym.id);
-		pom->type = sym.type;
-		pom->is_define = sym.is_define;
-		pom->is_main = sym.is_main;
+	if (pom == NULL)
+		error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
 
-		pom->next_item = local_table[idx].First;
-		local_table[idx].First = pom;
-	} else
-		return -1; // Semanticka chyba
+	pom->id = myMalloc(strlen(sym.id) * sizeof(char));
 
-	return 0;
+	if (pom->id == NULL) {
+		myFree(pom);
+		error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
+	}
+
+	pom->param = myMalloc(sizeof(tParamListElem));
+
+	if (pom->param == NULL) {
+		myFree(pom);
+		myFree(pom->id);
+		error_msg(INTERNAL_ERROR, "Nepodarilo sa alokovat miesto\n");
+	}
+
+	pom->param->First = NULL;
+	pom->param->Act = NULL;
+
+	strcpy(pom->id, sym.id);
+	pom->type = sym.type;
+	pom->is_define = sym.is_define;
+	pom->is_main = sym.is_main;
+	pom->has_return = 0;
+
+	pom->next_item = local_table[idx].First;
+	local_table[idx].First = pom;
+
+	return (0);
 }
 
 /*
@@ -264,6 +277,50 @@ param *return_parameter_from_index(tHashTable *local_table, tFooListElem sym, in
 	return NULL;
 }
 
+int change_return(tHashTable *local_table, char* id) {
+
+	int idx = hash_code(id);
+
+	local_table[idx].Act = local_table[idx].First;
+
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if (strcmp(local_table[idx].Act->id, id) == 0) // Porovna retazce
+		{
+				local_table[idx].Act->has_return = 1;
+				return 0;
+		}
+
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+
+	return -1;
+}
+
+
+int change_type(tHashTable *local_table, tFooListElem sym) {
+
+	int idx = hash_code(sym.id);
+
+	local_table[idx].Act = local_table[idx].First;
+
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
+		{
+			if (local_table[idx].Act->is_define == false) 
+			{
+				local_table[idx].Act->type = sym.type;
+				return 0;
+			}
+		}
+
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+
+	return -1;
+}
+
 /*
  * Funkcia: change_isdefine()
  * Popis: Funkcia prejde zoznam a najde prvoku zo spravym "sym.id" nastavi is_define na true
@@ -276,21 +333,26 @@ int change_isdefine(tHashTable *local_table, tFooListElem sym) {
 
 	local_table[idx].Act = local_table[idx].First;
 
-	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
-	{
-		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
-		{
-			if (local_table[idx].Act->is_define == false) 
-			{
-				local_table[idx].Act->is_define = true;
-				break;
-			} else
+	tFooListElem *temp = function_find(local_table, sym.id);
 
-				return -1; // Vraciam semanticku chybu
-		}
+	if(temp == NULL || temp->type != sym.type)
+		return -1;
 
-		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
-	}
+	temp->is_define = true;
+
+//	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+//	{
+//		if (strcmp(local_table[idx].Act->id, sym.id) == 0 && local_table[idx].Act->type == sym.type) // Porovna retazce
+//		{
+//			if (local_table[idx].Act->is_define == false)
+//			{
+//				local_table[idx].Act->is_define = true;
+//				return 0;
+//			}
+//		}
+//
+//		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+//	}
 
 	return 0;
 }

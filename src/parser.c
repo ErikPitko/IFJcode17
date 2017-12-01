@@ -160,7 +160,8 @@ parse_errno prog_body(){
 		curr_function.id = currToken->info;
 		curr_function.is_define = false;
 		curr_function.is_main = 0;
-		list_insert(hTable, curr_function);
+		if(list_insert(hTable, curr_function))
+			return (SEMANTIC_REDEF);
 
 		if((ret = check_LEFTP()) != PARSE_OK)
 			return (ret);
@@ -175,7 +176,8 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.type = currToken->type;
-		change_isdefine(hTable, curr_function);
+		if(change_type(hTable, curr_function))
+			return (SEMANTIC_REDEF);
 
 		if ((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -194,10 +196,11 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.id = currToken->info;
-		curr_function.is_define = false;
 		curr_function.is_main = 0;
 
-		if(list_insert(hTable, curr_function))
+		int table_ret = list_insert(hTable, curr_function);
+
+		if(table_ret != 0)
 			curr_function_declared = true;
 
 		debug("******FUNCTION*******");
@@ -216,7 +219,14 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.type = currToken->type;
-		change_isdefine(hTable, curr_function);
+
+		if(change_isdefine(hTable, curr_function) == -1)
+			return (SEMANTIC_REDEF);
+
+		if (function_find(hTable, curr_function.id)->type != curr_function.type){
+			warning_msg("Function definition does not match declaration");
+			return (SEMANTIC_REDEF);
+		}
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -227,12 +237,13 @@ parse_errno prog_body(){
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
 
+//		if(number_param(hTable, curr_function.id) == -1)
+//			return (SEMANTIC_TYPE);
 
-		if(number_param(hTable, curr_function.id) == -1)
-			return (SEMANTIC_TYPE);
-		if(number_param(hTable, curr_function.id) != param_counter)
-			return (SEMANTIC_TYPE);
-
+		if (param_counter != number_param(hTable, curr_function.id)){
+			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
+				return (SEMANTIC_TYPE);
+		}
 
 //		ltab_destroy(lTable);
 		lTable = NULL;
@@ -287,6 +298,7 @@ parse_errno fnc_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("FUNCTION correct");
+		//TODO priradenie default hodnoty
 		I_define_return();
 		break;
 	default:
@@ -454,7 +466,6 @@ parse_errno par_list(){
 
 		if(curr_function_declared){
 			int index;
-			//TODO funkcia bez parametrov
 			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
 				return(SEMANTIC_REDEF);
 			else
@@ -687,12 +698,8 @@ parse_errno var_type(){
 parse_errno print_exp(){
 	debug("print_exp() entered");
 	currToken = getToken();
+
 	switch(currToken->type){
-	case SEMICOLON:
-		debug("; correct");
-		if((ret = print_exp()) != PARSE_OK)
-			return (ret);
-		break;
 	case EOL:
 		debug("EOL correct");
 		tFooListElem val;
@@ -701,28 +708,15 @@ parse_errno print_exp(){
 		I_print(val);
 		break;
 	default:
-		if((ret = assignment()) != PARSE_OK)
-			return (ret);
+		currToken = parseExpression(currToken, NULL, lTable);
 
-		I_print(exprResult);
-
-		switch(currToken->type){
-		case SEMICOLON:
-			debug("; correct");
-			if((ret = print_exp()) != PARSE_OK)
-				return (ret);
-			break;
-		case EOL:
-			debug("EOL correct");
-			tFooListElem val;
-			val.id = "\n";
-			val.type = STRING;
-			I_print(val);
-			break;
-		default:
-			warning_msg("expected ; or EOL after assignment() in Print");
+		if (currToken->type != SEMICOLON){
+			debug("expected ; after EXP");
 			return (SYNTAX_ERR);
 		}
+		I_print(exprResult);
+		if((ret = print_exp()) != PARSE_OK)
+			return (ret);
 	}
 	return (PARSE_OK);
 }
@@ -834,6 +828,14 @@ parse_errno command(){
 	case PRINT:
 		debug("PRINT correct");
 
+		currToken = parseExpression(NULL, NULL, lTable);
+
+		if (currToken->type != SEMICOLON){
+			debug("expected ; after EXP");
+			return (SYNTAX_ERR);
+		}
+
+		I_print(exprResult);
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
 		break;
@@ -901,7 +903,10 @@ parse_errno command(){
 			return (SYNTAX_ERR);
 		}
 
+		change_return(hTable, curr_function.id);
+
 		I_move_to_global(exprResult);
+		I_define_return();
 
 		if(currToken->type != EOL){
 			warning_msg("expected EOL after assignment()");
@@ -925,8 +930,6 @@ parse_errno assignment(){
 	case IDENTIFIER:
 		debug("ID correct");
 
-		called_function.id = currToken->info;
-
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
 				return (SEMANTIC_REDEF);
@@ -936,6 +939,7 @@ parse_errno assignment(){
 			break;
 		}
 
+		called_function.id = currToken->info;
 		I_createFrame();
 
 		if((ret = check_LEFTP()) != PARSE_OK)
@@ -944,12 +948,18 @@ parse_errno assignment(){
 		if((ret = arg_list()) != PARSE_OK)
 			return (ret);
 
-		if (param_counter != number_param(hTable, called_function.id))
-			return (SEMANTIC_TYPE);
+		if (param_counter != number_param(hTable, called_function.id)){
+			if(!(number_param(hTable, called_function.id) == -1 && param_counter == 0))
+				return (SEMANTIC_TYPE);
+		}
 
 		I_callFunc(called_function.id);
 
+		if(function_find(hTable, called_function.id)->has_return == 0)
+			null_global();
+
 		I_priradenie(*returnVal);
+
 
 		param_counter = 0;
 		called_function.id = NULL;

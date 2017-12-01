@@ -19,6 +19,7 @@
 *
 */
 void I_move_to_global(tFooListElem value);
+void null_global();
 char * reformString(char *tmp);
 
 /*

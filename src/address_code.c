@@ -21,6 +21,12 @@ void I_move_to_global(tFooListElem value){
 	}
 }
 
+void null_global(){
+	printf("MOVE GF@_pom_integer int@0\n");
+	printf("MOVE GF@_pom_double float@0\n");
+	printf("MOVE GF@_pom_string string@\n");
+}
+
 /*
 *
 * vrati ukazatel na string vhodny pre vypis v 3ADD //PRINT
@@ -73,9 +79,7 @@ void init3ADD(){
 	printf("DEFVAR GF@_pom_double\n");
 	printf("DEFVAR GF@_pom_string\n");
 
-	printf("MOVE GF@_pom_integer int@0\n");
-	printf("MOVE GF@_pom_double float@0\n");
-	printf("MOVE GF@_pom_string string@\n");
+	null_global();
 
 	printf("DEFVAR GF@exppom1string\n");
 	printf("DEFVAR GF@exppom1double\n");
@@ -376,7 +380,7 @@ void I_print(tFooListElem value){ // type z expression
 * @param number - counter
 *
 */
-void I_priradenie(tFooListElem value){
+void I_priradeniee(tFooListElem value){
 	static int number = 0;
 
   if(value.type == STRING){
@@ -390,17 +394,17 @@ void I_priradenie(tFooListElem value){
     printf("JUMPIFEQ label_int0%d GF@_pom_integer GF@_int0\n",number);  // skoci si pre priradenie 0
 
     printf("FLOAT2R2EINT LF@_%s GF@_pom_double\n",value.id); // pretypuje a priradenie
-    printf("JUMP label_end%d\n",number);    //ukoncenie
+    printf("JUMP 1label_end%d\n",number);    //ukoncenie
 
     printf("LABEL label_int%d\n",number);  // aby sme mohli preskocit pretypovanie
     printf("MOVE LF@%s GF@_pom_integer\n",value.id);  // priradenie
-    printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
+    printf("JUMP 1label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
 
     //museli sme pretypovat
     printf("LABEL label_int0%d\n",number); // ak je 0
     printf("MOVE LF@%s GF@_int0\n",value.id);
 
-    printf("LABEL label_end%d\n",number);
+    printf("LABEL 1label_end%d\n",number);
   }else
 
   if(value.type == DOUBLE){
@@ -410,21 +414,52 @@ void I_priradenie(tFooListElem value){
         printf("JUMPIFEQ label_double0%d GF@_pom_double GF@_float0\n",number);  // skoci si pre priradenie 0.0
 
         printf("INT2FLOAT LF@_%s GF@_pom_integer\n",value.id); // pretypuje a priradi
-        printf("JUMP label_end%d\n",number);  // ukoncenie
+        printf("JUMP 1label_end%d\n",number);  // ukoncenie
 
         printf("LABEL label_double%d\n",number);  // aby sme mohli preskocit pretypovanie
         printf("MOVE LF@%s GF@_pom_double\n",value.id);  // priradenie
-        printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
+        printf("JUMP 1label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
 
         //museli sme pretypovat
         printf("LABEL label_double0%d\n",number); // ak je 0
         printf("MOVE LF@%s GF@_double0\n",value.id);
 
-        printf("LABEL label_end%d\n",number);
+        printf("LABEL 1label_end%d\n",number);
 
 
-  }//else error?
+  }
 
   number++;
 
+}
+
+void I_priradenie(tFooListElem value){
+	static int number = 0;
+
+	if(value.type == STRING){
+		printf("MOVE LF@%s GF@_pom_string\n",value.id);  //string pretypovavat nebudu
+	}else if(value.type == INTEGER){
+		printf("JUMPIFEQ label_int%d GF@_pom_double GF@_float0\n", number);  //zisti ci potrebujeme pretypovavat
+		printf("FLOAT2R2EINT LF@%s GF@_pom_double\n",value.id); // pretypuje a priradenie
+		printf("JUMP label_end%d\n",number);    //ukoncenie
+
+		printf("LABEL label_int%d\n",number);  // aby sme mohli preskocit pretypovanie
+		printf("MOVE LF@%s GF@_pom_integer\n",value.id);  // priradenie
+		printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
+
+		printf("LABEL label_end%d\n",number);
+
+	}else if(value.type == DOUBLE){
+		printf("JUMPIFEQ label_double%d GF@_pom_integer GF@_int0\n", number);  //zisti ci potrebujeme pretypovavat
+		printf("INT2FLOAT LF@%s GF@_pom_integer\n",value.id); // pretypuje a priradi
+		printf("JUMP label_end%d\n",number);  // ukoncenie
+
+		printf("LABEL label_double%d\n",number);  // aby sme mohli preskocit pretypovanie
+		printf("MOVE LF@%s GF@_pom_double\n",value.id);  // priradenie
+		printf("JUMP label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
+
+		printf("LABEL label_end%d\n",number);
+	}
+
+	number++;
 }

@@ -610,7 +610,7 @@ int isKeyword(char* s){
 }
 
 int isOperator(int c){
-	if(c == '+'|| c == '-'|| c == '*'|| c == 92 || c == '<' || c == '>' || c == '=' )
+	if(c == '+'|| c == '-'|| c == '*'|| c =='/'  || c == 92 || c == '<' || c == '>' || c == '=' )
 		return c;
 	else return 0;
 }

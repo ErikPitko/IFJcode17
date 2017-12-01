@@ -41,16 +41,14 @@ var_type 	->	Integer
 				Double
 				String
 
-print_exp	->	<assignment> ; <print_exp>
-				<assignment> EOL
-				; <print_exp>
+print_exp	->	EXP; <print_exp>
 				EOL
 
 command		->	Input id EOL
 				If EXP Then EOL <if_body> EOL
 				id = <assignment> EOL
 				Do While EXP EOL <while_body> EOL
-				Print <print_exp>
+				Print EXP ; <print_exp>
 				Dim id As <var_type> EOL
 				Dim id As <var_type> = <assignment> EOL
 				Return EXP EOL

@@ -1,0 +1,7 @@
+--- 53-interpret	2017-12-02 12:50:18.922214999 +0100
++++ 53.stdout	2017-12-01 14:29:10.000000000 +0100
+@@ -1,2 +1 @@
+- 43
+-assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
++43assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+\ No newline at end of file

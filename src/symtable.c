@@ -130,7 +130,6 @@ int list_insert_param(tHashTable *local_table, tFooListElem sym, param psym) {
 
 				if (pom->id == NULL) // Kontrola malloc
 				{
-					free(pom);
 					error_msg(INTERNAL_ERROR,
 							"Nepodarilo sa alokovat miesto\n");
 				}

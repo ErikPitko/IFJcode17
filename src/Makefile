@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-O0 -Wall -Wextra -g
+.PHONY: test
 
 all: IFJcode17
 
@@ -10,6 +11,10 @@ run: all
 
 int: all
 	./IFJcode17 ${ARGS} > out.txt && ./ic17int out.txt
+
+test: IFJcode17
+	cp IFJcode17 testy/
+	cd testy/ && ./test.sh
 
 IFJcode17: IFJcode17.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -22,6 +27,7 @@ tar: Makefile $(all)
 
 clean:
 	rm -f *.o IFJcode17 *.tgz *.zip
+	cd testy/ && ./test.sh -c
 
 ##############################################################
 

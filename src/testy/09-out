@@ -1,0 +1,59 @@
+.IFJcode17
+CREATEFRAME
+DEFVAR GF@_pom_integer
+DEFVAR GF@_pom_double
+DEFVAR GF@_pom_string
+MOVE GF@_pom_integer int@0
+MOVE GF@_pom_double float@0
+MOVE GF@_pom_string string@
+DEFVAR GF@exppom1string
+DEFVAR GF@exppom1double
+DEFVAR GF@exppom1integer
+MOVE GF@exppom1integer int@0
+MOVE GF@exppom1double float@0
+MOVE GF@exppom1string string@
+DEFVAR GF@exppom2string
+DEFVAR GF@exppom2double
+DEFVAR GF@exppom2integer
+MOVE GF@exppom2integer int@0
+MOVE GF@exppom2double float@0
+MOVE GF@exppom2string string@
+DEFVAR GF@exppom3string
+DEFVAR GF@exppom3double
+DEFVAR GF@exppom3integer
+MOVE GF@exppom3integer int@0
+MOVE GF@exppom3double float@0
+MOVE GF@exppom3string string@
+DEFVAR GF@_string0
+TYPE GF@_string0 GF@_string0
+DEFVAR GF@_int0
+FLOAT2INT GF@_int0 float@0.0
+DEFVAR GF@_float0
+INT2FLOAT GF@_float0 int@0
+PUSHFRAME
+JUMP labelSCOPE
+LABEL labelSCOPE
+DEFVAR LF@_a669
+MOVE LF@_a669 int@0
+MOVE GF@exppom1integer int@445655454 
+MOVE LF@_a669 GF@exppom1integer
+DEFVAR LF@b__67678
+MOVE LF@b__67678 string@
+MOVE GF@exppom1string string@FGGHGHHghjhhjhj\03256\032\032ahoj\032\032iloilailaeiii 
+MOVE LF@b__67678 GF@exppom1string
+DEFVAR LF@___ced65689
+MOVE LF@___ced65689 float@0.0
+MOVE GF@exppom1double float@56758.56686 
+MOVE LF@___ced65689 GF@exppom1double
+DEFVAR LF@___d___6778ghgkjhhj
+MOVE LF@___d___6778ghgkjhhj float@0.0
+MOVE GF@exppom1double float@566678.658678e+10 
+MOVE LF@___d___6778ghgkjhhj GF@exppom1double
+DEFVAR LF@ghg__e__676767
+MOVE LF@ghg__e__676767 float@0.0
+MOVE GF@exppom1double float@566678.658678e-10 
+MOVE LF@ghg__e__676767 GF@exppom1double
+DEFVAR LF@__6767hjhjghhjkh
+MOVE LF@__6767hjhjghhjkh float@0.0
+MOVE GF@exppom1double float@566678.658678e10 
+MOVE LF@__6767hjhjghhjkh GF@exppom1double

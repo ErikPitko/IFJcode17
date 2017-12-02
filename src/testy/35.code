@@ -1,0 +1,10 @@
+
+
+'expression
+
+scope
+dim a as integer = 5
+dim b as integer = 6
+
+print 5/(a-b) *(a /5);
+end scope

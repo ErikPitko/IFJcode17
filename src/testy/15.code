@@ -1,0 +1,4 @@
+' print without space success = 0
+scope
+	print(0-5);
+end scope

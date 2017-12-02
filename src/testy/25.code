@@ -1,0 +1,9 @@
+
+
+'expression
+
+scope
+
+print !"ahoj" + !"ahoj" + !"ahoj";
+
+end scope

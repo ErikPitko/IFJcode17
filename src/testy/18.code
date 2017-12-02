@@ -1,0 +1,5 @@
+' More prints success = 0
+scope
+	print !"ahoj";
+	print !"ahoj";
+end scope

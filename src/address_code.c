@@ -157,7 +157,7 @@ int  where = 0;
     }
     else{
       printf("DEFVAR LF@%s\n",value.id);
-      printf("MOVE LF@%s string@0\n",value.id);
+      printf("MOVE LF@%s string@\n",value.id);
     }
   }//else error
 }
@@ -380,58 +380,6 @@ void I_print(tFooListElem value){ // type z expression
 * @param number - counter
 *
 */
-void I_priradeniee(tFooListElem value){
-	static int number = 0;
-
-  if(value.type == STRING){
-      printf("MOVE LF@%s GF@_pom_string\n",value.id);  //string pretypovavat nebudu
-  }else
-
-
-  if(value.type == INTEGER){
-
-    printf("JUMPIFEQ label_int%d GF@_pom_double GF@_float0\n", number);  //zisti ci potrebujeme pretypovavat
-    printf("JUMPIFEQ label_int0%d GF@_pom_integer GF@_int0\n",number);  // skoci si pre priradenie 0
-
-    printf("FLOAT2R2EINT LF@_%s GF@_pom_double\n",value.id); // pretypuje a priradenie
-    printf("JUMP 1label_end%d\n",number);    //ukoncenie
-
-    printf("LABEL label_int%d\n",number);  // aby sme mohli preskocit pretypovanie
-    printf("MOVE LF@%s GF@_pom_integer\n",value.id);  // priradenie
-    printf("JUMP 1label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0
-
-    //museli sme pretypovat
-    printf("LABEL label_int0%d\n",number); // ak je 0
-    printf("MOVE LF@%s GF@_int0\n",value.id);
-
-    printf("LABEL 1label_end%d\n",number);
-  }else
-
-  if(value.type == DOUBLE){
-
-
-        printf("JUMPIFEQ label_double%d GF@_pom_integer GF@_int0\n", number);  //zisti ci potrebujeme pretypovavat
-        printf("JUMPIFEQ label_double0%d GF@_pom_double GF@_float0\n",number);  // skoci si pre priradenie 0.0
-
-        printf("INT2FLOAT LF@_%s GF@_pom_integer\n",value.id); // pretypuje a priradi
-        printf("JUMP 1label_end%d\n",number);  // ukoncenie
-
-        printf("LABEL label_double%d\n",number);  // aby sme mohli preskocit pretypovanie
-        printf("MOVE LF@%s GF@_pom_double\n",value.id);  // priradenie
-        printf("JUMP 1label_end%d\n",number); // ukoncenie pre pripad ze nepriradujeme 0.0
-
-        //museli sme pretypovat
-        printf("LABEL label_double0%d\n",number); // ak je 0
-        printf("MOVE LF@%s GF@_double0\n",value.id);
-
-        printf("LABEL 1label_end%d\n",number);
-
-
-  }
-
-  number++;
-
-}
 
 void I_priradenie(tFooListElem value){
 	static int number = 0;

@@ -1,0 +1,10 @@
+
+
+'expression
+
+scope
+dim a as integer
+dim b as integer
+
+print b + a;
+end scope

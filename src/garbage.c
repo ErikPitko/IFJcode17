@@ -61,6 +61,7 @@ static htab_listitem* create_item(void *key) {
 		return (NULL);
 
 	item->key = key;
+	item->next = NULL;
 	return (item);
 }
 

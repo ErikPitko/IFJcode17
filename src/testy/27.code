@@ -1,0 +1,11 @@
+
+
+'expression
+
+scope
+dim a as string = !"ahoj"
+dim b as string = !"ahoj"
+
+print a + b + !"ahoj";
+
+end scope

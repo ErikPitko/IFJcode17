@@ -1,0 +1,8 @@
+'komentar
+/' jololo #$@#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'/
+
+scope
+
+dim a as integer = 43
+	print a;
+end scope

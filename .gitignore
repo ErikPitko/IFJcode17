@@ -42,6 +42,11 @@
 *.su
 *.idb
 *.pdb
+*.txt
+src/testy/*-out
+src/testy/*-error
+src/testy/*-diff
+src/testy/*-interpret
 
 # Kernel Module Compile Results
 *.mod*

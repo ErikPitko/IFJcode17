@@ -1,0 +1,11 @@
+'komentar
+/' jololo #$@#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'/
+
+scope
+
+dim a as integer = 43
+	print a;
+'dlouhej string
+dim s as string = !"assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+print s;
+end scope

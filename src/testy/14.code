@@ -1,0 +1,6 @@
+' Exotic print format success = 0
+scope
+	print 42;
+	print                     42               ;	
+	print			42;
+end scope

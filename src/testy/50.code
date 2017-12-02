@@ -1,0 +1,9 @@
+
+
+scope
+
+dim b as double
+
+b = 5 + b
+print b;
+end scope

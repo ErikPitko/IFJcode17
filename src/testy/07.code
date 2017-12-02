@@ -1,0 +1,7 @@
+' Empty string Success - 0
+
+scope
+
+	dim a as string = !""
+
+end scope

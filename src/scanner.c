@@ -60,9 +60,24 @@ token *getToken(){
   tmpToken = getToken0();
   lastToken = tmpToken;
 	
+	int pomocna;
+  double pomocna_double;
+  char *ptr;
+	
   while(tmpToken->type == NOPE)
     tmpToken = getToken0();
   lastToken = tmpToken;
+	
+	if(tmpToken->type == VALUE_INTEGER){
+    pomocna =strtol(tmpToken->info,&ptr, 10);
+    sprintf(tmpToken->info,"%d",pomocna);
+  //  printf("%shuala\n",tmpToken->info);
+  }
+  if(tmpToken->type == VALUE_DOUBLE){
+    pomocna_double =strtod(tmpToken->info,&ptr);
+    sprintf(tmpToken->info,"%g",pomocna_double);
+  //  printf("%shuala\n",tmpToken->info);
+  }
   return tmpToken;
 }
 
@@ -188,7 +203,8 @@ token* getToken0() {
 					c = getchar0();
 				}
         //ungetcharpom = c;
-        if(c == '\n'){/*
+ //       if(c == '\n'){
+					/*
           tmpToken->type = NOPE;
   				tmpToken->info = NULL;
           ungetcharpom = '\n';
@@ -198,8 +214,8 @@ token* getToken0() {
           else tmpToken->type = EOL;
           tmpToken->info = NULL;
 				  return tmpToken;
-        }else
-          ERR; //komentar ukonceny EOF
+ //       }else
+ //         ERR; //komentar ukonceny EOF
 
 			}else
 			// ' -jednoriadkovy komentar ,1
@@ -610,7 +626,7 @@ int isKeyword(char* s){
 }
 
 int isOperator(int c){
-	if(c == '+'|| c == '-'|| c == '*'|| c == 92 || c == '<' || c == '>' || c == '=' )
+	if(c == '+'|| c == '-'|| c == '*'|| c =='/'  || c == 92 || c == '<' || c == '>' || c == '=' )
 		return c;
 	else return 0;
 }

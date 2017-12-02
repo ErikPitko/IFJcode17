@@ -1,0 +1,10 @@
+'komentar
+/' jololo #$@#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'/
+
+scope
+
+
+dim b as double
+b = 5e5
+print b;
+end scope

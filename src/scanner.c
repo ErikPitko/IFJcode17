@@ -188,7 +188,8 @@ token* getToken0() {
 					c = getchar0();
 				}
         //ungetcharpom = c;
-        if(c == '\n'){/*
+ //       if(c == '\n'){
+					/*
           tmpToken->type = NOPE;
   				tmpToken->info = NULL;
           ungetcharpom = '\n';
@@ -198,8 +199,8 @@ token* getToken0() {
           else tmpToken->type = EOL;
           tmpToken->info = NULL;
 				  return tmpToken;
-        }else
-          ERR; //komentar ukonceny EOF
+ //       }else
+ //         ERR; //komentar ukonceny EOF
 
 			}else
 			// ' -jednoriadkovy komentar ,1

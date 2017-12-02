@@ -95,6 +95,7 @@ parse_errno check_AS(){
 void debug(const char *form, ...){
 	return;
 	va_list args;
+	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");
 	vfprintf(stdout, form, args);
 	fprintf(stdout, "\n");
@@ -202,6 +203,9 @@ parse_errno prog_body(){
 
 		if(table_ret != 0)
 			curr_function_declared = true;
+		else
+			curr_function_declared = false;
+
 
 		debug("******FUNCTION*******");
 		I_define_func(curr_function.id);
@@ -219,6 +223,9 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.type = currToken->type;
+
+		if(change_type(hTable, curr_function))
+					return (SEMANTIC_REDEF);
 
 		if(change_isdefine(hTable, curr_function) == -1)
 			return (SEMANTIC_REDEF);
@@ -479,6 +486,8 @@ parse_errno par_list(){
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
+		param_counter++;
+
 		if(lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
@@ -530,13 +539,13 @@ parse_errno par_next(){
 				debug("index OK");
 			if(index != param_counter)
 				return(SEMANTIC_TYPE);
-			param_counter++;
 			debug("called parameter correct");
 		}
 
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
+		param_counter++;
 		if(lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
@@ -708,12 +717,14 @@ parse_errno print_exp(){
 		I_print(val);
 		break;
 	default:
+		debug("token: %s\n", currToken->info);
 		currToken = parseExpression(currToken, NULL, lTable);
 
 		if (currToken->type != SEMICOLON){
 			debug("expected ; after EXP");
 			return (SYNTAX_ERR);
 		}
+		debug("; correct");
 		I_print(exprResult);
 		if((ret = print_exp()) != PARSE_OK)
 			return (ret);
@@ -834,6 +845,7 @@ parse_errno command(){
 			debug("expected ; after EXP");
 			return (SYNTAX_ERR);
 		}
+		debug("; correct");
 
 		I_print(exprResult);
 		if((ret = print_exp()) != PARSE_OK)
@@ -894,7 +906,7 @@ parse_errno command(){
 		currToken = getToken();
 
 		if(!find_test(hTable, currToken->info)){
-			if(!find_test(lTable, currToken->info)){
+			if(!find_test(lTable, currToken->info) && currToken->type != VALUE_INTEGER && currToken->type != VALUE_DOUBLE && currToken->type != VALUE_STRING){
 				return (SEMANTIC_REDEF);
 			}
 			debug("NOT FUNCTION -> ExpressionParser");

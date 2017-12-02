@@ -78,8 +78,7 @@ function isOk () {
 	#echo "${testNumber#0}"
     printf "Test %02d	.." "${testNumber#0}"
 
-    if [ -s ${testError} ]
-    then
+    if [ -s ${testError} ]; then
         printf %s "isFail ExitCode: " 
         [ $testExit -eq $returnErr ] && green $testExit || red $testExit
 #        printf %s ", error output: $([ -s $testError ] && green "found" || red "not found")"
@@ -90,7 +89,6 @@ function isOk () {
 		#[ $err -eq 0 ] && printf "$TEXT_BROWN" && /bin/cat $testError
     
     else
-
         printf %s "isOK   ExitCode: "
         [ $testExit -eq $returnErr ] && green $testExit || red $testExit
 		
@@ -150,7 +148,7 @@ file_exists() {
 # Cleaning
 if [ "$1" == "-c" ]
 then
-	ls | grep '\-\(out\|error\|diff\|interpret\)$' | xargs -d "\n" rm
+	ls | grep '\.\(out\|error\|diff\|interpret\)$' | xargs -d "\n" rm
 	exit 0
 fi
 

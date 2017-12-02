@@ -8,12 +8,15 @@ void I_move_to_global(tFooListElem value){
 	
 	switch(value.type){
 	case STRING:
+	case VALUE_STRING:
 		printf("MOVE GF@_pom_string GF@%s\n", value.id);
 		break;
 	case DOUBLE:
+	case VALUE_DOUBLE:
 		printf("MOVE GF@_pom_double GF@%s\n", value.id);
 		break;
 	case INTEGER:
+	case VALUE_INTEGER:
 		printf("MOVE GF@_pom_integer GF@%s\n", value.id);
 		break;
 	default:

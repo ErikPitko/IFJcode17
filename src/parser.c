@@ -93,7 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-	return;
+//	return;
 	va_list args;
 	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");
@@ -184,6 +184,7 @@ parse_errno prog_body(){
 			return (ret);
 
 		curr_function.id = NULL;
+		param_counter = 0;
 
 		if ((ret = prog_body()) != PARSE_OK)
 			return (ret);
@@ -345,8 +346,6 @@ parse_errno if_body(){
 		debug("ELSEIF correct");
 		debug("*** ELSEIF GENERATION ***");
 
-//		cstackPrint("KKT", &ifstack);
-
 		tmp = *cstackTopPop(&ifstack);
 		I_jump_endif(*cstackTop(&ifstack));
 		cstackPush(&ifstack, tmp);
@@ -486,7 +485,7 @@ parse_errno par_list(){
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		param_counter++;
+//		param_counter++;
 
 		if(lTable)
 			if(list_insert(lTable, sym))
@@ -539,13 +538,13 @@ parse_errno par_next(){
 				debug("index OK");
 			if(index != param_counter)
 				return(SEMANTIC_TYPE);
+			param_counter++;
 			debug("called parameter correct");
 		}
 
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-		param_counter++;
 		if(lTable)
 			if(list_insert(lTable, sym))
 				return (SEMANTIC_REDEF);
@@ -717,7 +716,7 @@ parse_errno print_exp(){
 		I_print(val);
 		break;
 	default:
-		debug("token: %s\n", currToken->info);
+		debug("token: %s type : %d", currToken->info, currToken->type);
 		currToken = parseExpression(currToken, NULL, lTable);
 
 		if (currToken->type != SEMICOLON){

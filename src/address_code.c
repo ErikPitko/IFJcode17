@@ -41,8 +41,9 @@ char * reformString(char *tmp){
   char *pom;
   pom = myMalloc(3*(strlen(tmp )+1) * sizeof(char));
   int c;
-  while(tmp[j] != '\0'){
-    c = tmp[j++];
+  c = tmp[j++];
+  while(c != '\0'){
+
     if((c <= 32) || (c == 35)){
       pom[i++] = 92;//'\'
       pom[i++] = '0';
@@ -50,21 +51,60 @@ char * reformString(char *tmp){
       pom[i++] = c%10 +48;
     }
     else
-      if(c == 92){
+      if(c == 92){ //'\' <- sme nasli
+        pom[i++] = c;
         c = tmp[j++];
-        if(c == 34)
-          pom[i++] = c;
-        if((c <= 32)||(c == 92)){//mozno upravit '\n' + '\t' + '\'
-          pom[i++] = 92;//'\'
+
+        if(c <= 32){//mozno upravit '\n' + '\t' + '\'
+        //  pom[i++] = 92;//'\'
           pom[i++] = '0';
           pom[i++] = c/10 +48; // nastavi sa na cislo v charu
           pom[i++] = c%10 +48;
         }
+
+        if(c == 'n'){
+          pom[i++] = '0';
+          pom[i++] = '1';
+          pom[i++] = '0';
+        //  c = tmp[j++]; // aby sme si udrzali aktivnu hodnotu
+        }
+
+        if(c == 't'){
+          pom[i++] = '0';
+          pom[i++] = '0';
+          pom[i++] = '9';
+        //  c = tmp[j++]; // aby sme si udrzali aktivnu hodnotu
+        }
+
+        if(c == 92){
+          pom[i++] = '0';
+          pom[i++] = '9';
+          pom[i++] = '2';
+        //  c = tmp[j++]; // aby sme si udrzali aktivnu hodnotu
+        }
+
+        if(c == 34){ //'je tam " '
+          pom[i++] = '0';
+          pom[i++] = '3';
+          pom[i++] = '4';
+        }
+
+        if((c>= 48) && (c<= 57)){ //ak to uz bola nejaka ESC
+          pom[i++] = c;
+          c = tmp[j++];
+
+          pom[i++] = c;
+          c = tmp[j++];
+
+          pom[i++] = c;
+        //  c = tmp[j++];
+        }
       }else {
         pom[i++] = c; //normalny znak
       }
+    c = tmp[j++];
   }
-  pom[i] = '\0';
+  pom[i] = c;
 
   return pom;
 }

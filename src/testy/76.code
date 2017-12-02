@@ -1,0 +1,35 @@
+' four functions - 0
+declare function a(z as integer) as integer
+declare function b(z as integer) as integer
+declare function c(z as integer) as integer
+declare function d(z as integer) as integer
+
+function a(z as integer) as integer
+	return z + 1
+end function
+
+function b(z as integer) as integer
+	return z + 1
+end function
+
+function c(z as integer) as integer
+	return z + 1
+end function
+
+function d(z as integer) as integer
+	return z + 1
+end function
+scope
+	dim e as integer
+	dim f as integer
+	dim g as integer
+	dim h as integer
+	e = a(25)
+	f = b(24)
+	g = c(23)
+	h = d(22)
+	print e;
+	print f;
+	print g;
+	print h;
+end scope

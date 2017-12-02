@@ -1,0 +1,12 @@
+' diferent parameters id
+declare function a(b as integer) as integer
+
+function a(x as integer) as integer
+	return x + 1
+end function
+
+scope
+	dim c as integer
+	c = a(25)
+	print c;
+end scope

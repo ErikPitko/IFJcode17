@@ -214,6 +214,27 @@ test 52 0
 test 53 0
 test 54 0
 test 55 0
+test 56 0
+test 57 0
+test 58 3
+test 59 0
+test 60 0
+test 61 3
+test 62 3
+test 63 0
+test 64 0
+test 65 0
+test 66 0
+test 67 0
+test 68 2
+test 69 0
+test 70 0
+test 71 0
+test 72 0
+test 73 0
+test 74 3
+test 75 3
+test 76 0
 # ---------------------------
 
 END=$(date +%s)

@@ -1,0 +1,11 @@
+' function without declaration
+
+function a(b as integer) as integer
+	return b + 1
+end function
+
+scope
+	dim c as integer
+	c = a(25)
+	print c;
+end scope

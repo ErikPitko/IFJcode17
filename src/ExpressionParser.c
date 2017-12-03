@@ -565,6 +565,8 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 
 void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticError,int counter)
 {
+	if(returnVar == NULL)
+		return;
 	if(returnVar->type == INTEGER)
 	{
 		if(temporary->type == DOUBLE)

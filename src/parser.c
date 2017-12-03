@@ -93,7 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-//	return;
+	return;
 	va_list args;
 	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");
@@ -710,10 +710,6 @@ parse_errno print_exp(){
 	switch(currToken->type){
 	case EOL:
 		debug("EOL correct");
-		tFooListElem val;
-		val.id = "\n";
-		val.type = STRING;
-		I_print(val);
 		break;
 	default:
 		debug("token: %s type : %d", currToken->info, currToken->type);

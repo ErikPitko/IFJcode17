@@ -1,6 +1,6 @@
 
 
-'expression
+' expression test success = 0
 
 scope
 dim a as string = !"ahoj"

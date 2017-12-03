@@ -235,6 +235,23 @@ test 73 0
 test 74 3
 test 75 3
 test 76 0
+test 77 0
+test 78 0
+test 79 0
+test 80 0
+test 81 0
+test 82 0
+test 83 0
+test 84 0
+test 85 0
+test 86 0
+test 87 0
+test 88 0
+test 89 0
+test 90 0
+test 91 0
+test 92 0
+
 # ---------------------------
 
 END=$(date +%s)

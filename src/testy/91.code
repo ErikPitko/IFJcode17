@@ -1,0 +1,16 @@
+' simple loop
+
+scope
+
+dim a as integer = 0
+dim b as integer = 0
+dim c as integer = 0
+	
+	do while a < 10
+		
+		print a;
+
+		a = a + 1
+	loop	
+
+end scope

@@ -30,6 +30,43 @@ void null_global(){
 	printf("MOVE GF@_pom_string string@\n");
 }
 
+void printDefineStrLenFunction()  //int strlen (string s)
+{
+  printf("LABEL labellenght\n");
+  printf("STRLEN GF@_pom_integer LF@s\n");
+  printf("RETURN\n");
+}
+
+void printDefineChrFunction()//string inttochar (int i)
+{
+  printf("LABEL labelchr\n");
+  printf("INT2CHAR GF@_pom_string LF@i");
+  printf("RETURN\n");
+}
+
+void printDefineAscFunction() //int asc (string s, int i)
+{
+  printf("LABEL labelasc\n");
+  printf("GETCHAR GF@_pom_string LF@s LF@i");
+  printf("STRI2INT GF@_pom_integer GF@_pom_string int@0");
+  printf("RETURN\n");
+}
+
+//string strstr(string s,int i, int n)
+void printDefineStrStrFunction()
+{
+  printf("LABEL labelstrstr\n");
+  printf("MOVE GF@_pom_string string@");
+  printf("ADD LF@n LF@i");
+  printf("LABEL strstrloop");
+  printf("GETCHAR GF@exppom3string LF@s LF@i");
+  printf("CONCAT GF@_pom_string GF@exppom3string");
+  printf("ADD LF@i int@1");
+  printf("JUMPIFNEQ strstrloop LF@i LF@n");
+  printf("RETURN\n");
+}
+
+
 /*
 *
 * vrati ukazatel na string vhodny pre vypis v 3ADD //PRINT

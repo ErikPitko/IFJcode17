@@ -1,5 +1,5 @@
 
-'expression
+' expression test success = 0
 
 scope
 dim a as integer = 5

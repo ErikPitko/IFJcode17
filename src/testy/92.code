@@ -1,0 +1,23 @@
+' nested loop
+
+scope
+
+dim a as integer = 0
+dim b as integer = 0
+dim c as integer = 0
+	
+	do while a < 4
+		
+		print !"first cycle"; a; !"\n";
+
+		do while b < 4
+		
+			print !"second cycle"; b; !"\n";
+ 	
+			b = b + 1
+		loop
+
+		a = a + 1
+	loop	
+
+end scope

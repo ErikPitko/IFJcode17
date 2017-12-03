@@ -1,4 +1,6 @@
-testy od 0 - 24 su ich basic, ale mierne upravene
-testy od 25 - 55 su mnou upravene misove testy
-testy od 56 - 70 su ich function testy
-testy od 71 - 80 su moje function testy
+tests 0 - 24 their basic
+tests 25 - 55 our basic (expression test, print test, comment test)
+tests 56 - 70 their function
+tests 71 - 77 our function
+tests 78 - 90 our if
+tests 91 - 9x our cycle

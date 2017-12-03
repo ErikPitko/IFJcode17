@@ -93,7 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-//	return;
+	return;
 	va_list args;
 	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");
@@ -478,14 +478,13 @@ parse_errno par_list(){
 				debug("index OK");
 			if(index != param_counter)
 				return(SEMANTIC_TYPE);
-			param_counter++;
 			debug("called parameter correct");
 		}
 
 		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
 			return (SEMANTIC_REDEF);
 
-//		param_counter++;
+		param_counter++;
 
 		if(lTable)
 			if(list_insert(lTable, sym))
@@ -710,10 +709,6 @@ parse_errno print_exp(){
 	switch(currToken->type){
 	case EOL:
 		debug("EOL correct");
-		tFooListElem val;
-		val.id = "\n";
-		val.type = STRING;
-		I_print(val);
 		break;
 	default:
 		debug("token: %s type : %d", currToken->info, currToken->type);
@@ -988,11 +983,75 @@ parse_errno assignment(){
 	return (PARSE_OK);
 }
 
+
 parse_errno parse(){
 	init3ADD();
 	hTable = ltab_init();
 	cstackInit(&cstack);
 	cstackInit(&ifstack);
+
+	/**************BUILT_IN****************/
+	tFooListElem func;
+	func.is_main = false;
+	param par1;
+	param par2;
+	param par3;
+
+
+	/********LENGTH********/
+	func.id = "length";
+	func.type = INTEGER;
+
+	par1.id = "s";
+	par1.type = STRING;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+
+	/********SUBSTR********/
+
+	func.id = "substr";
+	func.type = STRING;
+
+	par1.id = "s";
+	par1.type = STRING;
+	par2.id = "i";
+	par2.type = INTEGER;
+	par3.id = "n";
+	par3.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+	list_insert_param(hTable, func, par2);
+	list_insert_param(hTable, func, par3);
+
+	/*********ASC**********/
+
+	func.id = "asc";
+	func.type = INTEGER;
+
+	par1.id = "s";
+	par1.type = STRING;
+	par2.id = "i";
+	par2.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+	list_insert_param(hTable, func, par2);
+
+	/*********CHR**********/
+
+	func.id = "chr";
+	func.type = STRING;
+
+	par1.id = "i";
+	par1.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+
+	/**************************************/
+
 	parse_errno rett;
 	rett = prog_body();
 	debug("FILE PARSING COMPLETE:");

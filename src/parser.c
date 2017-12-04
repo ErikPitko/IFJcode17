@@ -217,6 +217,11 @@ parse_errno prog_body(){
 		if((ret = par_list()) != PARSE_OK)
 			return (ret);
 
+		if (param_counter != number_param(hTable, curr_function.id) && curr_function_declared){
+			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
+				return (SEMANTIC_TYPE);
+		}
+
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
 
@@ -248,10 +253,6 @@ parse_errno prog_body(){
 //		if(number_param(hTable, curr_function.id) == -1)
 //			return (SEMANTIC_TYPE);
 
-		if (param_counter != number_param(hTable, curr_function.id)){
-			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
-				return (SEMANTIC_TYPE);
-		}
 
 //		ltab_destroy(lTable);
 		lTable = NULL;
@@ -306,7 +307,7 @@ parse_errno fnc_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("FUNCTION correct");
-		//TODO priradenie default hodnoty
+		null_global();
 		I_define_return();
 		break;
 	default:
@@ -471,17 +472,17 @@ parse_errno par_list(){
 
 
 		if(curr_function_declared){
-			int index;
-			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
+			param *temp_par;
+			if(!(temp_par = return_parameter_from_index(hTable, curr_function, param_counter)))
 				return(SEMANTIC_REDEF);
 			else
 				debug("index OK");
-			if(index != param_counter)
+			if(temp_par->type != p.type)
 				return(SEMANTIC_TYPE);
 			debug("called parameter correct");
 		}
 
-		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
+		if(!curr_function_declared && list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
 
 		param_counter++;
@@ -571,10 +572,11 @@ parse_errno arg_list(){
 		param p;
 		p.id = currToken->info;
 
-		if(return_index_parameter(hTable, called_function, p) != param_counter)
+		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
 			return (SEMANTIC_TYPE);
 
-		I_arg_i_id(currToken->info, param_find(hTable, called_function.id, p.id)->id);
+
+		I_arg_i_id(currToken->info, return_parameter_from_index(hTable, called_function, param_counter)->id);
 
 		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
@@ -639,10 +641,11 @@ parse_errno arg_next2(){
 		param p;
 		p.id = currToken->info;
 
-		if(return_index_parameter(hTable, called_function, p) != param_counter)
+
+		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
 			return (SEMANTIC_TYPE);
 
-		I_arg_i_id(currToken->info, param_find(hTable, curr_function.id, p.id)->id);
+		I_arg_i_id(currToken->info, return_parameter_from_index(hTable, called_function, param_counter)->id);
 
 		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
@@ -909,8 +912,6 @@ parse_errno command(){
 			return (SYNTAX_ERR);
 		}
 
-		change_return(hTable, curr_function.id);
-
 		I_move_to_global(exprResult);
 		I_define_return();
 
@@ -935,6 +936,7 @@ parse_errno assignment(){
 	switch(currToken->type){
 	case IDENTIFIER:
 		debug("ID correct");
+		param_counter = 0;
 
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
@@ -960,12 +962,7 @@ parse_errno assignment(){
 		}
 
 		I_callFunc(called_function.id);
-
-		if(function_find(hTable, called_function.id)->has_return == 0)
-			null_global();
-
 		I_priradenie(*returnVal);
-
 
 		param_counter = 0;
 		called_function.id = NULL;

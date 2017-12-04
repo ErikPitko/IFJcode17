@@ -93,7 +93,6 @@ int list_insert(tHashTable *local_table, tFooListElem sym) {
 	pom->type = sym.type;
 	pom->is_define = sym.is_define;
 	pom->is_main = sym.is_main;
-	pom->has_return = 0;
 
 	pom->next_item = local_table[idx].First;
 	local_table[idx].First = pom;
@@ -276,26 +275,6 @@ param *return_parameter_from_index(tHashTable *local_table, tFooListElem sym, in
 	return NULL;
 }
 
-int change_return(tHashTable *local_table, char* id) {
-
-	int idx = hash_code(id);
-
-	local_table[idx].Act = local_table[idx].First;
-
-	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
-	{
-		if (strcmp(local_table[idx].Act->id, id) == 0) // Porovna retazce
-		{
-				local_table[idx].Act->has_return = 1;
-				return 0;
-		}
-
-		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
-	}
-
-	return -1;
-}
-
 
 int change_type(tHashTable *local_table, tFooListElem sym) {
 
@@ -318,6 +297,39 @@ int change_type(tHashTable *local_table, tFooListElem sym) {
 	}
 
 	return -1;
+}
+
+int change_param_id(tHashTable *local_table, tFooListElem sym, char* id, char* newId) {
+
+	int idx = hash_code(sym.id);
+	int counter = 0;
+
+	local_table[idx].Act = local_table[idx].First;
+
+	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu
+	{
+		if (strcmp(local_table[idx].Act->id, sym.id) == 0) // Porovna retazce
+		{
+			local_table[idx].Act->param->Act =
+					local_table[idx].First->param->First;
+
+			while (local_table[idx].Act->param->Act != NULL) // Prejdeme vsetky prvky zoznamu parametrov
+			{
+				if (strcmp(local_table[idx].Act->param->Act->id, id) == 0){
+					local_table[idx].Act->param->Act->id = myMalloc(strlen(newId) * sizeof(char));
+					strcpy(local_table[idx].Act->param->Act->id, newId);
+					return 1;
+				}
+
+				local_table[idx].Act->param->Act =
+						local_table[idx].Act->param->Act->next_param; // Posunieme sa o prvok dalej v zozname parametrov
+			}
+		}
+
+		local_table[idx].Act = local_table[idx].Act->next_item; // Posunieme sa o prvok dalej
+	}
+
+	return 0;
 }
 
 /*

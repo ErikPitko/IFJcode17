@@ -39,7 +39,6 @@ typedef struct tSymFoo
 	bool is_define; // Kontrola ci je funkcia definovana
 	int is_main; // Kontrola ci je funkcia main	
     int is_global;
-    int has_return;
 	tParamListElem *param;
 
 	struct tSymFoo *next_item; // Ukazatel na dalsi prvok	
@@ -71,7 +70,7 @@ param *param_find (tHashTable *local_table,char* fooId, char* symId);
 // Podla id najde zoznam parametru a vrati v tokene vsetky informacie... id, type
 tFooListElem *function_find (tHashTable *local_table, char *fooId);
 
-int change_return(tHashTable *local_table, char* id);
+int change_param_id(tHashTable *local_table, tFooListElem sym, char* id, char* newId);
 int change_type(tHashTable *local_table, tFooListElem sym);
 // Nastavuje isdefine na true
 int change_isdefine (tHashTable *local_table, tFooListElem sym);

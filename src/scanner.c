@@ -78,6 +78,11 @@ token *getToken(){
     sprintf(tmpToken->info,"%g",pomocna_double);
   //  printf("%shuala\n",tmpToken->info);
   }
+	
+  if(tmpToken->type == LENGTH){
+    tmpToken->type = IDENTIFIER;
+    tmpToken->info = "length";
+  }
   return tmpToken;
 }
 

@@ -40,29 +40,29 @@ void printDefineStrLenFunction()  //int strlen (string s)
 void printDefineChrFunction()//string inttochar (int i)
 {
   printf("LABEL labelchr\n");
-  printf("INT2CHAR GF@_pom_string LF@i");
+  printf("INT2CHAR GF@_pom_string LF@i\n");
   printf("RETURN\n");
 }
 
 void printDefineAscFunction() //int asc (string s, int i)
 {
   printf("LABEL labelasc\n");
-  printf("GETCHAR GF@_pom_string LF@s LF@i");
-  printf("STRI2INT GF@_pom_integer GF@_pom_string int@0");
+  printf("GETCHAR GF@_pom_string LF@s LF@i\n");
+  printf("STRI2INT GF@_pom_integer GF@_pom_string int@0\n");
   printf("RETURN\n");
 }
 
 //string strstr(string s,int i, int n)
-void printDefineStrStrFunction()
+void printDefineSubStrFunction()
 {
-  printf("LABEL labelstrstr\n");
-  printf("MOVE GF@_pom_string string@");
-  printf("ADD LF@n LF@i");
-  printf("LABEL strstrloop");
-  printf("GETCHAR GF@exppom3string LF@s LF@i");
-  printf("CONCAT GF@_pom_string GF@exppom3string");
-  printf("ADD LF@i int@1");
-  printf("JUMPIFNEQ strstrloop LF@i LF@n");
+  printf("LABEL labelsubstr\n");
+  printf("MOVE GF@_pom_string string@\n");
+  printf("ADD LF@n LF@n LF@i\n");
+  printf("LABEL substrloop\n");
+  printf("GETCHAR GF@exppom3string LF@s LF@i\n");
+  printf("CONCAT GF@_pom_string GF@_pom_string GF@exppom3string\n");
+  printf("ADD LF@i LF@i int@1\n");
+  printf("JUMPIFNEQ substrloop LF@i LF@n\n");
   printf("RETURN\n");
 }
 
@@ -181,6 +181,11 @@ void init3ADD(){
 	printf("PUSHFRAME\n");
 	printf("JUMP labelSCOPE\n");
 
+	printDefineAscFunction();
+	printDefineChrFunction();
+	printDefineStrLenFunction();
+	printDefineSubStrFunction();
+
 }
 
 
@@ -283,23 +288,7 @@ void I_loop(int number){
 
 //TODO porovnavanie stringov
 void I_if_then(int number, tFooListElem value){
-	printf("DEFVAR LF@_pom%d\n", number);
-	printf("MOVE LF@_pom%d GF@%s\n", number, value.id);
-	/*switch(value.type){
-	case INTEGER:
-	case VALUE_INTEGER:
-		printf("JUMPIFEQ label_if%d LF@_pom%d int@0\n", number, number);
-		break;
-	case DOUBLE:
-	case VALUE_DOUBLE:
-		printf("JUMPIFEQ label_if%d LF@_pom%d float@0.0\n", number, number);
-		break;
-	case BOOLEAN:*/
-		printf("JUMPIFEQ label_if%d LF@_pom%d bool@false\n", number, number);
-/*		break;
-	default:
-		error_msg(SEMANTIC_TYPE, "wrong type in if statement: %s : %d", value.id, value.type);
-	}*/
+	printf("JUMPIFEQ label_if%d GF@%s bool@false\n", number, value.id);
 }
 
 //void I_else(int number){
@@ -370,7 +359,7 @@ void I_arg_i_const(char *_const, int type, char *idD){
   else if(type == VALUE_STRING)
   {
     _const = reformString(_const);
-    printf("MOVE TF@%s int@%s\n", idD, _const);
+    printf("MOVE TF@%s string@%s\n", idD, _const);
   }
 }
 /*

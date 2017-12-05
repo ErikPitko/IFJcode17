@@ -10,5 +10,6 @@ scope
 	dim g as string = !"retezec\032s\032lomitkem\032\092\032a\010novym\035radkem"
 
 	print a; b; c; d; e; f; g;
+	print !"\n";
 
 end scope

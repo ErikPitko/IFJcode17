@@ -12,5 +12,5 @@ scope
     b = chr(40.3)
     
     print b;
-    
+    	print !"\n";
 end scope

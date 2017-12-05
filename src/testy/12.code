@@ -17,6 +17,6 @@
 
 /''/
 		  print a; /' afd '/ ''
-
+		print !"\n";
   	END  SCOPE ' one line comment
 /' '/ '

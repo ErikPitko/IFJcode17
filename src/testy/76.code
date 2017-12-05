@@ -32,4 +32,5 @@ scope
 	print f;
 	print g;
 	print h;
+	print !"\n";
 end scope

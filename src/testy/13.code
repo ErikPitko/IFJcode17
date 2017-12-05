@@ -1002,4 +1002,5 @@ dim LMQispJtAXiWEeWMJUVwronnDTNbQN as integer = 997
 dim MBIpXphtWauhGmTIQCYDCExFmkydCe as integer = 998
 dim EzNSWlgffwjBUUQloLvAdlAoMhdWHk as integer = 999
 print WDaoyeFHRrJayTmxRWYTrhbxvKSFaI;
+print !"\n";
 end scope 

@@ -1,4 +1,5 @@
 ' Multilite print (from documentation) success = 0
 scope
 	print !"Ahoj\nSve'te\\\034";
+	print !"\n";
 end scope

@@ -5,4 +5,5 @@ scope
 	dim str as string
 
 	print int; float; str;
+	print !"\n";
 end scope

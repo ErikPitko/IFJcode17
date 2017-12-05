@@ -10,4 +10,5 @@ scope
 		loop
 		a = a - 3
 	loop
+	print !"\n";
 end scope

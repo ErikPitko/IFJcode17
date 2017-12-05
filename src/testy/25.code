@@ -5,5 +5,5 @@
 scope
 
 print !"ahoj" + !"ahoj" + !"ahoj";
-
+	print !"\n";
 end scope

@@ -17,5 +17,5 @@ SCOPE
 	b = HJHKHJK(a)
 
 	print a;
-
+	print !"\n";
 END SCOPE

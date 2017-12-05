@@ -10,4 +10,5 @@ scope
 		print a;
 		a = a - 11
 	loop
+	print !"\n";
 end scope

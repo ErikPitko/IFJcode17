@@ -35,4 +35,5 @@ dim c as integer = 0
 
 		a = a + 1
 	loop	
+	print !"\n";
 end scope

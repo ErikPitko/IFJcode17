@@ -9,4 +9,5 @@ dim b as integer = 6
 a =  5.5
 
 print a;
+	print !"\n";
 end scope

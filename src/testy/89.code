@@ -51,4 +51,5 @@ scope
 		end if
 
 	end if
+	print !"\n";
 end scope

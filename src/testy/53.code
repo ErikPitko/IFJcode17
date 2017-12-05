@@ -8,4 +8,5 @@ dim a as integer = 43
 'dlouhej string
 dim s as string = !"assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 print s;
+	print !"\n";
 end scope

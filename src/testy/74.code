@@ -10,4 +10,5 @@ scope
 	dim c as integer
 	c = a(25)
 	print c;
+	print !"\n";
 end scope

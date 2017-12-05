@@ -67,4 +67,5 @@ dim x as integer = 0
 		x = x + 1
 
 	loop
+	print !"\n";
 end scope

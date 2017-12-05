@@ -16,4 +16,5 @@ scope
 		print 57;
 		a = a - 5.38
 	loop
+	print !"\n";
 end scope

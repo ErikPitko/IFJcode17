@@ -9,4 +9,6 @@ scope
 	'print a;
 	'a = Length(!\"\\069\\042\\054\")  Od Ackarov ak to nepojde nebite ma
 	'print a;
+
+	print !"\n";
 end scope

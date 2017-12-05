@@ -8,5 +8,5 @@ scope
     b = substr(!"GZGGZGGGZGZ", a, 6.0)
     
     print b;
-    
+    	print !"\n";
 end scope

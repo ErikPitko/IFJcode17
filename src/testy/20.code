@@ -11,5 +11,5 @@ scope
     dim i as double = 31.42E-2
     
     print a + b + c + d + e + f+ g + h + i;
-    
+    print !"\n";
 end scope

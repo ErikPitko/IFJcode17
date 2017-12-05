@@ -16,4 +16,5 @@ scope
 	else
 		print 77;
 	end if
+	print !"\n";
 end scope

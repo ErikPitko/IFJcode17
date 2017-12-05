@@ -8,4 +8,5 @@ scope
 	dim a as integer
 	a = foo()
 	print a;
+	print !"\n";
 end scope

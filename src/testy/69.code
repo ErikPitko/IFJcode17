@@ -44,6 +44,6 @@ scope
 	dim a as integer
 	a = start(20)
 	print a;
-
+	print !"\n";
 
 end scope

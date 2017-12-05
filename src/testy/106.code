@@ -12,5 +12,5 @@ scope
     k = asc(!"peter", c)
 
     print i; j; k;
-    
+    	print !"\n";
 end scope

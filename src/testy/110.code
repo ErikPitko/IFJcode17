@@ -18,4 +18,5 @@ end function
 scope
 	dim ______dkhfskldfhsdfsfhjghs as integer
     ______dkhfskldfhsdfsfhjghs = hanoi(4, !"A", !"B", !"C")
+	print !"\n";
 end scope

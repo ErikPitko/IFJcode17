@@ -16,5 +16,6 @@
 
 
 		  print a;
+			print !"\n";
 
   	END  SCOPE

@@ -11,5 +11,5 @@ scope
     b = FuN(5)
     
     print a; b;
-
+	print !"\n";
 end scope

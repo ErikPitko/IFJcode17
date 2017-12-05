@@ -6,5 +6,5 @@ scope
 	a = !"/'komentar'/ 'komentar"
 
 	print a;
-
+	print !"\n";
 end scope

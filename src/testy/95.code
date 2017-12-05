@@ -50,4 +50,5 @@ dim c as integer = 0
 		print c;			
 		b = b + 1
 	loop
+	print !"\n";
 end scope

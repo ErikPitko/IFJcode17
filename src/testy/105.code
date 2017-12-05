@@ -19,6 +19,6 @@ scope
 	loop
 
 	print vypis;
-
+	print !"\n";
 
 end scope

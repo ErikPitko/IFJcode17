@@ -17,4 +17,5 @@ scope
 	print b;
 	b = GHGKghgk67()
 	print b;
+	print !"\n";
 end scope

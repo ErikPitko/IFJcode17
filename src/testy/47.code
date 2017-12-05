@@ -8,4 +8,5 @@ dim b as integer
 
 print a;/'+b
 '/
+	print !"\n";
 end scope

@@ -32,7 +32,7 @@ void null_global(){
 
 void printDefineStrLenFunction()  //int strlen (string s)
 {
-  printf("LABEL labellenght\n");
+  printf("LABEL labellength\n");
   printf("STRLEN GF@_pom_integer LF@s\n");
   printf("RETURN\n");
 }

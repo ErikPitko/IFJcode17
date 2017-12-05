@@ -251,8 +251,25 @@ test 89 0
 test 90 0
 test 91 0
 test 92 0
-
-# ---------------------------
+test 93 0
+test 94 0
+test 95 0
+test 96 0
+test 97 0
+test 98 0
+test 99 0
+test 100 0
+test 101 0
+test 102 0
+test 103 0
+test 104 0
+test 105 0
+test 106 0
+test 107 0
+test 108 0
+test 109 0
+test 110 0
+ ---------------------------
 
 END=$(date +%s)
 printf "Test trval vterin: $(( $END - $START ))\n"

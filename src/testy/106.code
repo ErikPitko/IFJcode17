@@ -1,0 +1,16 @@
+' Double constant into build-in function
+
+scope
+    dim a as double = 3.0
+    dim c as integer = 15
+    
+    dim i as integer
+    dim j as integer
+    dim k as integer
+    i = asc(!"gzgfggffg", a)
+    j = asc(!"ERTZUG", 3.0)
+    k = asc(!"peter", c)
+
+    print i; j; k;
+    
+end scope

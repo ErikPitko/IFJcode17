@@ -609,7 +609,10 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 		{			
 			exprResult.type = INTEGER;
 			temporary->type = INTEGER;
-			printf("FLOAT2R2EINT GF@%s float@%s\n","TypeOne",temporary->id);
+			if(!isGlobal(temporary->id))
+				printf("FLOAT2R2EINT GF@%s float@%s\n","TypeOne",temporary->id);
+			else 
+				printf("FLOAT2R2EINT GF@%s GF@%s\n","TypeOne",temporary->id);
 			exprResult.id = "TypeOne";
 			temporary->id = "TypeOne";
 		}
@@ -632,7 +635,10 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 		{			
 			exprResult.type = DOUBLE;
 			temporary->type = DOUBLE;
-			printf("INT2FLOAT GF@%s int@%s\n","TypeOne",temporary->id);
+			if(!isGlobal(temporary->id))
+				printf("FLOAT2R2EINT GF@%s float@%s\n","TypeOne",temporary->id);
+			else 
+				printf("FLOAT2R2EINT GF@%s GF@%s\n","TypeOne",temporary->id);
 			temporary->id = "TypeOne";
 			exprResult.id = "TypeOne";
 		}
@@ -682,7 +688,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 			tmp->zeroflag = true;
 		//printf("%s  %i",firstOper->id,returnVar->type);
 		//printf("%s \n",firstOper->id);
-		resultRetype(returnVar,firstOper,semanticError,*(counter));
+		resultRetype(NULL,firstOper,semanticError,*(counter));
 		tFooListElem temporary;
 		temporary.id = selectTmp(0,firstOper->type,*(counter));
 		temporary.type = firstOper->type;

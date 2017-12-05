@@ -93,7 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-//	return;
+	return;
 	va_list args;
 	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");
@@ -217,6 +217,11 @@ parse_errno prog_body(){
 		if((ret = par_list()) != PARSE_OK)
 			return (ret);
 
+		if (param_counter != number_param(hTable, curr_function.id) && curr_function_declared){
+			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
+				return (SEMANTIC_TYPE);
+		}
+
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
 
@@ -248,10 +253,6 @@ parse_errno prog_body(){
 //		if(number_param(hTable, curr_function.id) == -1)
 //			return (SEMANTIC_TYPE);
 
-		if (param_counter != number_param(hTable, curr_function.id)){
-			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
-				return (SEMANTIC_TYPE);
-		}
 
 //		ltab_destroy(lTable);
 		lTable = NULL;
@@ -306,7 +307,7 @@ parse_errno fnc_body(){
 			return (SYNTAX_ERR);
 		}
 		debug("FUNCTION correct");
-		//TODO priradenie default hodnoty
+		null_global();
 		I_define_return();
 		break;
 	default:
@@ -471,21 +472,20 @@ parse_errno par_list(){
 
 
 		if(curr_function_declared){
-			int index;
-			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
+			param *temp_par;
+			if(!(temp_par = return_parameter_from_index(hTable, curr_function, param_counter)))
 				return(SEMANTIC_REDEF);
 			else
 				debug("index OK");
-			if(index != param_counter)
+			if(temp_par->type != p.type)
 				return(SEMANTIC_TYPE);
-			param_counter++;
 			debug("called parameter correct");
 		}
 
-		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
+		if(!curr_function_declared && list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
 
-//		param_counter++;
+		param_counter++;
 
 		if(lTable)
 			if(list_insert(lTable, sym))
@@ -572,10 +572,11 @@ parse_errno arg_list(){
 		param p;
 		p.id = currToken->info;
 
-		if(return_index_parameter(hTable, called_function, p) != param_counter)
+		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
 			return (SEMANTIC_TYPE);
 
-		I_arg_i_id(currToken->info, param_find(hTable, called_function.id, p.id)->id);
+
+		I_arg_i_id(currToken->info, return_parameter_from_index(hTable, called_function, param_counter)->id);
 
 		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
@@ -640,10 +641,11 @@ parse_errno arg_next2(){
 		param p;
 		p.id = currToken->info;
 
-		if(return_index_parameter(hTable, called_function, p) != param_counter)
+
+		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
 			return (SEMANTIC_TYPE);
 
-		I_arg_i_id(currToken->info, param_find(hTable, curr_function.id, p.id)->id);
+		I_arg_i_id(currToken->info, return_parameter_from_index(hTable, called_function, param_counter)->id);
 
 		param_counter++;
 		if((ret = arg_next()) != PARSE_OK)
@@ -710,10 +712,6 @@ parse_errno print_exp(){
 	switch(currToken->type){
 	case EOL:
 		debug("EOL correct");
-		tFooListElem val;
-		val.id = "\n";
-		val.type = STRING;
-		I_print(val);
 		break;
 	default:
 		debug("token: %s type : %d", currToken->info, currToken->type);
@@ -914,8 +912,6 @@ parse_errno command(){
 			return (SYNTAX_ERR);
 		}
 
-		change_return(hTable, curr_function.id);
-
 		I_move_to_global(exprResult);
 		I_define_return();
 
@@ -940,6 +936,7 @@ parse_errno assignment(){
 	switch(currToken->type){
 	case IDENTIFIER:
 		debug("ID correct");
+		param_counter = 0;
 
 		if(!find_test(hTable, currToken->info)){
 			if(!find_test(lTable, currToken->info)){
@@ -965,12 +962,7 @@ parse_errno assignment(){
 		}
 
 		I_callFunc(called_function.id);
-
-		if(function_find(hTable, called_function.id)->has_return == 0)
-			null_global();
-
 		I_priradenie(*returnVal);
-
 
 		param_counter = 0;
 		called_function.id = NULL;
@@ -988,11 +980,75 @@ parse_errno assignment(){
 	return (PARSE_OK);
 }
 
+
 parse_errno parse(){
 	init3ADD();
 	hTable = ltab_init();
 	cstackInit(&cstack);
 	cstackInit(&ifstack);
+
+	/**************BUILT_IN****************/
+	tFooListElem func;
+	func.is_main = false;
+	param par1;
+	param par2;
+	param par3;
+
+
+	/********LENGTH********/
+	func.id = "length";
+	func.type = INTEGER;
+
+	par1.id = "s";
+	par1.type = STRING;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+
+	/********SUBSTR********/
+
+	func.id = "substr";
+	func.type = STRING;
+
+	par1.id = "s";
+	par1.type = STRING;
+	par2.id = "i";
+	par2.type = INTEGER;
+	par3.id = "n";
+	par3.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+	list_insert_param(hTable, func, par2);
+	list_insert_param(hTable, func, par3);
+
+	/*********ASC**********/
+
+	func.id = "asc";
+	func.type = INTEGER;
+
+	par1.id = "s";
+	par1.type = STRING;
+	par2.id = "i";
+	par2.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+	list_insert_param(hTable, func, par2);
+
+	/*********CHR**********/
+
+	func.id = "chr";
+	func.type = STRING;
+
+	par1.id = "i";
+	par1.type = INTEGER;
+
+	list_insert(hTable, func);
+	list_insert_param(hTable, func, par1);
+
+	/**************************************/
+
 	parse_errno rett;
 	rett = prog_body();
 	debug("FILE PARSING COMPLETE:");

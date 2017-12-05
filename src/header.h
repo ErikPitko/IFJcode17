@@ -113,6 +113,7 @@ typedef struct
 	token *firstToken;
 	ePrecElem priority;
 	bool isReduced;
+	bool zeroflag;
 }tReductToken;
 
 typedef struct

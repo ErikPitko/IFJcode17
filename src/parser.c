@@ -93,7 +93,7 @@ parse_errno check_AS(){
 /*--------------------------------------------*/
 
 void debug(const char *form, ...){
-	return;
+//	return;
 	va_list args;
 	va_start(args, form);
 	fprintf(stdout, "%s", "PARSER: ");

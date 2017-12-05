@@ -1,0 +1,12 @@
+scope 
+	dim a as integer
+	a = length(!"ahoj")
+	print a; ' 4
+	a = length(!"PeterAndris1")
+	print a; ' 12
+	
+	'a = Length(!\"\\n\\t\\n\")  Od Ackarov ak to nepojde nebite ma
+	'print a;
+	'a = Length(!\"\\069\\042\\054\")  Od Ackarov ak to nepojde nebite ma
+	'print a;
+end scope

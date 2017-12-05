@@ -32,7 +32,7 @@ void null_global(){
 
 void printDefineStrLenFunction()  //int strlen (string s)
 {
-  printf("LABEL labellenght\n");
+  printf("LABEL labellength\n");
   printf("STRLEN GF@_pom_integer LF@s\n");
   printf("RETURN\n");
 }
@@ -262,29 +262,12 @@ void I_input_id(tFooListElem value){//READ var type
 *
 */
 void I_do_while_label(int number){
-	printf("DEFVAR LF@_wpom%d\n", number);
-  printf("LABEL w_label%d\n",number);
+	printf("LABEL w_label%d\n",number);
 }
 
 void I_do_while(int number, tFooListElem value)
 {
-	printf("MOVE LF@_wpom%d GF@%s\n", number, value.id);
-
-	//switch(value.type){
-	/*case INTEGER:
-	case VALUE_INTEGER:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d int@0\n", number, number);
-		break;
-	case DOUBLE:
-	case VALUE_DOUBLE:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d float@0.0\n", number, number);
-		break;*/
-	//case BOOLEAN:
-		printf("JUMPIFEQ w_label%d_end LF@_wpom%d bool@false\n", number, number);
-		//break;
-	//default:
-		//error_msg(SEMANTIC_TYPE, "wrong type in while statement: %s : %d", value.id, value.type);
-	//}
+	printf("JUMPIFEQ w_label%d_end GF@%s bool@false\n", number, value.id);
 }
 
 /*
@@ -366,7 +349,7 @@ void I_createFrame(){
 * @param id - znak do premennej do ktorej to budeme zapisovat EXP/func
 */
 void I_arg_i_id(char *id, char *idD){
-
+    printf("DEFVAR TF@%s\n", idD);
     printf("MOVE TF@%s LF@%s\n", idD, id);
 
 }

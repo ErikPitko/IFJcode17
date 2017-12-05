@@ -588,8 +588,11 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 
 void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticError,int counter)
 {
-	if(returnVar == NULL)
+	if(returnVar == NULL){
+		if(temporary->type == STRING || temporary->type == VALUE_STRING)
+			temporary->id = reformString(temporary->id);
 		return;
+	}
 	if(returnVar->type == INTEGER)
 	{
 		if(temporary->type == DOUBLE)

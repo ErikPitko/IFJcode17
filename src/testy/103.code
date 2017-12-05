@@ -1,0 +1,70 @@
+' while in condition
+scope
+
+dim x as integer = 0 
+	
+	do while x < 5
+
+		if 78 > 2 then
+
+			dim a as integer = 12
+	
+			do while a >= 1
+				if a < 2 then
+					if a < 2 then
+						if a < 2 then
+							if a < 2 then
+								if a < 2 then
+									print !"victory!!!";
+								elseif a < 2 then 
+	
+								else
+						
+								end if
+							elseif a < 2 then 
+
+							else
+				
+							end if
+						elseif a < 2 then 
+
+						else 
+
+						end if
+					elseif a < 2 then 
+						print 3;
+					else 
+						print 4;
+					end if
+
+				elseif a > 2 then
+
+					if a < 2 then
+						print 7;
+					elseif a < 2 then 
+						print 8;
+					else 
+						print 9;
+					end if
+				else
+
+					if a > 2 then
+						print 12;
+					elseif a < 2 then 
+						print 13;
+					else 
+						print 14;
+					end if
+				end if
+			
+				a = a - 1
+			loop
+
+		else
+			print 77;
+		end if
+	
+		x = x + 1
+
+	loop
+end scope

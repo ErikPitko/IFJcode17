@@ -2,5 +2,10 @@ tests 0 - 24 their basic
 tests 25 - 55 our basic (expression test, print test, comment test)
 tests 56 - 70 their function
 tests 71 - 77 our function
-tests 78 - 90 our if
-tests 91 - 9x our cycle
+tests 78 - 90 our if 
+tests 91 - 95 our cycle
+tests 96 - 100 their cycle
+tests 101 - 105 our combination if and cycle
+tests 106 - 109 test on builtin functions
+test 110 special hanoi tower recursion "A"
+test 111 - 115 will be testing error input

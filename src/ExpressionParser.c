@@ -153,15 +153,9 @@ int tableIndexSelect(tReductToken *tok)
 
 bool isGlobal(char* str)
 {
-	if(strcmp(str,"exppom1double") == 0 || strcmp(str,"exppom1integer")== 0 || strcmp(str,"exppom1string")==0)
-	{
+	if(strcmp(str,"exppom1") == 0 || strcmp(str,"exppom2")== 0 || strcmp(str,"exppom3")==0||strcmp(str,"exppom4")==0)
 		return true;
-	}
-	else if(strcmp(str,"exppom2double") == 0 || strcmp(str,"exppom2integer")== 0 || strcmp(str,"exppom2string")==0)
-	{
-		return true;
-	}
-	else if(strcmp(str,"exppom3double") == 0 || strcmp(str,"exppom3integer")== 0 || strcmp(str,"exppom3string")==0)
+	else if(strcmp(str,"TypeOne") == 0 || strcmp(str,"TypeTwo")== 0)
 	{
 		return true;
 	}
@@ -310,9 +304,9 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				}
 				if(!operationPriority && (actToken.firstToken->type == PLUS || actToken.firstToken->type == MINUS))
 				{
-					operationCompare = true;
+					operationPriority = true;
 				}
-				if(!operationPriority && (actToken.firstToken->type == LESS || actToken.firstToken->type == GREATER||actToken.firstToken->type == EQUAL || actToken.firstToken->type == GREATER_EQUAL||actToken.firstToken->type == LESS_EQUAL))
+				if(!operationCompare && (actToken.firstToken->type == LESS || actToken.firstToken->type == GREATER||actToken.firstToken->type == EQUAL || actToken.firstToken->type == GREATER_EQUAL||actToken.firstToken->type == LESS_EQUAL))
 				{
 					operationCompare = true;
 				}
@@ -354,7 +348,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	{
 		error_msg(semanticError,"Semantic error in expression");
 	}
-	resultRetype(returnVar,&exprResult,&semanticError,&counter);
+	resultRetype(returnVar,&exprResult,&semanticError,counter);
 	if(returnVar != NULL && find_test(localTable, returnVar->id))
 	{
 		printf("MOVE LF@%s GF@%s\n",returnVar->id, exprResult.id);
@@ -435,7 +429,7 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 	if(isDiv)
 		goto firstOper;
 	if(firstOper != NULL && secondOper != NULL)
-	{
+	{	
 		if((firstOper->type == DOUBLE|| firstOper->type == VALUE_DOUBLE) && (secondOper->type == INTEGER||secondOper->type == VALUE_INTEGER))
 		{
 			firstOper:
@@ -444,40 +438,58 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 				if(isGlobal(secondOper->id))
 					printf("INT2FLOAT GF@%s GF@%s\n",secondOper->id,secondOper->id);
 				else
-					printf("INT2FLOAT LF@%s LF@%s\n",secondOper->id,secondOper->id);
+				{
+					printf("INT2FLOAT GF@%s LF@%s\n","TypeTwo",secondOper->id);
+					secondOper->id = "TypeTwo";
+				}
+				secondOper->type = DOUBLE;
 			}
 			else if(secondOper->type == VALUE_INTEGER)
 			{
 				if(isGlobal(secondOper->id))
 					printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
 				else
-					printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
-				secondOper->id = selectTmp(0,DOUBLE,counter);
+				{
+					printf("INT2FLOAT GF@%s int@%s\n","TypeTwo",secondOper->id);
+					secondOper->id = "TypeTwo";
+				}
 				secondOper->type = DOUBLE;
 			}
 			if(isDiv)
 				goto secondOper;
 		}
+
 		if((secondOper->type == DOUBLE|| secondOper->type == VALUE_DOUBLE) && (firstOper->type == INTEGER||firstOper->type == VALUE_INTEGER))
 		{
 			secondOper:
+			if(strcmp(firstOper->id,secondOper->id) == 0)
+			return;
 			if(firstOper->type == INTEGER)
 			{
 				if(isGlobal(firstOper->id))
 					printf("INT2FLOAT GF@%s GF@%s\n",firstOper->id,firstOper->id);
 				else
-					printf("INT2FLOAT LF@%s LF@%s\n",firstOper->id,firstOper->id);
+				{
+					printf("INT2FLOAT GF@%s LF@%s\n","TypeOne",firstOper->id);
+					firstOper->id = "TypeOne";
+				}
+				firstOper->type = DOUBLE;
+
 			}
 			else if(firstOper->type == VALUE_INTEGER)
 			{
 				if(isGlobal(firstOper->id))
 					printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
 				else
-					printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
-				firstOper->id =selectTmp(0,DOUBLE,counter);
+				{
+					printf("INT2FLOAT GF@%s int@%s\n","TypeOne",firstOper->id);
+					firstOper->id ="TypeOne";
+				}
 				firstOper->type = DOUBLE;
 			}
 		}
+
+
 	}
 	if(firstOper!= NULL)
 	{
@@ -513,33 +525,22 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 
 char* selectTmp(int zeroOrOne,int type,int counter)
 {
-	int modulo = (counter)%2 +zeroOrOne;
+	int modulo = (counter)%4 +zeroOrOne;
 	if(modulo == 0)
 	{
-		if(type == STRING || type == VALUE_STRING)
-			return "exppom1string";
-		else if(type == DOUBLE || type == VALUE_DOUBLE)
-			return "exppom1double";
-		else if(type == INTEGER|| type == VALUE_INTEGER)
-			return "exppom1integer";
+		return "exppom1";
 	}
 	else if(modulo == 1)
 	{
-		if(type == STRING || type == VALUE_STRING)
-			return "exppom2string";
-		else if(type == DOUBLE || type == VALUE_DOUBLE)
-			return "exppom2double";
-		else if(type == INTEGER|| type == VALUE_INTEGER)
-			return "exppom2integer";
+		return "exppom2";
 	}
 	else if (modulo == 2)
 	{
-		if(type == STRING || type == VALUE_STRING)
-			return "exppom3string";
-		else if(type == DOUBLE || type == VALUE_DOUBLE)
-			return "exppom3double";
-		else if(type == INTEGER|| type == VALUE_INTEGER)
-			return "exppom3integer";
+		return "exppom3";
+	}
+	else if (modulo == 3)
+	{
+		return "exppom4";
 	}
 	return "";
 }
@@ -594,20 +595,20 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 		if(temporary->type == DOUBLE)
 		{		
 			exprResult.type = INTEGER;
-			//temporary->type = INTEGER;
+			temporary->type = INTEGER;
 			if(isGlobal(temporary->id))
-				printf("FLOAT2R2EINT GF@%s GF@%s\n",selectTmp(0,INTEGER,counter),temporary->id);
+				printf("FLOAT2R2EINT GF@%s GF@%s\n","TypeOne",temporary->id);
 			else 
-				printf("FLOAT2R2EINT GF@%s LF@%s\n",selectTmp(0,INTEGER,counter),temporary->id);
-			exprResult.id = selectTmp(0,INTEGER,counter);
+				printf("FLOAT2R2EINT GF@%s LF@%s\n","TypeOne",temporary->id);
+			exprResult.id = "TypeOne";
 		}
 		else if(temporary->type == VALUE_DOUBLE)
 		{			
 			exprResult.type = INTEGER;
 			temporary->type = INTEGER;
-			printf("FLOAT2R2EINT GF@%s float@%s\n",selectTmp(0,INTEGER,counter),temporary->id);
-			exprResult.id = selectTmp(0,INTEGER,counter);
-			temporary->id = selectTmp(0,INTEGER,counter);
+			printf("FLOAT2R2EINT GF@%s float@%s\n","TypeOne",temporary->id);
+			exprResult.id = "TypeOne";
+			temporary->id = "TypeOne";
 		}
 		else if (temporary->type == STRING)
 			setSemanticError(semanticError,SEMANTIC_TYPE);
@@ -617,20 +618,20 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 		if(temporary->type == INTEGER)
 		{	
 			exprResult.type = DOUBLE;
-			//temporary->type = DOUBLE;
+			temporary->type = DOUBLE;
 			if(isGlobal(temporary->id))
-				printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),temporary->id);
+				printf("INT2FLOAT GF@%s GF@%s\n","TypeOne",temporary->id);
 			else
-				printf("INT2FLOAT GF@%s LF@%s\n",selectTmp(0,DOUBLE,counter),temporary->id);
-			exprResult.id = selectTmp(0,DOUBLE,counter);
+				printf("INT2FLOAT GF@%s LF@%s\n","TypeOne",temporary->id);
+			exprResult.id = "TypeOne";
 		}
 		else if(temporary->type == VALUE_INTEGER)
 		{			
 			exprResult.type = DOUBLE;
 			temporary->type = DOUBLE;
-			printf("INT2FLOAT GF@%s int@%s\n",selectTmp(0,DOUBLE,counter),temporary->id);
-			temporary->id = selectTmp(0,DOUBLE,counter);
-			exprResult.id = selectTmp(0,DOUBLE,counter);
+			printf("INT2FLOAT GF@%s int@%s\n","TypeOne",temporary->id);
+			temporary->id = "TypeOne";
+			exprResult.id = "TypeOne";
 		}
 		else if (temporary->type == STRING)
 			setSemanticError(semanticError,SEMANTIC_TYPE);
@@ -703,7 +704,6 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 		{
 			tReductToken fID = *(stackTop(rStack));	//pop a top stacku (je tam operand)
 			stackPop(rStack);	// X + b   => 	pop X
-			//stackPop(rStack);	//MUSÍ BÝT JINAK NEBUDE FUNGOVAT BACHA NA HORNÍ ŘÁDEK POKUD BUDEME PRACOVAT JAKO TOP POP MUSÍME VYMAZAT
 			if(!isOperatorExpr(fID.firstToken))
 			{
 			if(fID.firstToken->type == LEFT_PARENTHESIS || fID.firstToken->type == RIGHT_PARENTHESIS)
@@ -711,6 +711,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 				tReductToken tmp = *(stackTop(rStack));
 				stackPop(rStack);
 				//printf("****E -> (E)****\n");
+				*(counter) = *(counter)+1;
 				tReductToken *result =	(tReductToken*)myMalloc(sizeof(tReductToken));
 				result->firstToken = (token*)myMalloc(sizeof(token));
 				result->firstToken->info = tmp.firstToken->info;
@@ -778,6 +779,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						{						
 							i++;
 						}
+						*(counter) = *(counter)+1;
 						tFooListElem temporary;
 						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
@@ -861,6 +863,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						{						
 							i++;
 						}
+						*(counter) = *(counter)+1;
 						tFooListElem temporary;
 						temporary.type = firstOper->type;
 						//printf("%s  %s\n",strValueOfEnum(firstOper->type),strValueOfEnum(temporary->type));
@@ -927,7 +930,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
-					if(*(operationPriority)== true)
+					//if(*(operationPriority)== true)
 					{
 						//printf("AAA%i\n",*(counter));
 						*(operationPriority)= false;
@@ -1020,7 +1023,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 					}
 					if(secondOper != NULL && firstOper != NULL)
 					{
-						if(*(operationPriority)== true)
+						//if(*(operationPriority)== true)
 						{
 							//printf("AAA%i\n",*(counter));
 							*(operationPriority)= false;
@@ -1113,7 +1116,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 							setSemanticError(semanticError,SEMANTIC_OTHER);
 							goto semanticdivdouble;
 						}
-						if(*(operationPriority)== true)
+						//if(*(operationPriority)== true)
 						{
 							//printf("AAA%i\n",*(counter));
 							*(operationPriority)= false;
@@ -1135,13 +1138,16 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						exprResult.type = temporary.type;
 						exprResult.id = temporary.id;
 						printValue("DIV",&temporary,secondOper,firstOper);
-						if(returnVar->type == INTEGER)
+						if(returnVar != NULL)
 						{
-							exprResult.type = INTEGER;
-							exprResult.id = selectTmp(i,INTEGER,*(counter));
-							result->firstToken->type = INTEGER;
-							result->firstToken->info = exprResult.id;
-							printf("FLOAT2R2EINT GF@%s GF@%s\n",selectTmp(i,INTEGER,*(counter)),temporary.id);
+							if(returnVar->type == INTEGER)
+							{
+								exprResult.type = INTEGER;
+								exprResult.id = selectTmp(i,INTEGER,*(counter));
+								result->firstToken->type = INTEGER;
+								result->firstToken->info = exprResult.id;
+								printf("FLOAT2R2EINT GF@%s GF@%s\n",selectTmp(i,INTEGER,*(counter)),temporary.id);
+							}
 						}
 					}
 				}
@@ -1198,6 +1204,12 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 						secondOper->id = fID.firstToken->info;
 						secondOper->type = fID.firstToken->type;
 					}
+					/*if(*(operationPriority)== true)
+					{
+						//printf("AAA%i\n",*(counter));
+						*(operationPriority)= false;
+						*(counter) = *(counter)+1;
+					}*/
 					int i =0;
 					if(*(operationCompare))
 					{

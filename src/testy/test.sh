@@ -218,7 +218,7 @@ test 56 0
 test 57 0
 test 58 0
 test 59 0
-test 60 0
+test 60 3
 test 61 3
 test 62 3
 test 63 0

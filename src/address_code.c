@@ -71,11 +71,12 @@ void printDefineAscFunction() //int asc (string s, int i)
 //string strstr(string s,int i, int n)
 void printDefineSubStrFunction() {
 	printf("LABEL labelsubstr\n");
+	printf("MOVE GF@pom_AIM3 int@0\n");
 	printf("MOVE GF@_pom_string string@\n"); // vyprazdneni stringu
 
   printf("STRLEN GF@pom_AIM2 LF@s\n"); // strlen(s)
 
-  printf("SUB GF@pom_AIM3 GF@pom_AIM3 LF@i\n"); // strlen(s) - i
+  printf("SUB GF@pom_AIM3 GF@pom_AIM2 LF@i\n"); // strlen(s) - i
 
   // n < 0
   printf("LT GF@pom_AIM1 LF@n int@0\n");
@@ -93,13 +94,14 @@ void printDefineSubStrFunction() {
 
   // vse v ramci toho co sem udelal ve tri hodiny rano
 	//printf("ADD LF@n LF@n LF@i\n");
+	printf("SUB LF@i LF@i int@1\n"); // tohle nechapu ked tka vzmayat kvuli indexu
 	printf("LABEL label_substrloop\n"); // zaciatok cyklu
 	printf("GETCHAR GF@pom_AIM4 LF@s LF@i\n");  // postupne nacitani od i
 	printf("CONCAT GF@_pom_string GF@_pom_string GF@pom_AIM4\n"); // spojeni stringu
 	printf("ADD LF@i LF@i int@1\n");         // i++;
   printf("SUB LF@n LF@n int@1\n");          // n--;
   printf("GT GF@pom_AIM1 LF@n int@0\n");   // n > 0
-	printf("JUMPIFNEQ label_substrloop GF@pom_AIM1 bool@true\n"); // cyklenie ak n > 0
+	printf("JUMPIFEQ label_substrloop GF@pom_AIM1 bool@true\n"); // cyklenie ak n > 0
   printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
 
   printf("LABEL label_untilend\n"); // nevieme kedy skonci

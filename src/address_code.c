@@ -258,22 +258,12 @@ void I_dim_id_as_var_type(tFooListElem value) {
  *
  */
 void I_input_id(tFooListElem value) {   //READ var type
-	int where = 0;
 	if (value.type == STRING) {
-		if (where) {
-			printf("READ GF@_%s\n", value.id);
-		} else
-			printf("READ LF@_%s\n", value.id);
+			printf("READ LF@%s string\n", value.id);
 	} else if (value.type == DOUBLE) {
-		if (where) {
-			printf("READ GF@_%s\n", value.id);
-		} else
-			printf("READ LF@_%s\n", value.id);
+			printf("READ LF@%s float\n", value.id);
 	} else if (value.type == INTEGER) {
-		if (where) {
-			printf("READ GF@_%s\n", value.id);
-		} else
-			printf("READ LF@_%s\n", value.id);
+			printf("READ LF@%s int\n", value.id);
 	}   //else error
 
 }
@@ -411,10 +401,10 @@ void I_define_return() {
  *
  */
 void I_print(tFooListElem value) { // type z expression
+	value.id = reformString(value.id);
 	if (isGlobal(value.id)) {
 		printf("WRITE GF@%s\n", value.id);
 	} else {
-		value.id = reformString(value.id);
 		printf("WRITE string@%s\n", value.id);
 	}
 }

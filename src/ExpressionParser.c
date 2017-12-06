@@ -435,8 +435,9 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 			firstOper:
 			if(secondOper->type == INTEGER)
 			{
-				if(isGlobal(secondOper->id))
+				if(isGlobal(secondOper->id)){
 					printf("INT2FLOAT GF@%s GF@%s\n",secondOper->id,secondOper->id);
+				}
 				else
 				{
 					printf("INT2FLOAT GF@%s LF@%s\n","TypeTwo",secondOper->id);
@@ -446,8 +447,10 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 			}
 			else if(secondOper->type == VALUE_INTEGER)
 			{
-				if(isGlobal(secondOper->id))
+				if(isGlobal(secondOper->id)){
 					printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),secondOper->id);
+					secondOper->id = selectTmp(0,DOUBLE,counter);
+				}
 				else
 				{
 					printf("INT2FLOAT GF@%s int@%s\n","TypeTwo",secondOper->id);
@@ -478,8 +481,10 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 			}
 			else if(firstOper->type == VALUE_INTEGER)
 			{
-				if(isGlobal(firstOper->id))
+				if(isGlobal(firstOper->id)){
 					printf("INT2FLOAT GF@%s GF@%s\n",selectTmp(0,DOUBLE,counter),firstOper->id);
+					firstOper->id = selectTmp(0,DOUBLE,counter);
+				}
 				else
 				{
 					printf("INT2FLOAT GF@%s int@%s\n","TypeOne",firstOper->id);
@@ -636,9 +641,9 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 			exprResult.type = DOUBLE;
 			temporary->type = DOUBLE;
 			if(!isGlobal(temporary->id))
-				printf("FLOAT2R2EINT GF@%s float@%s\n","TypeOne",temporary->id);
+				printf("INT2FLOAT GF@%s float@%s\n","TypeOne",temporary->id);
 			else 
-				printf("FLOAT2R2EINT GF@%s GF@%s\n","TypeOne",temporary->id);
+				printf("INT2FLOAT GF@%s GF@%s\n","TypeOne",temporary->id);
 			temporary->id = "TypeOne";
 			exprResult.id = "TypeOne";
 		}

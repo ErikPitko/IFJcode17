@@ -74,54 +74,56 @@ void printDefineSubStrFunction() {
 	printf("MOVE GF@pom_AIM3 int@0\n");
 	printf("MOVE GF@_pom_string string@\n"); // vyprazdneni stringu
 
-  printf("STRLEN GF@pom_AIM2 LF@s\n"); // strlen(s)
+  	printf("STRLEN GF@pom_AIM2 LF@s\n"); // strlen(s)
 
-  printf("SUB GF@pom_AIM3 GF@pom_AIM2 LF@i\n"); // strlen(s) - i
+  		printf("SUB GF@pom_AIM3 GF@pom_AIM2 LF@i\n"); // strlen(s) - i
 
-  // n < 0
-  printf("LT GF@pom_AIM1 LF@n int@0\n");
-  printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@true\n");
-  //  n >  (strlen(s) - i)
-  printf("GT GF@pom_AIM1 LF@n GF@pom_AIM3\n"); //  n >  (strlen(s) - i)
-  printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@true\n");
+  	// n < 0
+  	printf("LT GF@pom_AIM1 LF@n int@0\n");
+  	printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@true\n");
+  	//  n >  (strlen(s) - i)
+  	printf("GT GF@pom_AIM1 LF@n GF@pom_AIM3\n"); //  n >  (strlen(s) - i)
+  	printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@true\n");
 
-  // i <= 0
-  printf("LT GF@pom_AIM1 LF@i int@1\n");
-  printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
-  // s == !""
-  printf("EQ GF@pom_AIM1 LF@s string@\n");
-  printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
-
-  // vse v ramci toho co sem udelal ve tri hodiny rano
+  	// i <= 0
+  	printf("LT GF@pom_AIM1 LF@i int@1\n");
+  	printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
+  	// s == !""
+  	printf("EQ GF@pom_AIM1 LF@s string@\n");
+  	printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
+	//n == 0
+	printf("JUMPIFEQ label_empty LF@n int@0\n");
+  	// vse v ramci toho co sem udelal ve tri hodiny rano
 	//printf("ADD LF@n LF@n LF@i\n");
 	printf("SUB LF@i LF@i int@1\n"); // tohle nechapu ked tka vzmayat kvuli indexu
 	printf("LABEL label_substrloop\n"); // zaciatok cyklu
 	printf("GETCHAR GF@pom_AIM4 LF@s LF@i\n");  // postupne nacitani od i
 	printf("CONCAT GF@_pom_string GF@_pom_string GF@pom_AIM4\n"); // spojeni stringu
 	printf("ADD LF@i LF@i int@1\n");         // i++;
-  printf("SUB LF@n LF@n int@1\n");          // n--;
-  printf("GT GF@pom_AIM1 LF@n int@0\n");   // n > 0
+	printf("SUB LF@n LF@n int@1\n");          // n--;
+ 	printf("GT GF@pom_AIM1 LF@n int@0\n");   // n > 0
 	printf("JUMPIFEQ label_substrloop GF@pom_AIM1 bool@true\n"); // cyklenie ak n > 0
-  printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
+  	printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
 
-  printf("LABEL label_untilend\n"); // nevieme kedy skonci
-  // az do konca dopln, n = (strlen(s) - i);
-  printf("SUB LF@n GF@pom_AIM2 LF@i\n");
-  //skoci hore kde to uz jednou udelane je
-  printf("JUMP label_substrloop\n");
-  printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie - dead_zone
+  	printf("LABEL label_untilend\n"); // nevieme kedy skonci
+  	printf("SUB LF@i LF@i int@1\n");
+  	// az do konca dopln, n = (strlen(s) - i);
+  	printf("SUB LF@n GF@pom_AIM2 LF@i\n");
+  	//skoci hore kde to uz jednou udelane je
+  	printf("JUMP label_substrloop\n");
+  	printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie - dead_zone
 
-  printf("LABEL label_empty\n"); // zzaciatok prazdneho
-  // prazdny retazec
-  printf("MOVE GF@_pom_string string@\n");
-  printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
+  	printf("LABEL label_empty\n"); // zzaciatok prazdneho
+  	// prazdny retazec
+  	printf("MOVE GF@_pom_string string@\n");
+  	printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
 
 
 
-//  printf("LABEL label_substrfunctiongood\n");
-  //konec snad
-  printf("LABEL label_konecfunkcesubstr\n");
-  printf("RETURN\n");
+	//printf("LABEL label_substrfunctiongood\n");
+  	//konec snad
+  	printf("LABEL label_konecfunkcesubstr\n");
+  	printf("RETURN\n");
 }
 
 /*

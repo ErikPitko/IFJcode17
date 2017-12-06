@@ -89,7 +89,7 @@ void printDefineSubStrFunction() {
   printf("LT GF@pom_AIM1 LF@i int@1\n");
   printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
   // s == !""
-  printf("EQ GF@pom_AIM1 LF@s string@!""\n");
+  printf("EQ GF@pom_AIM1 LF@s string@\n");
   printf("JUMPIFEQ label_empty GF@pom_AIM1 bool@true\n");
 
   // vse v ramci toho co sem udelal ve tri hodiny rano
@@ -113,7 +113,7 @@ void printDefineSubStrFunction() {
 
   printf("LABEL label_empty\n"); // zzaciatok prazdneho
   // prazdny retazec
-  printf("MOVE GF@_pom_string string@!""\n");
+  printf("MOVE GF@_pom_string string@\n");
   printf("JUMP label_konecfunkcesubstr\n"); // ukoncenie
 
 

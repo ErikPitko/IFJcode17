@@ -294,6 +294,7 @@ void I_dim_id_as_var_type(tFooListElem value) {
  *
  */
 void I_input_id(tFooListElem value) {   //READ var type
+	printf("WRITE string@%s\n", reformString("? "));
 	if (value.type == STRING) {
 			printf("READ LF@%s string\n", value.id);
 	} else if (value.type == DOUBLE) {

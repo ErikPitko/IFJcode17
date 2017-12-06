@@ -423,6 +423,8 @@ void print_Table(tHashTable *local_table) {
 }
 
 int find_test(tHashTable *local_table, char *id) {
+	if(!id)
+		return 0;
 
 	int i = hash_code(id);
 

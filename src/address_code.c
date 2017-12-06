@@ -383,6 +383,7 @@ void I_arg_i_id(char *id, char *idD) {
 }
 
 void I_move_var(char *to, char *from) {
+	printf("DEFVAR LF@%s\n", to);
 	printf("MOVE LF@%s LF@%s\n", to, from);
 
 }

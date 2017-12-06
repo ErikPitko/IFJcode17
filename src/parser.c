@@ -464,6 +464,8 @@ parse_errno par_list(){
 		param p;
 		sym.id = currToken->info;
 		p.id = currToken->info;
+		if(!lTable)
+			strcat(p.id, "_dec");
 
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
@@ -487,7 +489,7 @@ parse_errno par_list(){
 
 			if(lTable && strcmp(temp_par->id, p.id)){
 				I_move_var(p.id, temp_par->id);
-				debug("param name collision, moving ...| %s -> %s", temp_par->id, p.id);
+				debug("moving parameter from dec to def ...| %s -> %s", temp_par->id, p.id);
 			}
 		}
 
@@ -529,6 +531,8 @@ parse_errno par_next(){
 		param p;
 		sym.id = currToken->info;
 		p.id = currToken->info;
+		if(!lTable)
+			strcat(p.id, "_dec");
 
 		if((ret = check_AS()) != PARSE_OK)
 			return (ret);
@@ -552,7 +556,7 @@ parse_errno par_next(){
 
 			if(lTable && strcmp(temp_par->id, p.id)){
 				I_move_var(p.id, temp_par->id);
-				debug("param name collision, moving ...| %s -> %s", temp_par->id, p.id);
+				debug("moving parameter from dec to def ...| %s -> %s", temp_par->id, p.id);
 			}
 		}
 

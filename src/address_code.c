@@ -489,5 +489,7 @@ void I_priradenie(tFooListElem value) {
 		printf("LABEL label_end%d\n", number);
 	}
 
+	null_global();
+
 	number++;
 }

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O0 -Wall -Wextra -g
+CFLAGS=-O1 -Wall -Wextra -g
 .PHONY: test
 
 all: IFJcode17

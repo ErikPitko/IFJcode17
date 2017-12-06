@@ -193,6 +193,8 @@ param *param_find(tHashTable *local_table, char* fooId, char* symId) {
 
 
 tFooListElem *function_find(tHashTable *local_table, char *fooId) {
+	if(!fooId || !local_table)
+		return NULL;
 
 	int idx = hash_code(fooId);
 	for (local_table[idx].Act = local_table[idx].First;
@@ -201,7 +203,7 @@ tFooListElem *function_find(tHashTable *local_table, char *fooId) {
 	{
 		if (strcmp(local_table[idx].Act->id, fooId) == 0) // Porovna retazce
 		{
-			return local_table[idx].Act;
+			return (local_table[idx].Act);
 		}
 	}
 

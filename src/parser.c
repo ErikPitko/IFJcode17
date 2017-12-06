@@ -984,6 +984,7 @@ parse_errno assignment(){
 		}
 
 		called_function.id = currToken->info;
+		tFooListElem *tempq = function_find(hTable, currToken->info);
 		I_createFrame();
 
 		if((ret = check_LEFTP()) != PARSE_OK)
@@ -996,6 +997,10 @@ parse_errno assignment(){
 			if(!(number_param(hTable, called_function.id) == -1 && param_counter == 0))
 				return (SEMANTIC_TYPE);
 		}
+
+		if((tempq->type == STRING && returnVal->type != STRING) || (tempq->type != STRING && returnVal->type == STRING))
+			if(tempq->type != returnVal->type)
+				return (SEMANTIC_TYPE);
 
 		I_callFunc(called_function.id);
 		I_priradenie(*returnVal);

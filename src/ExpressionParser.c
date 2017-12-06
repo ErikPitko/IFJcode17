@@ -717,7 +717,7 @@ void applyRule(tStack *st,tStack *rStack,bool *reduct,int *semanticError,tFooLis
 		{
 			(*a)= (*a)+1;
 			//printf("%i \n",(*a));
-			printValue("MOVE", &temporary, firstOper, NULL);		
+			printValue("MOVE", &temporary, firstOper, NULL);
 		}
 		semanticreduct:
 		stackPop(rStack);

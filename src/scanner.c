@@ -85,20 +85,19 @@ token *getToken(){
   }
 
   if(tmpToken->type == ASC){
-    tmpToken->type = IDENTIFIER;
-    tmpToken->info = "asc";
-  }
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "asc";
+   }
 
-  if(tmpToken->type == SUBSTR){
-    tmpToken->type = IDENTIFIER;
-    tmpToken->info = "substr";
-  }
+   if(tmpToken->type == SUBSTR){
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "substr";
+   }
 
-  if(tmpToken->type == CHR){
-    tmpToken->type = IDENTIFIER;
-    tmpToken->info = "chr";
-  }
-
+   if(tmpToken->type == CHR){
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "chr";
+   }
   return tmpToken;
 }
 
@@ -280,7 +279,7 @@ token* getToken0() {
 					while (((c = getchar0()) >= '0') && (c<='9')) {
 							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;} // 222
 					}
-					if(isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
+					if(isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
 						//if (c == '\n')
 							tmp_s[i] = '\0';
 						tmpToken->type = VALUE_INTEGER;
@@ -299,7 +298,7 @@ token* getToken0() {
 							ERR; // 123.x // x neni cislo
 						}
 						if (c != 'e'/*isspace(c) || isOperator(c)*/){
-							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
 								ungetcharpom = c;
 								tmp_s[i] = '\0';
 								tmpToken->info = tmp_s;
@@ -327,7 +326,7 @@ token* getToken0() {
 							ungetcharpom = c;
 							ERR; // 123.123e+-c /
 						}
-						if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
+						if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
 							ungetcharpom = c;
 							tmp_s[i] = '\0';
 							tmpToken->info = tmp_s;
@@ -353,7 +352,7 @@ token* getToken0() {
               if((tmp_s[i-1] == 'e') || (tmp_s[i-1] == '+') || (tmp_s[i-1] == '-'))
                 ERR;
 
-							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
                 ungetcharpom = c;
                 tmp_s[i] = '\0';
                 tmpToken->info = tmp_s;
@@ -362,7 +361,7 @@ token* getToken0() {
 							} else ERR;
 
             }else{
-							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',')){
+							if (isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
     						tmp_s[i] = '\0';
     						ungetcharpom = c;
     						tmpToken->info = tmp_s;

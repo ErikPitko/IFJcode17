@@ -223,7 +223,7 @@ parse_errno prog_body(){
 
 		if (param_counter != number_param(hTable, curr_function.id) && curr_function_declared){
 			if(!(number_param(hTable, curr_function.id) == -1 && param_counter == 0))
-				return (SEMANTIC_TYPE);
+				return (SEMANTIC_REDEF);
 		}
 
 		if((ret = check_AS()) != PARSE_OK)
@@ -234,16 +234,17 @@ parse_errno prog_body(){
 
 		curr_function.type = currToken->type;
 
+		if (curr_function_declared == true && (function_find(hTable, curr_function.id)->type != curr_function.type)){
+			warning_msg("Function definition does not match declaration");
+			return (SEMANTIC_REDEF);
+		}
+
 		if(change_type(hTable, curr_function))
 					return (SEMANTIC_REDEF);
 
 		if(change_isdefine(hTable, curr_function) == -1)
 			return (SEMANTIC_REDEF);
 
-		if (function_find(hTable, curr_function.id)->type != curr_function.type){
-			warning_msg("Function definition does not match declaration");
-			return (SEMANTIC_REDEF);
-		}
 
 		if((ret = check_EOL()) != PARSE_OK)
 			return (ret);
@@ -484,7 +485,7 @@ parse_errno par_list(){
 			else
 				debug("index OK");
 			if(temp_par->type != p.type)
-				return(SEMANTIC_TYPE);
+				return(SEMANTIC_REDEF);
 			debug("called parameter correct");
 
 			if(lTable && strcmp(temp_par->id, p.id)){
@@ -551,7 +552,7 @@ parse_errno par_next(){
 			else
 				debug("index OK");
 			if(temp_par->type != p.type)
-				return(SEMANTIC_TYPE);
+				return(SEMANTIC_REDEF);
 			debug("called parameter correct");
 
 			if(lTable && strcmp(temp_par->id, p.id)){
@@ -611,11 +612,11 @@ parse_errno arg_list(){
 			return (SEMANTIC_TYPE);
 
 		if(tmp->type != currToken->type){
-			if(tmp->type == VALUE_INTEGER && currToken->type != VALUE_INTEGER)
+			if(tmp->type == INTEGER && currToken->type != VALUE_INTEGER)
 				return (SEMANTIC_TYPE);
-			if(tmp->type == VALUE_DOUBLE && currToken->type != VALUE_DOUBLE)
+			if(tmp->type == DOUBLE && currToken->type != VALUE_DOUBLE)
 				return (SEMANTIC_TYPE);
-			if(tmp->type == VALUE_STRING && currToken->type != VALUE_STRING)
+			if(tmp->type == STRING && currToken->type != VALUE_STRING)
 				return (SEMANTIC_TYPE);
 		}
 
@@ -680,11 +681,11 @@ parse_errno arg_next2(){
 			return (SEMANTIC_TYPE);
 
 		if(tmp->type != currToken->type){
-			if(tmp->type == VALUE_INTEGER && currToken->type != VALUE_INTEGER)
+			if(tmp->type == INTEGER && currToken->type != VALUE_INTEGER)
 				return (SEMANTIC_TYPE);
-			if(tmp->type == VALUE_DOUBLE && currToken->type != VALUE_DOUBLE)
+			if(tmp->type == DOUBLE && currToken->type != VALUE_DOUBLE)
 				return (SEMANTIC_TYPE);
-			if(tmp->type == VALUE_STRING && currToken->type != VALUE_STRING)
+			if(tmp->type == STRING && currToken->type != VALUE_STRING)
 				return (SEMANTIC_TYPE);
 		}
 
@@ -910,6 +911,10 @@ parse_errno command(){
 
 				if(currToken->type != EOL)
 					return (SYNTAX_ERR);
+				break;
+			default:
+				debug("expected EOL or = after var type");
+				return(SYNTAX_ERR);
 			}
 			break;
 	case RETURN0:
@@ -927,7 +932,7 @@ parse_errno command(){
 			debug("NOT FUNCTION -> ExpressionParser");
 			currToken = parseExpression(currToken, &curr_function, lTable);
 		}else{
-			return (SYNTAX_ERR);
+			return (SEMANTIC_REDEF);
 		}
 
 		I_move_to_global(exprResult);
@@ -989,9 +994,10 @@ parse_errno assignment(){
 		break;
 	default:
 	{
-		lastToken = myMalloc(sizeof(token));
-		memcpy(lastToken, currToken, sizeof(token));
-		currToken = parseExpression(lastToken, returnVal, lTable);
+//		lastToken = myMalloc(sizeof(token));
+//		memcpy(lastToken, currToken, sizeof(token));
+		debug("%s", returnVal->id);
+		currToken = parseExpression(currToken, returnVal, lTable);
 		returnVal = NULL;
 	}
 	}

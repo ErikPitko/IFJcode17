@@ -409,7 +409,7 @@ void setSemanticError(int *semanticError,int num)
 {
 	if(!*(semanticError))
 	{
-		*(semanticError) = num;
+		error_msg(num,"Expression error");
 	}
 }
 
@@ -623,8 +623,10 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 			exprResult.id = "TypeOne";
 			temporary->id = "TypeOne";
 		}
-		else if (temporary->type == STRING)
+		else if (temporary->type == STRING||temporary->type == VALUE_STRING)
+		{
 			setSemanticError(semanticError,SEMANTIC_TYPE);
+		}
 	}
 	else if(returnVar->type == DOUBLE)
 	{
@@ -649,11 +651,11 @@ void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticE
 			temporary->id = "TypeOne";
 			exprResult.id = "TypeOne";
 		}
-		else if (temporary->type == STRING)
+		else if (temporary->type == STRING||temporary->type == VALUE_STRING)
 			setSemanticError(semanticError,SEMANTIC_TYPE);
 	}
 	else if(returnVar->type == STRING||returnVar->type == VALUE_STRING)
-	{
+	{		
 		if(temporary->type == INTEGER||temporary->type == DOUBLE||temporary->type == VALUE_DOUBLE||temporary->type == VALUE_INTEGER)
 			setSemanticError(semanticError,SEMANTIC_TYPE);
 	}

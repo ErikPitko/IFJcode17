@@ -45,17 +45,43 @@ void printDefineChrFunction()  //string inttochar (int i)
 
 void printDefineAscFunction() //int asc (string s, int i)
 {
-	printf("LABEL labelasc\n");
-	printf("GETCHAR GF@_pom_string LF@s LF@i\n");
-	printf("STRI2INT GF@_pom_integer GF@_pom_string int@0\n");
-	printf("RETURN\n");
+	printf("LABEL labelasc\n"); //puvodne
+
+  printf("STRLEN GF@_pom_integer LF@s\n");
+  printf("LT GF@_pom_double GF@_pom_integer LF@i\n"); // GF@_pom_double predstavuje bool hodnotu
+  printf("JUMPIFEQ label_ascfunction bool@true GF@_pom_double\n"); // pokud je mimo "s" tak preskoci na pridanie 0
+
+  //puvodne 0
+  printf("SUB LF@i LF@i int@1\n");
+  printf("GETCHAR GF@_pom_string LF@s LF@i\n");
+  printf("STRI2INT GF@_pom_integer GF@_pom_string int@0\n");
+  //puvodne 1
+
+  printf("JUMP label_endofascfunction\n");
+  printf("LABEL label_ascfunction\n");
+  //priradenie nuly
+  printf("MOVE GF@_pom_integer int@0\n");
+
+
+  printf("LABEL label_endofascfunction\n");
+  printf("MOVE GF@_pom_double float@0\n"); // alien
+  printf("RETURN\n");
 }
 
 //string strstr(string s,int i, int n)
 void printDefineSubStrFunction() {
 	printf("LABEL labelsubstr\n");
 	printf("MOVE GF@_pom_string string@\n");
-	printf("ADD LF@n LF@n LF@i\n");
+
+  printf("LT GF@pom_AIM1 LF@n int@0"\n)
+  printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@"\n)
+
+
+
+  printf("STRLEN GF@_pom_integer LF@s\n");
+
+
+	//printf("ADD LF@n LF@n LF@i\n");
 	printf("LABEL substrloop\n");
 	printf("GETCHAR GF@exppom3string LF@s LF@i\n");
 	printf("CONCAT GF@_pom_string GF@_pom_string GF@exppom3string\n");
@@ -155,6 +181,11 @@ void init3ADD() {
 	printf("DEFVAR GF@_pom_string\n");
 
 	null_global();
+
+  printf("DEFVAR GF@pom_AIM1\n");
+  printf("DEFVAR GF@pom_AIM2\n");
+  printf("DEFVAR GF@pom_AIM3\n");
+  printf("DEFVAR GF@pom_AIM4\n");
 
 	printf("DEFVAR GF@exppom1\n");
 	printf("DEFVAR GF@exppom2\n");

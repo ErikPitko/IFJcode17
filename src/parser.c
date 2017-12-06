@@ -641,9 +641,9 @@ parse_errno arg_next2(){
 		param p;
 		p.id = currToken->info;
 
-
 		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
 			return (SEMANTIC_TYPE);
+
 
 		I_arg_i_id(currToken->info, return_parameter_from_index(hTable, called_function, param_counter)->id);
 
@@ -655,7 +655,6 @@ parse_errno arg_next2(){
 	case VALUE_STRING:
 	case VALUE_DOUBLE:
 		debug("constant correct");
-
 		param *tmp = return_parameter_from_index(hTable, called_function, param_counter);
 		if(tmp == NULL)
 			return (SEMANTIC_TYPE);
@@ -671,7 +670,6 @@ parse_errno arg_next2(){
 
 		I_arg_i_const(currToken->info, currToken->type, tmp->id);
 		param_counter++;
-
 		if((ret = arg_next()) != PARSE_OK)
 			return (ret);
 		break;

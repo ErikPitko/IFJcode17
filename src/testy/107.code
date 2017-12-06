@@ -1,11 +1,11 @@
 ' Double constant into build-in function substr
 
 scope
-    dim a as double = 3.0
+    dim a as integer = 3
     
     dim b as string
     
-    b = substr(!"GZGGZGGGZGZ", a, 6.0)
+    b = substr(!"GZGGZGGGZGZ", a, 6)
     
     print b;
     	print !"\n";

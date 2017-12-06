@@ -119,6 +119,11 @@ int list_insert_param(tHashTable *local_table, tFooListElem sym, param psym) {
 		{
 			if (strcmp(local_table[idx].Act->id, sym.id) == 0) //porovna retazce
 			{
+				param *prev = NULL;
+				if(local_table[idx].Act->param->First != NULL)
+					for(local_table[idx].Act->param->Act = local_table[idx].Act->param->First; local_table[idx].Act->param->Act != NULL; local_table[idx].Act->param->Act = local_table[idx].Act->param->Act->next_param){
+						prev = local_table[idx].Act->param->Act;
+					}
 				param *pom = myMalloc(sizeof(struct paramP));
 
 				if (pom == NULL)
@@ -135,9 +140,12 @@ int list_insert_param(tHashTable *local_table, tFooListElem sym, param psym) {
 
 				strcpy(pom->id, psym.id);
 				pom->type = psym.type;
+				pom->next_param = NULL;
 
-				pom->next_param = local_table[idx].First->param->First;
-				local_table[idx].First->param->First = pom;
+				if(local_table[idx].Act->param->First == NULL)
+					local_table[idx].Act->param->First = pom;
+				else
+					prev->next_param = pom;
 			}
 
 			local_table[idx].Act = local_table[idx].Act->next_item; //posunieme sa o prvok dalej

@@ -202,7 +202,11 @@ parse_errno prog_body(){
 
 		int table_ret = list_insert(hTable, curr_function);
 
-		if(table_ret != 0)
+		if(table_ret == -1)
+			return (SEMANTIC_REDEF);
+		debug("type of function and declaration OK");
+
+		if(table_ret == 1)
 			curr_function_declared = true;
 		else
 			curr_function_declared = false;
@@ -480,6 +484,11 @@ parse_errno par_list(){
 			if(temp_par->type != p.type)
 				return(SEMANTIC_TYPE);
 			debug("called parameter correct");
+
+			if(lTable && strcmp(temp_par->id, p.id)){
+				I_move_var(p.id, temp_par->id);
+				debug("param name collision, moving ...| %s -> %s", temp_par->id, p.id);
+			}
 		}
 
 		if(!curr_function_declared && list_insert_param(hTable, curr_function, p))
@@ -530,20 +539,27 @@ parse_errno par_next(){
 		sym.type = currToken->type;
 		p.type = currToken->type;
 
+
 		if(curr_function_declared){
-			int index;
-			if((index = return_index_parameter(hTable, curr_function, p)) == -1)
+			param *temp_par;
+			if(!(temp_par = return_parameter_from_index(hTable, curr_function, param_counter)))
 				return(SEMANTIC_REDEF);
 			else
 				debug("index OK");
-			if(index != param_counter)
+			if(temp_par->type != p.type)
 				return(SEMANTIC_TYPE);
-			param_counter++;
 			debug("called parameter correct");
+
+			if(lTable && strcmp(temp_par->id, p.id)){
+				I_move_var(p.id, temp_par->id);
+				debug("param name collision, moving ...| %s -> %s", temp_par->id, p.id);
+			}
 		}
 
-		if(!list_insert_param(hTable, curr_function, p) && curr_function_declared)
+		if(!curr_function_declared && list_insert_param(hTable, curr_function, p))
 			return (SEMANTIC_REDEF);
+
+		param_counter++;
 
 		if(lTable)
 			if(list_insert(lTable, sym))

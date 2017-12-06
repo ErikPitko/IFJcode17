@@ -277,7 +277,7 @@ token* getToken0() {
 				case 2://"POSSIBLE_NUMBER":
 					i= 1;
 					while (((c = getchar0()) >= '0') && (c<='9')) {
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;} // 222
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;} // 222
 					}
 					if(isspace(c) || isOperator(c) ||( c == ')' )  || (c == '(' ) || (c == ';') || (c == ',') || (c == 39)){
 						//if (c == '\n')
@@ -289,9 +289,9 @@ token* getToken0() {
 					}
 
 					if (c == '.'){ // double?
-						{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+						{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						while (((c = upper2lower(getchar0())) >= '0') && (c <='9')){
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
 						if(tmp_s[i-1] == '.'){
 							ungetcharpom = c;
@@ -306,7 +306,7 @@ token* getToken0() {
 								return tmpToken; // 123.123
 							}else ERR;
 						}else {
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
 						c = getchar0();
 						if(c == EOF){
@@ -316,11 +316,11 @@ token* getToken0() {
               ERR;
             }
 						if( c ==  '+' || c == '-')//{ // 123.132e+ // 111 dobrovolne znamenko?
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						else ungetcharpom = c;
 
 						while (((c = getchar0()) >= '0') && (c <='9')){ // 123.132e+123
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}// konec cyklu
 						if((tmp_s[i-1] == 'e') || (tmp_s[i-1] ==  '+') || (tmp_s[i-1] == '-')){ /// 112
 							ungetcharpom = c;
@@ -385,7 +385,7 @@ token* getToken0() {
 				c = getchar0();
 				c = upper2lower(c);
 				while ((c == '_') || ((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z'))) {
-					{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+					{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 					c = getchar0();
 					c = upper2lower(c);
 				}
@@ -421,19 +421,19 @@ token* getToken0() {
 						if (c == 92){//START OF ESC // c == '\'
 							//possible escape sequance
 
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 							c = getchar0();//\_
 							if(c == EOF){
 								ERR; // eof pocas esc 1
 							}
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//0-2 default ERR
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}//0-2 default ERR
 							switch(c){
 								case '0': //0
 											c = getchar0();
 											if(c == EOF){
 												ERR;//eof pocas esc 2
 											}
-											{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//0x
+											{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}//0x
 											if (c == '0'){//00
 												c = getchar0();
                         if (c == EOF){
@@ -443,14 +443,14 @@ token* getToken0() {
 														ERR;//\000 wrong escape sequance
 												}
 												else if (c <='9'&& c>'0')//001-9
-															{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+															{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 															else {
 																	ERR;// what did come? char?
 															}
 											//01-9
   										}else if ((c <= '9') && (c >='0'))
                               if (((c=getchar0()) <= '9') && (c >='0'))
-    														{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//01-9x
+    														{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}//01-9x
     														else{
     															ERR; // 01-9x x-neni cislo //some char nor number
     														}
@@ -461,29 +461,29 @@ token* getToken0() {
 								case '1'://1
 												c=getchar0();
 												if(c<='9'&& c>='0')
-													{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//1x
+													{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}//1x
 												else ERR; //wrong escape sequance
 
 												c=getchar0();
 												if (c<='9'&& c >='0')
-													{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}//1xx
+													{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}//1xx
 												else ERR;//wrong ESC
 								break;
 								case '2'://2
 												c=getchar0();//2x
-												{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+												{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 												if (c<='4'&& c>='0'){//20-4
 														c=getchar0();//20-4x
 														if(c == EOF){
 															ERR;
 														}
-														{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+														{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 												}
 												else
 													if(c == '5'){
 														c = getchar0();//25x
 														if(c <= '5' && c >= '0'){
-															{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+															{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 														}else ERR;//256+ wrong ESC or char
 													}else ERR; //26+ wrong esc or char
 								break;
@@ -508,7 +508,7 @@ token* getToken0() {
 						}// end of ESC
 						// ak nieje esc sekvencia
 						else {
-							{if((i % 255) == 254) myRealloc(tmp_s,(i+256)*sizeof(char)); tmp_s[i++] = c;}
+							{if((i % 255) == 254) tmp_s = myMalloc((i+256)*sizeof(char)); tmp_s[i++] = c;}
 						}
 				}
 				tmp_s[i]='\0';

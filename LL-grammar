@@ -1,58 +1,45 @@
 prog_body	->	EOF
-				EOL <prog_body>
-				Scope EOL <main_body> <prog_body>
-				Declare Function fncName ( <par_list> As <var_type> EOL <prog_body>
-				Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
-
+                        EOL <prog_body>
+                        Scope EOL <main_body> <prog_body>
+                        Declare Function fncName ( <par_list> As <var_type> EOL <prog_body>
+                        Function id ( <par_list> As <var_type> EOL <fnc_body> EOL <prog_body>
 main_body	->	<command><main_body>
-				End Scope
-
+                        End Scope
 fnc_body	->	<command><fnc_body>
-				End Function
-
+                        End Function
 if_body		->	<command><if_body>
-				ElseIf EXP Then EOL <if_body>
-				Else <else_body>
-				End If
-
+                        ElseIf EXP Then EOL <if_body>
+                        Else <else_body>
+                        End If
 else_body	->	<command><else_body>
-				End If
-
+                        End If
 while_body	->	<command><while_body>
-				Loop
-
+                        Loop
 par_list	->	)
-				id As <var_type> <par_next>
-
+                        id As <var_type> <par_next>
 par_next	->	, id As <var type> <par_next>
-				)
-
+                        )
 arg_list	->	)
-				id <arg_next>
-				const <arg_next>
-
+                        id <arg_next>
+                        const <arg_next>
 arg_next	->	)
-				, <arg_next2>
-
+                        , <arg_next2>
 arg_next2	->	id <arg_next>
-				const <arg_next>
-
+                        const <arg_next>
 var_type 	->	Integer
-				Double
-				String
-
+                        Double
+                        String
 print_exp	->	EXP; <print_exp>
-				EOL
-
+                        EOL
 command		->	Input id EOL
-				If EXP Then EOL <if_body> EOL
-				id = <assignment> EOL
-				Do While EXP EOL <while_body> EOL
-				Print EXP ; <print_exp>
-				Dim id As <var_type> EOL
-				Dim id As <var_type> = <assignment> EOL
-				Return EXP EOL
-				EOL
-
+                        If EXP Then EOL <if_body> EOL
+                        id = <assignment> EOL
+			Do While EXP EOL <while_body> EOL
+			Print EXP ; <print_exp>
+			Dim id As <var_type> <dim_end>
+			Return EXP EOL
+			EOL
+dim_end         ->      EOL
+                        = <assignment> EOL
 assignment	->	EXP
-				id ( <arg_list>
+			id ( <arg_list>

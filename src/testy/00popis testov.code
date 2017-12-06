@@ -8,4 +8,5 @@ tests 96 - 100 their cycle
 tests 101 - 105 our combination if and cycle
 tests 106 - 109 test on builtin functions
 test 110 special hanoi tower recursion "A"
-test 111 - 115 will be testing error input
+test 111 - 126 lexical error tests
+

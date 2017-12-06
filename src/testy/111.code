@@ -1,0 +1,6 @@
+' Neukončený viac riadkový komentár za end scope
+
+scope
+
+
+end scope /' Toto je komentář '

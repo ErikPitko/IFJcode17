@@ -1,0 +1,5 @@
+' Chybny format pre double
+
+scope
+	Dim h as double = !\"
+end scope

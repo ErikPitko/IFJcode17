@@ -1,0 +1,5 @@
+' Chybny format pre double
+
+scope
+	Dim f as Double = .e74
+end scope

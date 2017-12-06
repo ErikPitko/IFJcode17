@@ -1,0 +1,5 @@
+' Chybny format pre string
+
+scope
+	Dim l as string = !"\\m\"
+end scope

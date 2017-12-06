@@ -1,0 +1,5 @@
+' Chybny formát pre string
+
+scope
+	Dim h as string = !\"
+end scope

@@ -1,0 +1,5 @@
+' Chybny format pre integer
+
+scope
+	dim g as integer = 12.21.74
+end scope

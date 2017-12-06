@@ -1,0 +1,5 @@
+' Chybny format pre double
+
+scope
+	Dim c as Double = 33455457.e---
+end scope

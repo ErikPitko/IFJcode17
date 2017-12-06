@@ -2,12 +2,11 @@
 scope
 
 dim x as integer = 0 
+dim a as integer = 12
 	
 	do while x < 5
 
 		if 78 > 2 then
-
-			dim a as integer = 12
 	
 			do while a >= 1
 				if a < 2 then
@@ -69,3 +68,4 @@ dim x as integer = 0
 	loop
 	print !"\n";
 end scope
+

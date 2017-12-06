@@ -1,0 +1,5 @@
+' Chybny format pre string
+
+scope
+	Dim k as string = !"\\256\"
+end scope

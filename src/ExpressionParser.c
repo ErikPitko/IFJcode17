@@ -185,6 +185,7 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 	bool operationCompare = false;
 	int operandCounter = 0;
 	int counter = 0;
+	int compareCounter = 0;
 	int semanticError = 0;
 	int a = 0;
 	priority.firstToken = (token*)myMalloc(sizeof(token));
@@ -306,9 +307,15 @@ token *parseExpression(token *getSetToken,tFooListElem *returnVar,tHashTable *lo
 				{
 					operationPriority = true;
 				}
-				if(!operationCompare && (actToken.firstToken->type == LESS || actToken.firstToken->type == GREATER||actToken.firstToken->type == EQUAL || actToken.firstToken->type == GREATER_EQUAL||actToken.firstToken->type == LESS_EQUAL))
+				if((actToken.firstToken->type == LESS || actToken.firstToken->type == GREATER||actToken.firstToken->type == EQUAL || actToken.firstToken->type == GREATER_EQUAL||actToken.firstToken->type == LESS_EQUAL))
 				{
-					operationCompare = true;
+					if(!operationCompare)
+						operationCompare = true;
+					if(compareCounter >= 1)
+					{
+						error_msg(SYNTAX_ERR,"Too many compare operators in expression");
+					}
+					compareCounter++;
 				}
 				stackPush(&stack,actToken);
 				reduct = false;

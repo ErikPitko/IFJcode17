@@ -1,0 +1,4 @@
+' Chyba operator
+scope
+	print (5+6)(1+2);
+end scope

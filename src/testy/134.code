@@ -1,0 +1,4 @@
+' Syntax chyby v expr
+scope
+	print 2 + * 8;
+end scope

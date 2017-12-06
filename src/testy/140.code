@@ -1,0 +1,4 @@
+' Syntax chyba 
+scope
+	dim a as integer < 0
+end scope

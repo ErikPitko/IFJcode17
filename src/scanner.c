@@ -83,6 +83,21 @@ token *getToken(){
     tmpToken->type = IDENTIFIER;
     tmpToken->info = "length";
   }
+
+  if(tmpToken->type == ASC){
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "asc";
+   }
+
+   if(tmpToken->type == SUBSTR){
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "substr";
+   }
+
+   if(tmpToken->type == CHR){
+     tmpToken->type = IDENTIFIER;
+     tmpToken->info = "chr";
+   }
   return tmpToken;
 }
 

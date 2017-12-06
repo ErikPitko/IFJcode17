@@ -380,6 +380,11 @@ void I_arg_i_id(char *id, char *idD) {
 
 }
 
+void I_move_var(char *to, char *from) {
+	printf("MOVE LF@%s LF@%s\n", to, from);
+
+}
+
 /*
  *
  * arg_i_const - vola pri kazdom argumente

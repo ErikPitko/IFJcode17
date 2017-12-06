@@ -42,6 +42,7 @@ void I_endif(int number);
 void I_id_expression(char *id);
 void I_createFrame();
 void I_arg_i_id(char *id, char *idD);
+void I_move_var(char *to, char *from);
 void I_arg_i_const(char *_const, int type, char *idD);
 void I_callFunc(char *id_func);
 void I_define_func(char *id_func);

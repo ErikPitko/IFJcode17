@@ -73,8 +73,8 @@ void printDefineSubStrFunction() {
 	printf("LABEL labelsubstr\n");
 	printf("MOVE GF@_pom_string string@\n");
 
-  printf("LT GF@pom_AIM1 LF@n int@0"\n)
-  printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@"\n)
+  printf("LT GF@pom_AIM1 LF@n int@0"\n);
+  printf("JUMPIFEQ label_untilend GF@pom_AIM1 bool@true"\n);
 
 
 

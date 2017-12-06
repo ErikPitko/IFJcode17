@@ -593,7 +593,16 @@ parse_errno arg_list(){
 		param p;
 		p.id = currToken->info;
 
-		if(return_parameter_from_index(hTable, called_function, param_counter)->type != function_find(lTable, p.id)->type)
+		param *decParam;
+		tFooListElem *locVar;
+
+		decParam = return_parameter_from_index(hTable, called_function, param_counter);
+		locVar = function_find(lTable, p.id);
+
+		if(!decParam || !locVar)
+			return (SEMANTIC_REDEF);
+
+		if(decParam->type != locVar->type)
 			return (SEMANTIC_TYPE);
 
 
@@ -925,14 +934,18 @@ parse_errno command(){
 		debug("RETURN correct");
 		currToken = getToken();
 
-		if(!find_test(hTable, currToken->info)){
-			if(!find_test(lTable, currToken->info) && currToken->type != VALUE_INTEGER && currToken->type != VALUE_DOUBLE && currToken->type != VALUE_STRING){
+		if(currToken->type == IDENTIFIER || currToken->type == VALUE_INTEGER ||  currToken->type == VALUE_DOUBLE ||  currToken->type == VALUE_STRING){
+			if(!find_test(hTable, currToken->info)){
+				if(!find_test(lTable, currToken->info) && currToken->type != VALUE_INTEGER && currToken->type != VALUE_DOUBLE && currToken->type != VALUE_STRING){
+					return (SEMANTIC_REDEF);
+				}
+				debug("NOT FUNCTION -> ExpressionParser");
+				currToken = parseExpression(currToken, &curr_function, lTable);
+			}else{
 				return (SEMANTIC_REDEF);
 			}
-			debug("NOT FUNCTION -> ExpressionParser");
-			currToken = parseExpression(currToken, &curr_function, lTable);
 		}else{
-			return (SEMANTIC_REDEF);
+			return(SYNTAX_ERR);
 		}
 
 		I_move_to_global(exprResult);

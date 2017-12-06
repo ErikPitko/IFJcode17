@@ -310,8 +310,6 @@ int change_type(tHashTable *local_table, tFooListElem sym) {
 int change_param_id(tHashTable *local_table, tFooListElem sym, char* id, char* newId) {
 
 	int idx = hash_code(sym.id);
-	int counter = 0;
-
 	local_table[idx].Act = local_table[idx].First;
 
 	while (local_table[idx].Act != NULL) // Prejde vsetky prvky zoznamu

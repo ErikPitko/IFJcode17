@@ -530,6 +530,7 @@ void convertTo(tFooListElem *firstOper,tFooListElem *secondOper,int *semanticErr
 
 char* selectTmp(int zeroOrOne,int type,int counter)
 {
+	(void)type;
 	int modulo = (counter)%4 +zeroOrOne;
 	if(modulo == 0)
 	{
@@ -593,6 +594,7 @@ void printValue(char* instr,tFooListElem *temporary,tFooListElem *firstOper,tFoo
 
 void resultRetype(tFooListElem *returnVar,tFooListElem *temporary,int *semanticError,int counter)
 {
+	(void)counter;
 	if(returnVar == NULL){
 		if(temporary->type == STRING || temporary->type == VALUE_STRING)
 			temporary->id = reformString(temporary->id);
